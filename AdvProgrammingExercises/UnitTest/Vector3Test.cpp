@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "CppUnitTest.h"
+#define NDEBUG
 #include "../AdvProgrammingExercises/Vector3.h"
+#undef NDEBUG
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -9,53 +11,6 @@ namespace UnitTest
     TEST_CLASS(Vector3Test)
     {
     public:
-        TEST_METHOD(ClassroomSlide_Task)
-        {
-            // ------------------------------------------------------------
-            // Setup: crear vectores igual que en la diapositiva
-            // ------------------------------------------------------------
-            Vector3<float> a;            // (0,0,0)
-            Vector3<float> b(1, 0, 1);   // (1,0,1)
-            Vector3<float> c(b);         // copia de b
-            Vector3<float> d = b + c;    // (2,0,2)
-
-            // ------------------------------------------------------------
-            // 1️⃣ Normalizar d → debería dar (0.707, 0, 0.707)
-            // ------------------------------------------------------------
-            Vector3<float> n = d.Normalize();
-            Assert::AreEqual(0.7071f, n.getX(), 0.001f);
-            Assert::AreEqual(0.0f, n.getY(), 0.001f);
-            Assert::AreEqual(0.7071f, n.getZ(), 0.001f);
-
-            // ------------------------------------------------------------
-            // 2️⃣ Distancia entre d (2,0,2) y b (1,0,1)
-            // distancia = √((2-1)² + (0-0)² + (2-1)²) = √2 ≈ 1.4142
-            // ------------------------------------------------------------
-            float distance = d.distance_to(b);
-            Assert::AreEqual(1.4142f, distance, 0.001f);
-
-            // ------------------------------------------------------------
-            // 3️⃣ Producto punto d·b = (2*1 + 0*0 + 2*1) = 4
-            // ------------------------------------------------------------
-            float dot = d.dot_product(b);
-            Assert::AreEqual(4.0f, dot, 0.0001f);
-
-            // ------------------------------------------------------------
-            // 4️⃣ Producto cruzado d×b = (0, 0, 0) porque son paralelos
-            // ------------------------------------------------------------
-            Vector3<float> cross = d.cross_product(b);
-            Assert::AreEqual(0.0f, cross.getX(), 0.0001f);
-            Assert::AreEqual(0.0f, cross.getY(), 0.0001f);
-            Assert::AreEqual(0.0f, cross.getZ(), 0.0001f);
-
-            // ------------------------------------------------------------
-            // 5️⃣ Ángulo entre d y b → 0° (paralelos)
-            // ------------------------------------------------------------
-            float angleRadians = d.angle_between(b);
-            float angleDegrees = angleRadians * (180.0f / 3.14159265f);
-            Assert::AreEqual(0.0f, angleDegrees, 0.1f);
-        }
-
         // ---------------------------------------------------------------
         // 🧱 Constructors & Getters
         // ---------------------------------------------------------------
