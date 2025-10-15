@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "CppUnitTest.h"
-#define NDEBUG
 #include "../AdvProgrammingExercises/String.h"
+#define NDEBUG
 #undef NDEBUG
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -18,13 +18,13 @@ namespace UnitTest
         {
             String s;
             Assert::AreEqual(true, s.isEmpty());
-            Assert::AreEqual(0, s.getSize());
+            Assert::AreEqual((unsigned long long) 0, s.getSize());
         }
 
         TEST_METHOD(Constructor_FromCStr_ShouldCopyContent)
         {
             String s("hello");
-            Assert::AreEqual(5, s.getSize());
+            Assert::AreEqual((unsigned long long) 5, s.getSize());
             Assert::AreEqual(false, s.isEmpty());
             Assert::AreEqual('h', s[0]);
             Assert::AreEqual('o', s[4]);
@@ -43,7 +43,7 @@ namespace UnitTest
         TEST_METHOD(MoveConstructor_ShouldTransferOwnership)
         {
             String a("move");
-            int sizeA = a.getSize();
+            unsigned long long sizeA = a.getSize();
 
             String b(std::move(a));
             Assert::AreEqual(sizeA, b.getSize());
@@ -67,7 +67,7 @@ namespace UnitTest
             String b("bar");
             String c = a + b;
 
-            Assert::AreEqual(6, c.getSize());
+            Assert::AreEqual((unsigned long long) 6, c.getSize());
             Assert::AreEqual('f', c[0]);
             Assert::AreEqual('b', c[3]);
             Assert::AreEqual('r', c[5]);
@@ -96,13 +96,13 @@ namespace UnitTest
             s.clear();
 
             Assert::AreEqual(true, s.isEmpty());
-            Assert::AreEqual(0, s.getSize());
+            Assert::AreEqual((unsigned long long) 0, s.getSize());
         }
 
         TEST_METHOD(Length_ShouldMatchSize)
         {
             String s("length");
-            Assert::AreEqual(6, s.length());
+            Assert::AreEqual((unsigned long long) 6, s.length());
         }
 
         // ---------------------------------------------------------------

@@ -128,11 +128,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AdvProgrammingExercises.cpp" />
+    <ClCompile Include="String.cpp" />
+    <ClCompile Include="StringHash.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="String.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="StringHash.h" />
     <ClInclude Include="Vector3.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
