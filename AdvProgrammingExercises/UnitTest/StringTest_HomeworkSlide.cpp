@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "../AdvProgrammingExercises/StringHash.h"
 #include "../AdvProgrammingExercises/String.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -18,17 +19,17 @@ namespace UnitTest
             // a = "hello"
             // b = "hello"
             // c = "hellohello"
-            Assert::AreEqual(5, a.length());
-            Assert::AreEqual(5, b.length());
-            Assert::AreEqual(10, c.length());
+            Assert::AreEqual((unsigned long long) 5, a.length());
+            Assert::AreEqual((unsigned long long)5, b.length());
+            Assert::AreEqual((unsigned long long)10, c.length());
 
             Assert::IsTrue(c == String("hellohello"));
 
-            Assert::AreEqual(10, c.length());
+            Assert::AreEqual((unsigned long long)10, c.length());
 
             c.clear();
             Assert::IsTrue(c.isEmpty());
-            Assert::AreEqual(0, c.getSize());
+            Assert::AreEqual((unsigned long long) 0, c.getSize());
         }
 
         TEST_METHOD(HomeworkSlide_ExtraBonus_MoveEfficiency)
@@ -40,7 +41,7 @@ namespace UnitTest
             String a = GetMeAString();
 
             Assert::IsTrue(a == String("another string"));
-            Assert::AreEqual(14, a.length());
+            Assert::AreEqual((unsigned long long) 14, a.length());
         }
     };
 }

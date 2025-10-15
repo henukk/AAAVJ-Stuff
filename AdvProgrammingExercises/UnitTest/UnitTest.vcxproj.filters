@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de origen\Añadidos">
+      <UniqueIdentifier>{01485c87-c618-4312-bf28-aadd7d3082b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UnitTest.cpp">
@@ -32,6 +35,12 @@
     </ClCompile>
     <ClCompile Include="Vector3Test_HomeworkSlide.cpp">
       <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AdvProgrammingExercises\String.cpp">
+      <Filter>Archivos de origen\Añadidos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AdvProgrammingExercises\StringHash.cpp">
+      <Filter>Archivos de origen\Añadidos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
