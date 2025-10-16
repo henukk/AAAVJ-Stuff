@@ -1,8 +1,7 @@
 ﻿#include "pch.h"
 #include "CppUnitTest.h"
 #include "../AdvProgrammingExercises/String.h"
-#define NDEBUG
-#undef NDEBUG
+#include "../AdvProgrammingExercises/StringHash.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

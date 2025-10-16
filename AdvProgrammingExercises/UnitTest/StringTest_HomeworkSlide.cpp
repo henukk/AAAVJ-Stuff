@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "../AdvProgrammingExercises/StringHash.h"
 #include "../AdvProgrammingExercises/String.h"
-
+#include "../AdvProgrammingExercises/StringHash.h"
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace UnitTest

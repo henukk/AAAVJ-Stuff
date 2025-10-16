@@ -3,7 +3,7 @@
 
 class StringHash;
 
-constexpr bool OPTIMIZED_COMPARATOR = false;
+extern bool OPTIMIZED_COMPARATOR;
 class String {
 private:
 	char* chars;

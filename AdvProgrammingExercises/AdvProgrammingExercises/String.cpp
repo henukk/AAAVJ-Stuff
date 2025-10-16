@@ -2,6 +2,9 @@
 #include "StringHash.h"
 #include <cassert>
 
+//CONFIG
+bool OPTIMIZED_COMPARATOR = false;
+
 
 //PRIVATE
 String::String(char* init, const unsigned long long size) noexcept : chars(init), size(size), hash(new StringHash()) {}
@@ -40,8 +43,8 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 	}
 
 	String::~String() noexcept {
-		delete[] chars;
-		delete hash;
+		if (chars) delete[] chars;
+		if (hash) delete hash;
 	}
 #pragma endregion
 
