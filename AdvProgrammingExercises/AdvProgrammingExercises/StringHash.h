@@ -1,8 +1,8 @@
 #pragma once
-constexpr unsigned long long MAX_HASH = 1e9 + 9;
 class StringHash
 {
 private:
+	constexpr static unsigned long long MAX_HASH = 1e9 + 9;
 	const static int p = 31;
 	unsigned long long hash;
 	bool hashed;

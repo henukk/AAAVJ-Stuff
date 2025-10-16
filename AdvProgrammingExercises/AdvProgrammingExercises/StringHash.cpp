@@ -1,10 +1,12 @@
 #include "StringHash.h"
+#include <cassert>
 
 StringHash::StringHash() noexcept : hash(0), hashed(false) {}
 StringHash::StringHash(const StringHash& other) noexcept : hash(other.hash), hashed(other.hashed) {}
 StringHash::~StringHash() noexcept {}
 
 bool StringHash::operator==(const StringHash& other) const noexcept {
+	assert(!hashed && "ASSERT FAIL: StringHash::operator== - comparing without hashing is null");
 	return (hash == other.hash);
 }
 

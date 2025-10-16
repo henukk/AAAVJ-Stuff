@@ -2,7 +2,6 @@
 #include"Vector3.h"
 #include"String.h"
 
-
 void exampleVect3() {
 	std::cout << "Slide exercise Vector3:\n";
 	Vector3<float> a;
