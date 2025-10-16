@@ -34,6 +34,8 @@ public:
 	char operator[](unsigned long long i) const noexcept;
 	bool operator==(const String& other) const noexcept;
 	String operator+(const String& other) const;
+	String& operator=(const String& other);
+	String& operator=(String&& other) noexcept;
 	friend std::ostream& operator<<(std::ostream& os, const String& s) noexcept {
 		if (!s.chars) return os;
 		os << s.chars;

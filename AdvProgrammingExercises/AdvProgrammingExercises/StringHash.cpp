@@ -7,6 +7,9 @@ StringHash::~StringHash() noexcept {}
 
 bool StringHash::operator==(const StringHash& other) const noexcept {
 	assert(!hashed && "ASSERT FAIL: StringHash::operator== - comparing without hashing is null");
+	if (!hashed || !other.hashed) {
+		return false;
+	}
 	return (hash == other.hash);
 }
 

@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Application.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugDrawPass.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePad.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\imgui-docking\imgui.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\imgui-docking\imgui_demo.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\imgui-docking\imgui_draw.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\imgui-docking\backends\imgui_impl_dx12.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\imgui-docking\backends\imgui_impl_win32.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\imgui-docking\imgui_tables.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\imgui-docking\imgui_widgets.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiPass.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdParty\ImGuizmo\ImGuizmo.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleInput.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleMath.cpp">
+      <Filter>TeacherStuff</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleD3D12.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_draw.hpp">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugDrawPass.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePad.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdParty\imgui-docking\imgui.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdParty\imgui-docking\backends\imgui_impl_dx12.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdParty\imgui-docking\backends\imgui_impl_win32.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdParty\imgui-1.89.8\backends\imgui_impl_win32.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdParty\imgui-docking\imgui_internal.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiPass.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdParty\ImGuizmo\ImGuizmo.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Module.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleInput.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="PlatformHelpers.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadData.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleMath.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>TeacherStuff</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleD3D12.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Engine.ico">
+      <Filter>TeacherStuff</Filter>
+    </Image>
+    <Image Include="small.ico">
+      <Filter>TeacherStuff</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="TeacherStuff">
+      <UniqueIdentifier>{4c64341e-d45b-4622-9a5e-ca10fd9c6374}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Engine.rc">
+      <Filter>TeacherStuff</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SimpleMath.inl">
+      <Filter>TeacherStuff</Filter>
+    </None>
+  </ItemGroup>
+</Project>
