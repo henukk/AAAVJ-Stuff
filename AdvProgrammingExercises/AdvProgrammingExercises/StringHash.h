@@ -10,6 +10,7 @@ private:
 public:
 	StringHash() noexcept;
 	StringHash(const StringHash& other) noexcept;
+	StringHash& operator=(const StringHash& other) noexcept = default;
 	~StringHash() noexcept;
 	
 	bool operator==(const StringHash& other) const noexcept;

@@ -37,6 +37,9 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 		}
 	}
 	String::String(String&& other) noexcept : chars(other.chars), size(other.size), hash(new StringHash(*other.hash)) {
+		if (!hash) {
+			hash = new StringHash();
+		}
 		other.chars = nullptr;
 		other.size = 0;
 		other.hash = new StringHash();
@@ -61,39 +64,48 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 #pragma endregion
 
 #pragma region OPERATORS
-	char& String::operator[](unsigned long long i) { //modificador de carácter -> por eso reset hash
+	char& String::operator[](unsigned long long i) { //modificador de caracter -> por eso reset hash
 		assert(chars != nullptr && "ASSERT FAIL: String::operator[] - chars is null");
 		assert(i < size && "ASSERT FAIL: String::operator[] - index out of bounds");
 		hash->reset();
 		return chars[i];
 	}
-	char String::operator[](unsigned long long i) const noexcept { //consultor de carácter
+	char String::operator[](unsigned long long i) const noexcept { //consultor de caracter
 		assert(chars != nullptr && "ASSERT FAIL: String::operator[] - chars is null");
 		assert(i < size && "ASSERT FAIL: String::operator[] - index out of bounds");
 		return chars[i];
 	}
 	bool String::operator==(const String& other) const noexcept {
-		assert(chars != nullptr && "String::operator== - left operand is null");			//en RELEASE no se que hará
-		assert(other.chars != nullptr && "String::operator== - right operand is null");		//en RELEASE no se que hará
-		if (!chars || !other.chars) return chars == other.chars;
-		if (size != other.size) return false;
+		if (this == &other) {
+			return true;
+		}
+		if (size != other.size) {
+			return false;
+		}
+		if (size == 0) {
+			return true;
+		}
 
+		assert(chars != nullptr && "String::operator== - left operand is null");
+		assert(other.chars != nullptr && "String::operator== - right operand is null");
 
 		if (OPTIMIZED_COMPARATOR) {
-			if (!hash->getHashed())hash->generateHash(size, chars);
-			if (!other.hash->getHashed()) other.hash->generateHash(other.size, other.chars);
+			if (hash && !hash->getHashed()) hash->generateHash(size, chars);
+			if (other.hash && !other.hash->getHashed()) other.hash->generateHash(other.size, other.chars);
 
-			return (*hash == *other.hash);
+			if (hash && other.hash) {
+				return (*hash == *other.hash);
+			}
 		}
 
-		bool result = true;
-		unsigned long long curr = 0;
-		while (result && curr < size) { //creo que prevé mejor los saltos la cpu así
-			result = chars[curr] == other[curr];
-			++curr;
+		for (unsigned long long curr = 0; curr < size; ++curr) {
+			if (chars[curr] != other.chars[curr]) {
+				return false;
+			}
 		}
-		return result;
+		return true;
 	}
+
 	String String::operator+(const String& other) const {
 		//assert(chars != nullptr && "String::operator+ - left operand is null");
 		//assert(other.chars != nullptr && "String::operator+ - right operand is null");
@@ -108,6 +120,75 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 
 		return String(newChars, newSize);
 	}
+
+	String& String::operator=(const String& other) {
+		if (this == &other) {
+			return *this;
+		}
+
+		char* newChars = nullptr;
+		if (other.size > 0 && other.chars != nullptr) {
+			newChars = new char[other.size + 1];
+			std::copy_n(other.chars, other.size, newChars);
+			newChars[other.size] = '\0';
+		}
+
+		if (chars) {
+			delete[] chars;
+		}
+
+		chars = newChars;
+		size = other.size;
+
+		if (other.hash) {
+			if (!hash) {
+				hash = new StringHash(*other.hash);
+			}
+			else {
+				*hash = *other.hash;
+			}
+		}
+		else {
+			if (!hash) {
+				hash = new StringHash();
+			}
+			else {
+				hash->reset();
+			}
+		}
+
+		return *this;
+	}
+
+	String& String::operator=(String&& other) noexcept {
+		if (this == &other) {
+			return *this;
+		}
+
+		if (chars) {
+			delete[] chars;
+			chars = nullptr;
+		}
+
+		if (hash) {
+			delete hash;
+			hash = nullptr;
+		}
+
+		chars = other.chars;
+		size = other.size;
+		hash = other.hash;
+
+		if (!hash) {
+			hash = new StringHash();
+		}
+
+		other.chars = nullptr;
+		other.size = 0;
+		other.hash = new StringHash();
+
+		return *this;
+	}
 #pragma endregion
 
 #pragma region FUNCTIONS
@@ -118,7 +199,9 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 		if (chars) delete[] chars;
 		chars = nullptr;
 		size = 0;
-		hash->reset();
+		if (hash) {
+			hash->reset();
+		}
 	}
 #pragma endregion
 
