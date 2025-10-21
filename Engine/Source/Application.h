@@ -7,6 +7,7 @@
 #include <chrono>
 
 class Module;
+class ModuleD3D12;
 
 class Application
 {
@@ -32,6 +33,8 @@ private:
     typedef std::array<uint64_t, MAX_FPS_TICKS> TickList;
 
     std::vector<Module*> modules;
+
+    ModuleD3D12* d3d12 = nullptr;
 
     uint64_t  lastMilis = 0;
     TickList  tickList;
