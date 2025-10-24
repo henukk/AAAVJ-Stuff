@@ -1,18 +1,16 @@
 #include "String.h"
-#include "StringHash.h"
 #include <cassert>
 
 //CONFIG
 bool OPTIMIZED_COMPARATOR = false;
 
-
 //PRIVATE
-String::String(char* init, const unsigned long long size) noexcept : chars(init), size(size), hash(new StringHash()) {}
+String::String(char* init, const unsigned long long size) noexcept : chars(init), size(size), hash(StringHash()) {}
 
 //PUBLIC
 #pragma region CONSTRUCTORS & DESTRUCTORS
-	String::String() noexcept : chars(nullptr), size(0), hash(new StringHash()) {}
-	String::String(const char* init) : size(0), hash(new StringHash()) {
+	String::String() noexcept : chars(nullptr), size(0), hash(StringHash()) {}
+	String::String(const char* init) : size(0), hash(StringHash()) {
 		assert(init != nullptr && "ASSERT FAIL: String constructor: init pointer is null\n");
 		while (init[size] != '\0') {
 			++size;
@@ -24,7 +22,7 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 		}
 		chars[size] = '\0';
 	}
-	String::String(const String& other) : chars(nullptr), size(other.size), hash(new StringHash(*other.hash)) {
+	String::String(const String& other) : chars(nullptr), size(other.size), hash(StringHash(other.hash)) {
 		if (size == 0) {
 			chars = nullptr;
 		}
@@ -36,18 +34,13 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 			chars[size] = '\0';
 		}
 	}
-	String::String(String&& other) noexcept : chars(other.chars), size(other.size), hash(new StringHash(*other.hash)) {
-		if (!hash) {
-			hash = new StringHash();
-		}
+	String::String(String&& other) noexcept : chars(other.chars), size(other.size), hash(other.hash) {
 		other.chars = nullptr;
 		other.size = 0;
-		other.hash = new StringHash();
 	}
 
 	String::~String() noexcept {
 		if (chars) delete[] chars;
-		if (hash) delete hash;
 	}
 #pragma endregion
 
@@ -67,7 +60,7 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 	char& String::operator[](unsigned long long i) { //modificador de caracter -> por eso reset hash
 		assert(chars != nullptr && "ASSERT FAIL: String::operator[] - chars is null");
 		assert(i < size && "ASSERT FAIL: String::operator[] - index out of bounds");
-		hash->reset();
+		hash.reset();
 		return chars[i];
 	}
 	char String::operator[](unsigned long long i) const noexcept { //consultor de caracter
@@ -90,12 +83,14 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 		assert(other.chars != nullptr && "String::operator== - right operand is null");
 
 		if (OPTIMIZED_COMPARATOR) {
-			if (hash && !hash->getHashed()) hash->generateHash(size, chars);
-			if (other.hash && !other.hash->getHashed()) other.hash->generateHash(other.size, other.chars);
-
-			if (hash && other.hash) {
-				return (*hash == *other.hash);
+			if (!hash.getHashed()) {
+				hash.generateHash(size, chars);
 			}
+			if (!other.hash.getHashed()) {
+				other.hash.generateHash(other.size, other.chars);
+			}
+
+			return (hash == other.hash);
 		}
 
 		for (unsigned long long curr = 0; curr < size; ++curr) {
@@ -139,23 +134,7 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 
 		chars = newChars;
 		size = other.size;
-
-		if (other.hash) {
-			if (!hash) {
-				hash = new StringHash(*other.hash);
-			}
-			else {
-				*hash = *other.hash;
-			}
-		}
-		else {
-			if (!hash) {
-				hash = new StringHash();
-			}
-			else {
-				hash->reset();
-			}
-		}
+		hash = other.hash;
 
 		return *this;
 	}
@@ -170,22 +149,12 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 			chars = nullptr;
 		}
 
-		if (hash) {
-			delete hash;
-			hash = nullptr;
-		}
-
 		chars = other.chars;
 		size = other.size;
 		hash = other.hash;
 
-		if (!hash) {
-			hash = new StringHash();
-		}
-
 		other.chars = nullptr;
 		other.size = 0;
-		other.hash = new StringHash();
 
 		return *this;
 	}
@@ -199,9 +168,7 @@ String::String(char* init, const unsigned long long size) noexcept : chars(init)
 		if (chars) delete[] chars;
 		chars = nullptr;
 		size = 0;
-		if (hash) {
-			hash->reset();
-		}
+		hash.reset();
 	}
 #pragma endregion
 

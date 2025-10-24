@@ -1,14 +1,13 @@
 #pragma once
 #include <iostream>
-
-class StringHash;
+#include "StringHash.h"
 
 extern bool OPTIMIZED_COMPARATOR;
 class String {
 private:
 	char* chars;
 	unsigned long long size;
-	StringHash* hash;
+	mutable StringHash hash;
 
 	String(char* init, const unsigned long long size) noexcept;
 public:
