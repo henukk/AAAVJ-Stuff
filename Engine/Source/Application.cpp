@@ -3,9 +3,11 @@
 
 #include "ModuleD3D12.h"
 #include "ModuleInput.h"
+#include "ModuleEditor.h"
 
 Application::Application(int argc, wchar_t** argv, void* hWnd)
 {
+    modules.push_back(new ModuleEditor());
     modules.push_back(d3d12 = new ModuleD3D12((HWND)hWnd));
     modules.push_back(new ModuleInput((HWND)hWnd));
 }
@@ -24,8 +26,11 @@ bool Application::init()
 {
 	bool ret = true;
 
-	for(auto it = modules.begin(); it != modules.end() && ret; ++it)
-		ret = (*it)->init();
+    for (auto it = modules.begin(); it != modules.end() && ret; ++it)
+        ret = (*it)->init();
+
+    for (auto it = modules.begin(); it != modules.end() && ret; ++it)
+        ret = (*it)->postInit();
 
     lastMilis = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
