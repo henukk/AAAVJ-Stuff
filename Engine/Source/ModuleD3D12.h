@@ -3,11 +3,14 @@
 
 //#include <dxgi1_6.h> //No necesario y ahorramos mediante forward declaration
 
-constexpr int N = 3;
+constexpr int N = 2;
 
 class IDXGIFactory6;
 class IDXGIAdapter4;
 class IDXGISwapChain3;
+
+class ImGuiPass;
+class ModuleD3D12;
 
 class ModuleD3D12 : public Module {
 private:
@@ -62,5 +65,13 @@ public:
     IDXGISwapChain3* getSwapChain() const { return swapChain.Get(); }
     ID3D12CommandQueue* getCommandQueue() const { return commandQueue.Get(); }
 
+private:
+    ImGuiPass* imguiPass = nullptr;
+    ModuleD3D12* d3d12 = nullptr;
 
+
+    bool Editor_postInit();
+    void Editor_preRender();
+    void Editor_render();
+    bool Editor_cleanUp();
 };

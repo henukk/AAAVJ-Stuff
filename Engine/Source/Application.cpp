@@ -7,7 +7,7 @@
 
 Application::Application(int argc, wchar_t** argv, void* hWnd)
 {
-    modules.push_back(new ModuleEditor());
+    //modules.push_back(new ModuleEditor());
     modules.push_back(d3d12 = new ModuleD3D12((HWND)hWnd));
     modules.push_back(new ModuleInput((HWND)hWnd));
 }
