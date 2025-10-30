@@ -34,45 +34,45 @@ void ModuleD3D12::preRender() {
     currentIndex = swapChain->GetCurrentBackBufferIndex();
     waitForFence(fenceValues[currentIndex]);
     commandAllocators[currentIndex]->Reset();
-}
 
-void ModuleD3D12::postRender() {
-    commandQueue->Signal(fence.Get(), ++fenceValue);
-    currentIndex = swapChain->GetCurrentBackBufferIndex();
-    fenceValues[currentIndex] = fenceValue;
-}
-
-void ModuleD3D12::render() {
     commandList->Reset(commandAllocators[currentIndex].Get(), nullptr);
-
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[currentIndex].Get(),
         D3D12_RESOURCE_STATE_PRESENT,
         D3D12_RESOURCE_STATE_RENDER_TARGET
     );
     commandList->ResourceBarrier(1, &barrier);
+}
 
+void ModuleD3D12::render() {
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
         rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         currentIndex, rtvDescriptorSize
     );
 
-    const float clearColor[4] = { 1.f, 0.f, 0.f, 1.f };
+    const float clearColor[4] = { 1.f, 0.f, 0.f, 0.2f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
-    barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+    
+    auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[currentIndex].Get(),
         D3D12_RESOURCE_STATE_RENDER_TARGET,
         D3D12_RESOURCE_STATE_PRESENT
     );
     commandList->ResourceBarrier(1, &barrier);
+}
 
+
+void ModuleD3D12::postRender() {
     commandList->Close();
 
     ID3D12CommandList* cmdLists[] = { commandList.Get() };
     commandQueue->ExecuteCommandLists(1, cmdLists);
 
     swapChain->Present(1, 0);
+
+    commandQueue->Signal(fence.Get(), ++fenceValue);
+    currentIndex = swapChain->GetCurrentBackBufferIndex();
+    fenceValues[currentIndex] = fenceValue;
 }
 
 bool ModuleD3D12::cleanUp() {

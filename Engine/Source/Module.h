@@ -15,9 +15,14 @@ public:
 
     }
 
-	virtual bool init() 
+	virtual bool init()
 	{
-		return true; 
+		return true;
+	}
+
+	virtual bool postInit()
+	{
+		return true;
 	}
 
 	virtual void update()

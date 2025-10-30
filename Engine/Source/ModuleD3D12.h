@@ -54,4 +54,13 @@ private:
 
     void initSynchronization();
     void waitForFence(UINT64 value);
+
+public:
+    HWND getHWND() const { return hWnd; }
+    ID3D12Device5* getDevice() const { return device.Get(); }
+    ID3D12GraphicsCommandList* getCommandList() const { return commandList.Get(); }
+    IDXGISwapChain3* getSwapChain() const { return swapChain.Get(); }
+    ID3D12CommandQueue* getCommandQueue() const { return commandQueue.Get(); }
+
+
 };

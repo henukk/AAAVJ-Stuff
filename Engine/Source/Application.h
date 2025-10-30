@@ -17,6 +17,7 @@ public:
 	~Application();
 
 	bool         init();
+    bool         preinit();
 	void         update();
 	bool         cleanUp();
 
@@ -27,6 +28,14 @@ public:
 
     bool                        isPaused() const { return paused; }
     bool                        setPaused(bool p) { paused = p; return paused; }
+
+    template <class T> T* GetModule() const {
+        for (auto* module : modules) {
+            if (auto* result = dynamic_cast<T*>(module))
+                return result;
+        }
+        return nullptr;
+    }
 
 private:
     enum { MAX_FPS_TICKS = 30 };
