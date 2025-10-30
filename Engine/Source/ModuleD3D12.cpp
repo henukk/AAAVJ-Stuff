@@ -5,6 +5,10 @@
 #include <d3d12.h>
 #include "d3dx12.h"
 
+#include "Application.h"
+#include "ImGuiPass.h"
+#include "imgui.h"
+
 ModuleD3D12::ModuleD3D12(HWND hWnd) : hWnd(hWnd), currentIndex(0), fenceValue(0), fenceEvent(nullptr) {}
 ModuleD3D12::~ModuleD3D12() {}
 
@@ -25,51 +29,57 @@ bool ModuleD3D12::init() {
     createRenderTargets();
 
     initSynchronization();
+
+    Editor_postInit();
     return true;
 }
 
 void ModuleD3D12::update() {}
 
 void ModuleD3D12::preRender() {
+    Editor_preRender();
+
     currentIndex = swapChain->GetCurrentBackBufferIndex();
     waitForFence(fenceValues[currentIndex]);
     commandAllocators[currentIndex]->Reset();
+}
 
+void ModuleD3D12::render() {
     commandList->Reset(commandAllocators[currentIndex].Get(), nullptr);
+
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[currentIndex].Get(),
         D3D12_RESOURCE_STATE_PRESENT,
         D3D12_RESOURCE_STATE_RENDER_TARGET
     );
     commandList->ResourceBarrier(1, &barrier);
-}
 
-void ModuleD3D12::render() {
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
         rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         currentIndex, rtvDescriptorSize
     );
 
-    const float clearColor[4] = { 1.f, 0.f, 0.f, 0.2f };
+    const float clearColor[4] = { 1.f, 0.f, 0.f, 1.f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-    
-    auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+
+    Editor_render();
+
+    barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[currentIndex].Get(),
         D3D12_RESOURCE_STATE_RENDER_TARGET,
         D3D12_RESOURCE_STATE_PRESENT
     );
     commandList->ResourceBarrier(1, &barrier);
-}
 
-
-void ModuleD3D12::postRender() {
     commandList->Close();
 
     ID3D12CommandList* cmdLists[] = { commandList.Get() };
     commandQueue->ExecuteCommandLists(1, cmdLists);
 
     swapChain->Present(1, 0);
+}
 
+void ModuleD3D12::postRender() {
     commandQueue->Signal(fence.Get(), ++fenceValue);
     currentIndex = swapChain->GetCurrentBackBufferIndex();
     fenceValues[currentIndex] = fenceValue;
@@ -80,6 +90,7 @@ bool ModuleD3D12::cleanUp() {
         CloseHandle(fenceEvent);
         fenceEvent = nullptr;
     }
+    Editor_cleanUp();
     return true;
 }
 
@@ -122,6 +133,7 @@ void ModuleD3D12::createSwapChain() {
     desc.BufferCount = N;
     desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     desc.SampleDesc = { 1, 0 };
+    desc.Scaling = DXGI_SCALING_STRETCH;
 
     Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
     factory->CreateSwapChainForHwnd(commandQueue.Get(), hWnd, &desc, nullptr, nullptr, &swapChain1);
@@ -156,4 +168,27 @@ void ModuleD3D12::waitForFence(UINT64 value) {
         fence->SetEventOnCompletion(value, fenceEvent);
         WaitForSingleObject(fenceEvent, INFINITE);
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+bool ModuleD3D12::Editor_postInit() {
+    //d3d12 = (ModuleD3D12*)app->GetModule<ModuleD3D12>();
+    imguiPass = new ImGuiPass(device.Get(), hWnd);
+    return true;
+}
+
+void ModuleD3D12::Editor_preRender() {
+    imguiPass->startFrame();
+    ImGui::ShowDemoWindow();
+}
+
+void ModuleD3D12::Editor_render() {
+    ID3D12GraphicsCommandList* cmdList = commandList.Get();
+    imguiPass->record(cmdList);
+}
+
+bool ModuleD3D12::Editor_cleanUp() {
+    delete imguiPass;
+    imguiPass = nullptr;
+    return true;
 }
