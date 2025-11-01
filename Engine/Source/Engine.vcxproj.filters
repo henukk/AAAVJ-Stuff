@@ -33,28 +33,28 @@
     </ClCompile>
     <ClCompile Include="ModuleD3D12.cpp" />
     <ClCompile Include="3rdParty\imgui-docking\imgui_demo.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="3rdParty\imgui-docking\imgui_draw.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="3rdParty\imgui-docking\backends\imgui_impl_dx12.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="3rdParty\imgui-docking\backends\imgui_impl_win32.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="3rdParty\imgui-docking\imgui_tables.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="3rdParty\imgui-docking\imgui_widgets.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="ImGuiPass.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="3rdParty\ImGuizmo\ImGuizmo.cpp">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="ModuleEditor.cpp">
       <Filter>Engine_UI</Filter>
@@ -111,25 +111,25 @@
     </ClInclude>
     <ClInclude Include="ModuleD3D12.h" />
     <ClInclude Include="3rdParty\imgui-docking\imgui.h">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="3rdParty\imgui-docking\backends\imgui_impl_dx12.h">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="3rdParty\imgui-1.89.8\backends\imgui_impl_win32.h">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="3rdParty\imgui-docking\backends\imgui_impl_win32.h">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="3rdParty\imgui-docking\imgui_internal.h">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="ImGuiPass.h">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="3rdParty\ImGuizmo\ImGuizmo.h">
-      <Filter>Engine_UI\Teacher</Filter>
+      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="ModuleEditor.h">
       <Filter>Engine_UI</Filter>
@@ -150,7 +150,10 @@
     <Filter Include="Engine_UI">
       <UniqueIdentifier>{522d4bde-c44c-4447-ac67-1e8827c08620}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine_UI\Teacher">
+    <Filter Include="External">
+      <UniqueIdentifier>{33a66c4b-258e-4166-bb52-43a31601f2c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\ImGui">
       <UniqueIdentifier>{16a66a20-a85f-4f52-9a86-037c9b102e14}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
