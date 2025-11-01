@@ -1,2 +1,0 @@
-C:\Users\hectornc\source\repos\Engine\Source\3rdParty\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug\DirectXTex.lib
-C:\Users\hector.nunez\OneDrive - La Salle URL\MasterVJAAA\AAAVJ-Stuff\Engine\Source\3rdParty\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug\DirectXTex.lib
