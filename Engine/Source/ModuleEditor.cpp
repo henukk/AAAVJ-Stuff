@@ -28,12 +28,11 @@ void ModuleEditor::preRender() {
 }
 
 void ModuleEditor::render() {
-    ID3D12GraphicsCommandList* cmdList = d3d12->getCommandList();
-    imguiPass->record(cmdList);
 }
 
 void ModuleEditor::postRender() {
-
+    ID3D12GraphicsCommandList* cmdList = d3d12->getCommandList();
+    imguiPass->record(cmdList);
 }
 
 bool ModuleEditor::cleanUp() {

@@ -36,7 +36,6 @@ private:
     unsigned windowWidth = 0;
     unsigned windowHeight = 0;
     bool fullscreen = false;
-    RECT lastWindowRect;
 
 public:
 	ModuleD3D12(HWND hWnd);
@@ -73,14 +72,4 @@ public:
     IDXGISwapChain3* getSwapChain() const { return swapChain.Get(); }
     ID3D12CommandQueue* getCommandQueue() const { return commandQueue.Get(); }
     void resize();
-
-private:
-    ImGuiPass* imguiPass = nullptr;
-    ModuleD3D12* d3d12 = nullptr;
-
-
-    bool Editor_postInit();
-    void Editor_preRender();
-    void Editor_render();
-    bool Editor_cleanUp();
 };

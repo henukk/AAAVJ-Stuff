@@ -34,15 +34,12 @@ bool ModuleD3D12::init() {
 
     initSynchronization();
 
-    Editor_postInit();
     return true;
 }
 
 void ModuleD3D12::update() {}
 
 void ModuleD3D12::preRender() {
-    Editor_preRender();
-
     currentIndex = swapChain->GetCurrentBackBufferIndex();
     waitForFence(fenceValues[currentIndex]);
     commandAllocators[currentIndex]->Reset();
@@ -66,10 +63,10 @@ void ModuleD3D12::render() {
     const float clearColor[4] = { 1.f, 0.f, 0.f, 1.f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+}
 
-    Editor_render();
-
-    barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+void ModuleD3D12::postRender() {
+    auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
         renderTargets[currentIndex].Get(),
         D3D12_RESOURCE_STATE_RENDER_TARGET,
         D3D12_RESOURCE_STATE_PRESENT
@@ -82,9 +79,7 @@ void ModuleD3D12::render() {
     commandQueue->ExecuteCommandLists(1, cmdLists);
 
     swapChain->Present(1, 0);
-}
 
-void ModuleD3D12::postRender() {
     commandQueue->Signal(fence.Get(), ++fenceValue);
     currentIndex = swapChain->GetCurrentBackBufferIndex();
     fenceValues[currentIndex] = fenceValue;
@@ -95,7 +90,6 @@ bool ModuleD3D12::cleanUp() {
         CloseHandle(fenceEvent);
         fenceEvent = nullptr;
     }
-    Editor_cleanUp();
     return true;
 }
 
@@ -237,27 +231,4 @@ void ModuleD3D12::flush()
 
     fence->SetEventOnCompletion(fenceValue, fenceEvent);
     WaitForSingleObject(fenceEvent, INFINITE);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////
-bool ModuleD3D12::Editor_postInit() {
-    //d3d12 = (ModuleD3D12*)app->GetModule<ModuleD3D12>();
-    imguiPass = new ImGuiPass(device.Get(), hWnd);
-    return true;
-}
-
-void ModuleD3D12::Editor_preRender() {
-    imguiPass->startFrame();
-    ImGui::ShowDemoWindow();
-}
-
-void ModuleD3D12::Editor_render() {
-    ID3D12GraphicsCommandList* cmdList = commandList.Get();
-    imguiPass->record(cmdList);
-}
-
-bool ModuleD3D12::Editor_cleanUp() {
-    delete imguiPass;
-    imguiPass = nullptr;
-    return true;
 }
