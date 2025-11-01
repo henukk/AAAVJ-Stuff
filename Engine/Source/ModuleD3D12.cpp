@@ -61,6 +61,7 @@ void ModuleD3D12::render() {
 
     const float clearColor[4] = { 1.f, 0.f, 0.f, 1.f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+    commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
     Editor_render();
 

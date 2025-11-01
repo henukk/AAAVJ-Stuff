@@ -102,7 +102,6 @@ void ImGuiPass::record(ID3D12GraphicsCommandList* commandList)
         ID3D12DescriptorHeap* descriptorHeaps[] = { heap.Get() };
         commandList->SetDescriptorHeaps(1, descriptorHeaps);
     }
-
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
     END_EVENT(commandList);
