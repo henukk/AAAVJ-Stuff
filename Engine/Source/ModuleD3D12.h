@@ -33,6 +33,11 @@ private:
 
 	UINT currentIndex;
 
+    unsigned windowWidth = 0;
+    unsigned windowHeight = 0;
+    bool fullscreen = false;
+    RECT lastWindowRect;
+
 public:
 	ModuleD3D12(HWND hWnd);
 	~ModuleD3D12();
@@ -58,12 +63,16 @@ private:
     void initSynchronization();
     void waitForFence(UINT64 value);
 
+    void getWindowSize(unsigned& width, unsigned& height);
+    void flush();
+
 public:
     HWND getHWND() const { return hWnd; }
     ID3D12Device5* getDevice() const { return device.Get(); }
     ID3D12GraphicsCommandList* getCommandList() const { return commandList.Get(); }
     IDXGISwapChain3* getSwapChain() const { return swapChain.Get(); }
     ID3D12CommandQueue* getCommandQueue() const { return commandQueue.Get(); }
+    void resize();
 
 private:
     ImGuiPass* imguiPass = nullptr;
