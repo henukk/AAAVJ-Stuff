@@ -10,7 +10,9 @@
 #include "imgui.h"
 
 ModuleD3D12::ModuleD3D12(HWND hWnd) : hWnd(hWnd), currentIndex(0), fenceValue(0), fenceEvent(nullptr) {}
-ModuleD3D12::~ModuleD3D12() {}
+ModuleD3D12::~ModuleD3D12() {
+    flush();
+}
 
 bool ModuleD3D12::init() {
     #if defined(_DEBUG)
@@ -19,6 +21,8 @@ bool ModuleD3D12::init() {
         debugInterface->EnableDebugLayer();
     #endif
     initDXGIFactoryAndDevice();
+
+    getWindowSize(windowWidth, windowHeight);
 
     createCommandQueue();
     createCommandAllocators();
@@ -123,12 +127,9 @@ void ModuleD3D12::createCommandList() {
 }
 
 void ModuleD3D12::createSwapChain() {
-    RECT rect;
-    GetWindowRect(hWnd, &rect);
-
     DXGI_SWAP_CHAIN_DESC1 desc = {};
-    desc.Width = rect.right - rect.left;
-    desc.Height = rect.bottom - rect.top;
+    desc.Width = windowHeight;
+    desc.Height = windowHeight;
     desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     desc.BufferCount = N;
@@ -169,6 +170,73 @@ void ModuleD3D12::waitForFence(UINT64 value) {
         fence->SetEventOnCompletion(value, fenceEvent);
         WaitForSingleObject(fenceEvent, INFINITE);
     }
+}
+
+void ModuleD3D12::resize()
+{
+    unsigned width, height;
+    getWindowSize(width, height);
+
+    if (width == 0 || height == 0)
+        return;
+
+    if (width == windowWidth && height == windowHeight)
+        return;
+
+    windowWidth = width;
+    windowHeight = height;
+
+    flush();
+
+    for (unsigned i = 0; i < N; ++i)
+    {
+        renderTargets[i].Reset();
+        fenceValues[i] = 0;
+    }
+
+    // redimensionar el swap chain
+    DXGI_SWAP_CHAIN_DESC desc = {};
+    swapChain->GetDesc(&desc);
+
+    HRESULT hr = swapChain->ResizeBuffers(
+        N,
+        windowWidth,
+        windowHeight,
+        desc.BufferDesc.Format,
+        desc.Flags
+    );
+
+    if (FAILED(hr))
+    {
+        LOG("Failed to resize swap chain buffers");
+        return;
+    }
+
+    currentIndex = swapChain->GetCurrentBackBufferIndex();
+
+    // recrear RTVs
+    createRenderTargets();
+
+    LOG("SwapChain resized to %ux%u", windowWidth, windowHeight);
+}
+
+
+
+void ModuleD3D12::getWindowSize(unsigned& width, unsigned& height)
+{
+    RECT clientRect = {};
+    GetClientRect(hWnd, &clientRect);
+
+    width = unsigned(clientRect.right - clientRect.left);
+    height = unsigned(clientRect.bottom - clientRect.top);
+}
+
+void ModuleD3D12::flush()
+{
+    commandQueue->Signal(fence.Get(), ++fenceValue);
+
+    fence->SetEventOnCompletion(fenceValue, fenceEvent);
+    WaitForSingleObject(fenceEvent, INFINITE);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
