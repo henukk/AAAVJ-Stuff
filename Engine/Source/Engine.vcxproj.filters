@@ -57,6 +57,16 @@
       <Filter>Engine_UI</Filter>
     </ClCompile>
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="EditorConsole.cpp">
+      <Filter>Engine_UI\Console</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorMenuBar.cpp">
+      <Filter>Engine_UI\BarMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleResources.cpp" />
+    <ClCompile Include="ModuleExercise1.cpp">
+      <Filter>Exercises</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -130,6 +140,16 @@
       <Filter>Engine_UI</Filter>
     </ClInclude>
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="EditorConsole.h">
+      <Filter>Engine_UI\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorMenuBar.h">
+      <Filter>Engine_UI\BarMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleResources.h" />
+    <ClInclude Include="ModuleExercise1.h">
+      <Filter>Exercises</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -151,6 +171,15 @@
     </Filter>
     <Filter Include="External\ImGui">
       <UniqueIdentifier>{16a66a20-a85f-4f52-9a86-037c9b102e14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine_UI\Console">
+      <UniqueIdentifier>{7f21b140-45a6-46e0-8cbf-17b02e6a26b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine_UI\BarMenu">
+      <UniqueIdentifier>{e0a1ec63-8aef-432f-9832-e312e46207ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Exercises">
+      <UniqueIdentifier>{66dfaca2-0a00-4dc3-9a77-a2159789252f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

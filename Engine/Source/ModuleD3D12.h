@@ -10,7 +10,7 @@ class IDXGIAdapter4;
 class IDXGISwapChain3;
 
 class ImGuiPass;
-class ModuleD3D12;
+//class ModuleD3D12;
 
 class ModuleD3D12 : public Module {
 private:
@@ -30,6 +30,7 @@ private:
 	UINT64 fenceValues[N] = {};
     UINT64 fenceValue = 0;
     HANDLE fenceEvent = nullptr;
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
 
 	UINT currentIndex;
 
@@ -63,7 +64,6 @@ private:
     void waitForFence(UINT64 value);
 
     void getWindowSize(unsigned& width, unsigned& height);
-    void flush();
 
 public:
     HWND getHWND() const { return hWnd; }
@@ -71,5 +71,9 @@ public:
     ID3D12GraphicsCommandList* getCommandList() const { return commandList.Get(); }
     IDXGISwapChain3* getSwapChain() const { return swapChain.Get(); }
     ID3D12CommandQueue* getCommandQueue() const { return commandQueue.Get(); }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE getRtvHandle() const { return rtvHandle; }
+   
     void resize();
+    void flush();
 };

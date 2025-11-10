@@ -1,11 +1,18 @@
 #pragma once
-
 #include "Module.h"
 
 class ImGuiPass;
 class ModuleD3D12;
+class EditorConsole;
+class EditorMenuBar;
 
 class ModuleEditor : public Module {
+private:
+    ModuleD3D12* d3d12 = nullptr;
+    ImGuiPass* imguiPass = nullptr;
+    EditorConsole* console = nullptr;
+    EditorMenuBar* menuBar = nullptr;
+
 public:
     ModuleEditor();
     ~ModuleEditor();
@@ -19,6 +26,8 @@ public:
     bool cleanUp() override;
 
 private:
-    ImGuiPass* imguiPass = nullptr;
-    ModuleD3D12* d3d12 = nullptr;
+    void drawMenuBar();
+    void drawDockSpace();
+    void drawPanels();
+    void logFrameInfo();
 };

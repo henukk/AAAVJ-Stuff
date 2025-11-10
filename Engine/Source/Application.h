@@ -8,6 +8,9 @@
 
 class Module;
 class ModuleD3D12;
+class ModuleInput;
+class ModuleEditor;
+class ModuleResources;
 
 class Application
 {
@@ -29,21 +32,21 @@ public:
     bool                        isPaused() const { return paused; }
     bool                        setPaused(bool p) { paused = p; return paused; }
 
-    template <class T> T* GetModule() const {
-        for (auto* module : modules) {
-            if (auto* result = dynamic_cast<T*>(module))
-                return result;
-        }
-        return nullptr;
-    }
+    ModuleD3D12* getModuleD3D12();
+    ModuleInput* getModuleInput();
+    ModuleEditor* getModuleEditor();
+    ModuleResources* getModuleResources();
 
 private:
     enum { MAX_FPS_TICKS = 30 };
     typedef std::array<uint64_t, MAX_FPS_TICKS> TickList;
 
     std::vector<Module*> modules;
-
     ModuleD3D12* d3d12 = nullptr;
+    ModuleInput* moduleInput;
+    ModuleEditor* moduleEditor;
+    ModuleResources* moduleResources;
+
 
     uint64_t  lastMilis = 0;
     TickList  tickList;
