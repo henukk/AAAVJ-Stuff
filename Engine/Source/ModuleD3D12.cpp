@@ -43,9 +43,7 @@ void ModuleD3D12::preRender() {
     currentIndex = swapChain->GetCurrentBackBufferIndex();
     waitForFence(fenceValues[currentIndex]);
     commandAllocators[currentIndex]->Reset();
-}
 
-void ModuleD3D12::render() {
     commandList->Reset(commandAllocators[currentIndex].Get(), nullptr);
 
     auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -55,11 +53,13 @@ void ModuleD3D12::render() {
     );
     commandList->ResourceBarrier(1, &barrier);
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(
+    rtvHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
         rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         currentIndex, rtvDescriptorSize
     );
+}
 
+void ModuleD3D12::render() {    
     const float clearColor[4] = { 1.f, 0.f, 0.f, 1.f };
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
@@ -77,7 +77,7 @@ void ModuleD3D12::postRender() {
 
     ID3D12CommandList* cmdLists[] = { commandList.Get() };
     commandQueue->ExecuteCommandLists(1, cmdLists);
-
+    
     swapChain->Present(1, 0);
 
     commandQueue->Signal(fence.Get(), ++fenceValue);

@@ -4,12 +4,36 @@
 #include "ModuleD3D12.h"
 #include "ModuleInput.h"
 #include "ModuleEditor.h"
+#include "ModuleResources.h"
+
+#include "ModuleExercise1.h"
+
+/*Exercise1::render()
+{
+    clearrendertarget()
+
+        app->getModuleEditor()->getImGuiPass()->record(commandList);
+}*/
 
 Application::Application(int argc, wchar_t** argv, void* hWnd)
 {
-    modules.push_back(new ModuleEditor());
-    modules.push_back(d3d12 = new ModuleD3D12((HWND)hWnd));
-    modules.push_back(new ModuleInput((HWND)hWnd));
+    modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));
+    d3d12 = new ModuleD3D12((HWND)hWnd);
+    modules.push_back(d3d12);
+    modules.push_back(moduleResources = new ModuleResources());
+    modules.push_back(moduleEditor = new ModuleEditor());
+    
+    //Ex1
+    //modules.push_back(new ModuleExercise1());
+
+    //Ex2
+    //modules.push_back(new ModuleExercise2());
+    
+    //Ex3
+
+    
+    //Ex4
+
 }
 
 Application::~Application()
@@ -75,4 +99,20 @@ bool Application::cleanUp()
 		ret = (*it)->cleanUp();
 
 	return ret;
+}
+
+ModuleD3D12* Application::getModuleD3D12() {
+    return d3d12;
+}
+
+ModuleInput* Application::getModuleInput() {
+    return moduleInput;
+}
+
+ModuleEditor* Application::getModuleEditor() {
+    return moduleEditor;
+}
+
+ModuleResources* Application::getModuleResources() {
+    return moduleResources;
 }
