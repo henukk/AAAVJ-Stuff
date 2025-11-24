@@ -4,116 +4,89 @@
 #include "Application.h"
 #include "ModuleD3D12.h"
 
-ModuleResources::ModuleResources() {
-
-}
-
-ModuleResources::~ModuleResources() {
-
-}
+#include "DirectXTex.h"
 
 bool ModuleResources::init() {
     d3d12 = app->getModuleD3D12();
     device = d3d12->getDevice();
+
+    device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
+    device->CreateCommandList1(0, D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_LIST_FLAG_NONE, IID_PPV_ARGS(&commandList));
+    commandList->Reset(commandAllocator.Get(), nullptr);
+
 	return true;
-}
-
-bool ModuleResources::postInit() {
-	return true;
-}
-
-void ModuleResources::update() {
-
-}
-
-void ModuleResources::preRender() {
-
-}
-
-void ModuleResources::render() {
-
-}
-
-void ModuleResources::postRender() {
-
 }
 
 bool ModuleResources::cleanUp() {
-	buffer.Reset();
-	vertexBuffer.Reset();
-	stagingBuffer.Reset();
-
 	return true;
 }
 
-void ModuleResources::CreateUploadBuffer(const void* cpuData, UINT64 bufferSize) { //parametro o constexpr??
-	// 1. Describe the buffer
-	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
-	// 2. Specify UPLOAD heap properties
-	CD3DX12_HEAP_PROPERTIES heapProps(D3D12_HEAP_TYPE_UPLOAD);
-	// 3. Create the resource
-	device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&buffer));
+ComPtr<ID3D12Resource> ModuleResources::createUploadBuffer(const void* data, size_t size, const char* name) {
+    ID3D12CommandQueue* queue = d3d12->getCommandQueue();
 
-	// Map the buffer: get a CPU pointer to its memory
-	BYTE* pData = nullptr;
-	CD3DX12_RANGE readRange(0, 0); // We won't read from it, so range is (0,0)
-	buffer->Map(0, &readRange, reinterpret_cast<void**>(&pData));
-	// Copy our application data into the GPU buffer
-	memcpy(pData, cpuData, bufferSize);
-	// Unmap the buffer (invalidate the pointer)
-	buffer->Unmap(0, nullptr);
-}
+    ComPtr<ID3D12Resource> buffer;
 
-ComPtr<ID3D12Resource> ModuleResources::CreateDefaultBuffer(
-    const void* cpuData, UINT64 bufferSize)
-{
-    ComPtr<ID3D12Resource> defaultBuffer;
-    ComPtr<ID3D12Resource> uploadBuffer;
+    CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(size);
+    device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&buffer));
 
-    auto defaultHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-    auto uploadHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-    auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
+    std::wstring convertStr(name, name + strlen(name));
+    buffer->SetName(convertStr.c_str());
 
-    // Create default buffer (GPU only)
-    device->CreateCommittedResource(
-        &defaultHeap,
-        D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
-        D3D12_RESOURCE_STATE_COPY_DEST,
-        nullptr,
-        IID_PPV_ARGS(&defaultBuffer)
-    );
-
-    // Create upload buffer (CPU-visible)
-    device->CreateCommittedResource(
-        &uploadHeap,
-        D3D12_HEAP_FLAG_NONE,
-        &bufferDesc,
-        D3D12_RESOURCE_STATE_GENERIC_READ,
-        nullptr,
-        IID_PPV_ARGS(&uploadBuffer)
-    );
-
-    // Copy CPU data into upload buffer
     BYTE* pData = nullptr;
     CD3DX12_RANGE readRange(0, 0);
-    uploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pData));
-    memcpy(pData, cpuData, bufferSize);
-    uploadBuffer->Unmap(0, nullptr);
+    buffer->Map(0, &readRange, reinterpret_cast<void**>(&pData));
+    memcpy(pData, data, size);
+    buffer->Unmap(0, nullptr);
 
-    // Copy upload -> default
-    auto cmd = d3d12->getCommandList();
-    cmd->CopyBufferRegion(defaultBuffer.Get(), 0, uploadBuffer.Get(), 0, bufferSize);
+    return buffer;
+}
 
-    // Add required barrier (VERY IMPORTANT)
-    auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        defaultBuffer.Get(),
-        D3D12_RESOURCE_STATE_COPY_DEST,
-        D3D12_RESOURCE_STATE_GENERIC_READ
-    );
-    cmd->ResourceBarrier(1, &barrier);
+ComPtr<ID3D12Resource> ModuleResources::createDefaultBuffer(const void* data, size_t size, const char* name) {
+    ID3D12CommandQueue* queue = d3d12->getCommandQueue();
 
-    // return the GPU buffer, but keep uploadBuffer alive long enough if needed
-    this->stagingBuffer = uploadBuffer; // keep ref for this frame
-    return defaultBuffer;
+    ComPtr<ID3D12Resource> buffer;
+
+    CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(size);
+    bool ok = SUCCEEDED(device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&buffer)));
+
+    heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+
+    ComPtr<ID3D12Resource> upload = getUploadHeap(size);
+
+    if (ok)
+    {
+        BYTE* pData = nullptr;
+        CD3DX12_RANGE readRange(0, 0);
+        upload->Map(0, &readRange, reinterpret_cast<void**>(&pData));
+        memcpy(pData, data, size);
+        upload->Unmap(0, nullptr);
+
+        commandList->CopyBufferRegion(buffer.Get(), 0, upload.Get(), 0, size);
+        commandList->Close();
+
+        ID3D12CommandList* commandLists[] = { commandList.Get() };
+        queue->ExecuteCommandLists(UINT(std::size(commandLists)), commandLists);
+
+        d3d12->flush();
+
+        commandAllocator->Reset();
+        ok = SUCCEEDED(commandList->Reset(commandAllocator.Get(), nullptr));
+
+        std::wstring convertStr(name, name + strlen(name));
+        buffer->SetName(convertStr.c_str());
+    }
+
+    return buffer;
+}
+
+ComPtr<ID3D12Resource> ModuleResources::getUploadHeap(size_t size) {
+    ComPtr<ID3D12Resource> uploadHeap;
+
+    CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    CD3DX12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(size);
+    device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&uploadHeap));
+
+    return uploadHeap;
 }

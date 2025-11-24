@@ -5,9 +5,6 @@
 #include "ModuleResources.h"
 #include "ReadData.h"
 
-ModuleExercise2::ModuleExercise2() {}
-ModuleExercise2::~ModuleExercise2() {}
-
 bool ModuleExercise2::init() {
 	//get dependencies
 	d3d12 = app->getModuleD3D12();
@@ -24,7 +21,7 @@ bool ModuleExercise2::init() {
 
 	UINT vertexBufferSize = sizeof(vertices);
 
-	vertexBuffer = moduleResources->CreateDefaultBuffer(vertices, vertexBufferSize);
+	vertexBuffer = moduleResources->createDefaultBuffer(vertices, vertexBufferSize, "Exercise2");
 
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
 	vertexBufferView.StrideInBytes = sizeof(Vertex);
@@ -96,16 +93,6 @@ bool ModuleExercise2::init() {
 	return true;
 }
 
-bool ModuleExercise2::postInit() {
-	return true;
-}
-
-void ModuleExercise2::update() {}
-
-void ModuleExercise2::preRender() {}
-
-void ModuleExercise2::postRender() {}
-
 void ModuleExercise2::render()
 {
 	auto commandList = d3d12->getCommandList();
@@ -135,9 +122,4 @@ void ModuleExercise2::render()
 
 	// draw
 	commandList->DrawInstanced(3, 1, 0, 0);
-}
-
-
-bool ModuleExercise2::cleanUp() {
-	return true;
 }

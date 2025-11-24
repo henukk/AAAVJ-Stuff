@@ -1,35 +1,23 @@
 #pragma once
 #include "Module.h"
-#include <d3d12.h>
-#include <wrl.h>
-#include "d3dx12.h"
-
-using Microsoft::WRL::ComPtr;
 
 class ModuleD3D12;
 
 class ModuleResources : public Module {
 public:
-    ModuleResources();
-    ~ModuleResources() override;
-
     bool init() override;
-    bool postInit() override;
-    void update() override;
-    void preRender() override;
-    void render() override;
-    void postRender() override;
     bool cleanUp() override;
 
 public:
-    void CreateUploadBuffer(const void* cpuData, UINT64 bufferSize);
-    ComPtr<ID3D12Resource> CreateDefaultBuffer(const void* cpuData, UINT64 bufferSize);
+    ComPtr<ID3D12Resource> createUploadBuffer(const void* data, size_t size, const char* name);
+    ComPtr<ID3D12Resource> createDefaultBuffer(const void* data, size_t size, const char* name);
+
+    ComPtr<ID3D12Resource> getUploadHeap(size_t size);
 
 private:
-    ModuleD3D12* d3d12 = nullptr;
-    ID3D12Device5* device = nullptr;
+    ModuleD3D12* d3d12;
+    ID3D12Device5* device;
 
-    ComPtr<ID3D12Resource> buffer;
-    ComPtr<ID3D12Resource> vertexBuffer;
-    ComPtr<ID3D12Resource> stagingBuffer;
+    ComPtr<ID3D12CommandAllocator> commandAllocator;
+    ComPtr<ID3D12GraphicsCommandList> commandList;
 };
