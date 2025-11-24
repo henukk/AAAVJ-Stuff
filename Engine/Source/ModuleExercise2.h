@@ -14,13 +14,6 @@ private:
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12PipelineState> pso;
 public:
-	ModuleExercise2();
-	~ModuleExercise2();
 	bool init();
-	bool postInit();
-	void update();
-	void preRender();
-	void postRender();
 	void render();
-	bool cleanUp();
 };
