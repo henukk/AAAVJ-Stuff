@@ -16,7 +16,6 @@ Application::Application(int argc, wchar_t** argv, void* hWnd)
     d3d12 = new ModuleD3D12((HWND)hWnd);
     modules.push_back(d3d12);
     modules.push_back(moduleResources = new ModuleResources());
-    modules.push_back(moduleEditor = new ModuleEditor());
     
     //Ex1 - Paint the background
     //modules.push_back(new ModuleExercise1());
@@ -26,8 +25,8 @@ Application::Application(int argc, wchar_t** argv, void* hWnd)
     
     //Ex3
 
-    
-    //Ex4
+
+    modules.push_back(moduleEditor = new ModuleEditor());
 
 }
 
@@ -47,9 +46,6 @@ bool Application::init()
 
     for (auto it = modules.begin(); it != modules.end() && ret; ++it)
         ret = (*it)->init();
-
-    for (auto it = modules.begin(); it != modules.end() && ret; ++it)
-        ret = (*it)->postInit();
 
     lastMilis = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 

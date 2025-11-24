@@ -8,8 +8,6 @@
 #include "EditorConsole.h"
 #include "EditorMenuBar.h"
 
-ModuleEditor::ModuleEditor() {}
-ModuleEditor::~ModuleEditor() {}
 
 bool ModuleEditor::init() {
     d3d12 = app->getModuleD3D12();
@@ -18,12 +16,6 @@ bool ModuleEditor::init() {
     menuBar = new EditorMenuBar();
     return true;
 }
-
-bool ModuleEditor::postInit() {
-    return true;
-}
-
-void ModuleEditor::update() {}
 
 void ModuleEditor::preRender() {
     imguiPass->startFrame();
@@ -41,10 +33,6 @@ void ModuleEditor::render() {
 
     ID3D12GraphicsCommandList* cmdList = d3d12->getCommandList();
     imguiPass->record(cmdList);
-
-}
-
-void ModuleEditor::postRender() {
 }
 
 bool ModuleEditor::cleanUp() {

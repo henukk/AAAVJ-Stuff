@@ -14,15 +14,9 @@ private:
     EditorMenuBar* menuBar = nullptr;
 
 public:
-    ModuleEditor();
-    ~ModuleEditor();
-
     bool init() override;
-    bool postInit() override;
-    void update() override;
     void preRender() override;
     void render() override;
-    void postRender() override;
     bool cleanUp() override;
 
 private:
