@@ -37,8 +37,6 @@ bool ModuleD3D12::init() {
     return true;
 }
 
-void ModuleD3D12::update() {}
-
 void ModuleD3D12::preRender() {
     currentIndex = swapChain->GetCurrentBackBufferIndex();
     waitForFence(fenceValues[currentIndex]);
@@ -57,10 +55,6 @@ void ModuleD3D12::preRender() {
         rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
         currentIndex, rtvDescriptorSize
     );
-}
-
-void ModuleD3D12::render() {   
-
 }
 
 void ModuleD3D12::postRender() {

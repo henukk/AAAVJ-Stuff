@@ -14,6 +14,6 @@ private:
 	ComPtr<ID3D12RootSignature> rootSignature;
 	ComPtr<ID3D12PipelineState> pso;
 public:
-	bool init();
-	void render();
+	bool init() override;
+	void render() override;
 };

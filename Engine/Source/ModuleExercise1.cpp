@@ -3,26 +3,10 @@
 #include "Application.h"
 #include "ModuleD3D12.h"
 
-ModuleExercise1::ModuleExercise1() {
-
-}
-
-ModuleExercise1::~ModuleExercise1(){}
-
 bool ModuleExercise1::init(){
 	d3d12 = app->getModuleD3D12();
 	return true;
 }
-
-bool ModuleExercise1::postInit(){
-	return true;
-}
-
-void ModuleExercise1::update(){}
-
-void ModuleExercise1::preRender(){}
-
-void ModuleExercise1::postRender(){}
 
 void ModuleExercise1::render() {
 	ComPtr<ID3D12GraphicsCommandList> commandList = d3d12->getCommandList();
