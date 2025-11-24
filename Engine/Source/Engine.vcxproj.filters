@@ -67,6 +67,9 @@
     <ClCompile Include="ModuleExercise1.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleExercise2.cpp">
+      <Filter>Exercises</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -150,6 +153,15 @@
     <ClInclude Include="ModuleExercise1.h">
       <Filter>Exercises</Filter>
     </ClInclude>
+    <ClInclude Include="ModuleExercise2.h">
+      <Filter>Exercises</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Chrono.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -180,6 +192,9 @@
     </Filter>
     <Filter Include="Exercises">
       <UniqueIdentifier>{66dfaca2-0a00-4dc3-9a77-a2159789252f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{1272bbc9-a6ac-489b-9b14-f2a74d18f3a5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
