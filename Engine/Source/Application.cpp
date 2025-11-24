@@ -7,6 +7,8 @@
 #include "ModuleResources.h"
 
 #include "ModuleExercise1.h"
+#include "ModuleExercise2.h"
+
 
 /*Exercise1::render()
 {
@@ -27,7 +29,7 @@ Application::Application(int argc, wchar_t** argv, void* hWnd)
     //modules.push_back(new ModuleExercise1());
 
     //Ex2
-    //modules.push_back(new ModuleExercise2());
+    modules.push_back(new ModuleExercise2());
     
     //Ex3
 
