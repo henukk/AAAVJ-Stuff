@@ -10,13 +10,6 @@
 #include "ModuleExercise2.h"
 
 
-/*Exercise1::render()
-{
-    clearrendertarget()
-
-        app->getModuleEditor()->getImGuiPass()->record(commandList);
-}*/
-
 Application::Application(int argc, wchar_t** argv, void* hWnd)
 {
     modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));
