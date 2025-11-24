@@ -73,6 +73,9 @@ public:
     ID3D12CommandQueue* getCommandQueue() const { return commandQueue.Get(); }
 
     D3D12_CPU_DESCRIPTOR_HANDLE getRtvHandle() const { return rtvHandle; }
+
+    unsigned getWindowWidth() const { return windowWidth; }
+    unsigned getWindowHeight() const { return windowHeight; }
    
     void resize();
     void flush();

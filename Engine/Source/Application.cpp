@@ -25,10 +25,10 @@ Application::Application(int argc, wchar_t** argv, void* hWnd)
     modules.push_back(moduleResources = new ModuleResources());
     modules.push_back(moduleEditor = new ModuleEditor());
     
-    //Ex1
+    //Ex1 - Paint the background
     //modules.push_back(new ModuleExercise1());
 
-    //Ex2
+    //Ex2 - Paint a triangle
     modules.push_back(new ModuleExercise2());
     
     //Ex3

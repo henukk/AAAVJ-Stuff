@@ -196,6 +196,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{1272bbc9-a6ac-489b-9b14-f2a74d18f3a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{828ef4aa-39fb-4b79-8505-0fa02cd4d506}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Engine.rc">
@@ -206,5 +209,13 @@
     <None Include="SimpleMath.inl">
       <Filter>TeacherStuff</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\Exercise2VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Exercise2PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
