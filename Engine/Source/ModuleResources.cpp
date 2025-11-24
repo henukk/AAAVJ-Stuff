@@ -13,13 +13,12 @@ ModuleResources::~ModuleResources() {
 }
 
 bool ModuleResources::init() {
+    d3d12 = app->getModuleD3D12();
+    device = d3d12->getDevice();
 	return true;
 }
 
 bool ModuleResources::postInit() {
-	d3d12 = app->getModuleD3D12();
-	device = d3d12->getDevice();
-
 	return true;
 }
 
@@ -65,43 +64,56 @@ void ModuleResources::CreateUploadBuffer(const void* cpuData, UINT64 bufferSize)
 	buffer->Unmap(0, nullptr);
 }
 
-void ModuleResources::CreateDefaultBuffer(const void* cpuData, UINT64 bufferSize) {
-    // --- CREATE THE FINAL GPU BUFFER (DEFAULT HEAP) ---
+ComPtr<ID3D12Resource> ModuleResources::CreateDefaultBuffer(
+    const void* cpuData, UINT64 bufferSize)
+{
+    ComPtr<ID3D12Resource> defaultBuffer;
+    ComPtr<ID3D12Resource> uploadBuffer;
+
     auto defaultHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+    auto uploadHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     auto bufferDesc = CD3DX12_RESOURCE_DESC::Buffer(bufferSize);
 
+    // Create default buffer (GPU only)
     device->CreateCommittedResource(
         &defaultHeap,
         D3D12_HEAP_FLAG_NONE,
         &bufferDesc,
         D3D12_RESOURCE_STATE_COPY_DEST,
         nullptr,
-        IID_PPV_ARGS(&vertexBuffer)
+        IID_PPV_ARGS(&defaultBuffer)
     );
 
-    // --- CREATE THE STAGING BUFFER (UPLOAD HEAP) ---
-    auto uploadHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+    // Create upload buffer (CPU-visible)
     device->CreateCommittedResource(
         &uploadHeap,
         D3D12_HEAP_FLAG_NONE,
         &bufferDesc,
         D3D12_RESOURCE_STATE_GENERIC_READ,
         nullptr,
-        IID_PPV_ARGS(&stagingBuffer)
+        IID_PPV_ARGS(&uploadBuffer)
     );
 
-    // --- CPU: FILL STAGING BUFFER ---
+    // Copy CPU data into upload buffer
     BYTE* pData = nullptr;
     CD3DX12_RANGE readRange(0, 0);
-    stagingBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pData));
+    uploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pData));
     memcpy(pData, cpuData, bufferSize);
-    stagingBuffer->Unmap(0, nullptr);
+    uploadBuffer->Unmap(0, nullptr);
 
-    // --- GPU: COPY DATA ---
-    auto commandList = d3d12->getCommandList();
-    commandList->CopyResource(vertexBuffer.Get(), stagingBuffer.Get());
+    // Copy upload -> default
+    auto cmd = d3d12->getCommandList();
+    cmd->CopyBufferRegion(defaultBuffer.Get(), 0, uploadBuffer.Get(), 0, bufferSize);
 
-    // --- Flush GPU commands to ensure completion ---
-    d3d12->flush();
+    // Add required barrier (VERY IMPORTANT)
+    auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+        defaultBuffer.Get(),
+        D3D12_RESOURCE_STATE_COPY_DEST,
+        D3D12_RESOURCE_STATE_GENERIC_READ
+    );
+    cmd->ResourceBarrier(1, &barrier);
+
+    // return the GPU buffer, but keep uploadBuffer alive long enough if needed
+    this->stagingBuffer = uploadBuffer; // keep ref for this frame
+    return defaultBuffer;
 }
-

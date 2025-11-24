@@ -23,7 +23,7 @@ public:
 
 public:
     void CreateUploadBuffer(const void* cpuData, UINT64 bufferSize);
-    void CreateDefaultBuffer(const void* cpuData, UINT64 bufferSize);
+    ComPtr<ID3D12Resource> CreateDefaultBuffer(const void* cpuData, UINT64 bufferSize);
 
 private:
     ModuleD3D12* d3d12 = nullptr;
