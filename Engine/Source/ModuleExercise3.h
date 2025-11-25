@@ -5,34 +5,33 @@
 
 class ModuleD3D12;
 class ModuleResources;
-class ImGuiPass;
+class ModuleUI;
 
 class ModuleExercise3 : public Module {
 private:
-    ModuleD3D12* moduleD3d12;
-    ModuleResources* moduleResources;
+    ModuleD3D12* moduleD3d12 = nullptr;
+    ModuleResources* moduleResources = nullptr;
+    ModuleUI* ui = nullptr;
 
     ComPtr<ID3D12Resource> vertexBuffer;
-    D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+    D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
     ComPtr<ID3D12RootSignature> rootSignature;
     ComPtr<ID3D12PipelineState> pso;
     std::unique_ptr<DebugDrawPass> debugDrawPass;
 
     Matrix mvp;
+
 public:
-    virtual bool init() override;
-    virtual void preRender() override;
-    virtual void render() override;
-    virtual bool cleanUp() override;
+    bool init() override;
+    void update() override {}
+    void render() override;
+    bool cleanUp() override;
 
 private:
     bool createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride);
     bool createRootSignature();
     bool createPSO();
 
-private:
-    ImGuiPass* imguiPass;
-private:
     void drawGUI();
 
     Vector3 triPos = { 0.0f, 0.0f, 0.0f };

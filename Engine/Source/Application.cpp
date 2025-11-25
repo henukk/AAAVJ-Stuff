@@ -1,10 +1,13 @@
 #include "Globals.h"
 #include "Application.h"
 
-#include "ModuleD3D12.h"
 #include "ModuleInput.h"
-#include "ModuleEditor.h"
+
+#include "ModuleD3D12.h"
 #include "ModuleResources.h"
+
+#include "ModuleUI.h"
+#include "ModuleEditor.h"
 
 #include "ModuleExercise1.h"
 #include "ModuleExercise2.h"
@@ -13,8 +16,7 @@
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));
-    d3d12 = new ModuleD3D12((HWND)hWnd);
-    modules.push_back(d3d12);
+    modules.push_back(d3d12 = new ModuleD3D12((HWND)hWnd));
     modules.push_back(moduleResources = new ModuleResources());
     
     // Ex1 - Paint the background
@@ -25,11 +27,11 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     
     // Ex3 - Paint triangle with transformations and grid
     // INCOMPATIBLE WITH MODULE EDITOR
-    //modules.push_back(new ModuleExercise3());
+    modules.push_back(new ModuleExercise3());
 
     // Module Editor
+    modules.push_back(moduleUI = new ModuleUI());
     modules.push_back(moduleEditor = new ModuleEditor());
-
 }
 
 Application::~Application()
@@ -94,12 +96,16 @@ bool Application::cleanUp()
 	return ret;
 }
 
+ModuleInput* Application::getModuleInput() {
+    return moduleInput;
+}
+
 ModuleD3D12* Application::getModuleD3D12() {
     return d3d12;
 }
 
-ModuleInput* Application::getModuleInput() {
-    return moduleInput;
+ModuleUI* Application::getModuleUI() {
+    return moduleUI;
 }
 
 ModuleEditor* Application::getModuleEditor() {

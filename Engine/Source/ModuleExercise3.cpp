@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "ModuleD3D12.h"
 #include "ModuleResources.h"
+#include "ModuleUI.h"
 
 #include "ReadData.h"
 
@@ -11,9 +12,16 @@
 #include <d3dcompiler.h>
 #include "d3dx12.h"
 
-#include "ImGuiPass.h"
+bool ModuleExercise3::init()
+{
+    moduleD3d12 = app->getModuleD3D12();
+    moduleResources = app->getModuleResources();
+    ui = app->getModuleUI();
 
-bool ModuleExercise3::init() {
+    // UI window registration
+    ui->registerWindow([this]() { drawGUI(); });
+
+    // ---- Triangle vertex buffer ----
     struct Vertex { Vector3 position; };
     static Vertex vertices[3] = {
         { Vector3(-1, -1, 0) },
@@ -25,24 +33,18 @@ bool ModuleExercise3::init() {
     ok = ok && createRootSignature();
     ok = ok && createPSO();
 
-    moduleD3d12 = app->getModuleD3D12();
-    debugDrawPass = std::make_unique<DebugDrawPass>(moduleD3d12->getDevice(), moduleD3d12->getDrawCommandQueue());
-
-    imguiPass = new ImGuiPass(moduleD3d12->getDevice(), moduleD3d12->getHWnd());
+    debugDrawPass = std::make_unique<DebugDrawPass>(
+        moduleD3d12->getDevice(),
+        moduleD3d12->getDrawCommandQueue()
+    );
 
     return ok;
 }
 
-void ModuleExercise3::preRender()
-{
-    imguiPass->startFrame();
-
-    drawGUI();
-}
-
 void ModuleExercise3::render()
 {
-    if (camPos == camTarget) camTarget.x += 0.001f;
+    if (camPos == camTarget)
+        camTarget.x += 0.001f;
 
     ID3D12GraphicsCommandList* commandList = moduleD3d12->getCommandList();
     unsigned width = moduleD3d12->getWindowWidth();
@@ -54,12 +56,14 @@ void ModuleExercise3::render()
         Matrix::CreateFromYawPitchRoll(
             XMConvertToRadians(triRot.y),
             XMConvertToRadians(triRot.x),
-            XMConvertToRadians(triRot.z)) *
+            XMConvertToRadians(triRot.z)
+        ) *
         Matrix::CreateTranslation(triPos);
 
     Matrix view = Matrix::CreateLookAt(camPos, camTarget, Vector3::Up);
     Matrix proj = Matrix::CreatePerspectiveFieldOfView(
-        XM_PIDIV4, float(width) / float(height), 0.1f, 1000.0f);
+        XM_PIDIV4, float(width) / float(height), 0.1f, 1000.0f
+    );
 
     mvp = (model * view * proj).Transpose();
 
@@ -67,12 +71,13 @@ void ModuleExercise3::render()
     commandList->SetPipelineState(pso.Get());
     commandList->SetGraphicsRootSignature(rootSignature.Get());
 
-    // ---- Triangle ----
+    // ---- Draw triangle ----
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
     commandList->SetGraphicsRoot32BitConstants(
-        0, sizeof(XMMATRIX) / sizeof(UINT32), &mvp, 0);
+        0, sizeof(XMMATRIX) / sizeof(UINT32), &mvp, 0
+    );
 
     commandList->DrawInstanced(3, 1, 0, 0);
 
@@ -81,9 +86,6 @@ void ModuleExercise3::render()
     dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
 
     debugDrawPass->record(commandList, width, height, view, proj);
-
-    // ---- IMGUI ----
-    imguiPass->record(commandList);
 }
 
 bool ModuleExercise3::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride)
@@ -91,11 +93,13 @@ bool ModuleExercise3::createVertexBuffer(void* bufferData, unsigned bufferSize, 
     ModuleResources* resources = app->getModuleResources();
 
     vertexBuffer = resources->createDefaultBuffer(bufferData, bufferSize, "Triangle");
-    bool ok = vertexBuffer;
+    bool ok = vertexBuffer != nullptr;
 
     if (ok)
     {
-        vertexBufferView = { vertexBuffer->GetGPUVirtualAddress(), bufferSize, stride };
+        vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
+        vertexBufferView.SizeInBytes = bufferSize;
+        vertexBufferView.StrideInBytes = stride;
     }
 
     return ok;
@@ -103,52 +107,67 @@ bool ModuleExercise3::createVertexBuffer(void* bufferData, unsigned bufferSize, 
 
 bool ModuleExercise3::createRootSignature()
 {
-    CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-    CD3DX12_ROOT_PARAMETER rootParameters[1];
+    CD3DX12_ROOT_SIGNATURE_DESC rootDesc;
+    CD3DX12_ROOT_PARAMETER params[1];
 
-    rootParameters[0].InitAsConstants(sizeof(Matrix) / sizeof(UINT32), 0);
-    rootSignatureDesc.Init(1, rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+    params[0].InitAsConstants(sizeof(Matrix) / sizeof(UINT32), 0);
 
-    ComPtr<ID3DBlob> rootSignatureBlob;
+    rootDesc.Init(
+        1, params,
+        0, nullptr,
+        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+    );
 
-    if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &rootSignatureBlob, nullptr)))
-    {
+    ComPtr<ID3DBlob> blob;
+    ComPtr<ID3DBlob> error;
+
+    if (FAILED(D3D12SerializeRootSignature(&rootDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, &error)))
         return false;
-    }
 
-    if (FAILED(app->getModuleD3D12()->getDevice()->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
-    {
+    if (FAILED(moduleD3d12->getDevice()->CreateRootSignature(
+        0, blob->GetBufferPointer(), blob->GetBufferSize(),
+        IID_PPV_ARGS(&rootSignature))))
         return false;
-    }
 
     return true;
 }
 
 bool ModuleExercise3::createPSO()
 {
-    D3D12_INPUT_ELEMENT_DESC inputLayout[] = { {"MY_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0} };
+    D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
+        { "MY_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+          0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+    };
 
-    auto dataVS = DX::ReadData(L"Exercise3VS.cso");
-    auto dataPS = DX::ReadData(L"Exercise3PS.cso");
+    auto vs = DX::ReadData(L"Exercise3VS.cso");
+    auto ps = DX::ReadData(L"Exercise3PS.cso");
 
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-    psoDesc.InputLayout = { inputLayout, sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC) };  // the structure describing our input layout
-    psoDesc.pRootSignature = rootSignature.Get();                                                   // the root signature that describes the input data this pso needs
-    psoDesc.VS = { dataVS.data(), dataVS.size() };                                                  // structure describing where to find the vertex shader bytecode and how large it is
-    psoDesc.PS = { dataPS.data(), dataPS.size() };                                                  // same as VS but for pixel shader
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;                         // type of topology we are drawing
-    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;                                             // format of the render target
-    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-    psoDesc.SampleDesc = { 1, 0 };                                                                    // must be the same sample description as the swapchain and depth/stencil buffer
-    psoDesc.SampleMask = 0xffffffff;                                                                // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);                               // a default rasterizer state.
-    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);                                         // a default blend state.
-    psoDesc.NumRenderTargets = 1;                                                                   // we are only binding one render target
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{};
+    desc.pRootSignature = rootSignature.Get();
+    desc.InputLayout = { inputLayout, _countof(inputLayout) };
+    desc.VS = { vs.data(), vs.size() };
+    desc.PS = { ps.data(), ps.size() };
+    desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    desc.NumRenderTargets = 1;
+    desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+    desc.SampleDesc = { 1, 0 };
+    desc.SampleMask = UINT_MAX;
+    desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
-    // create the pso
-    return SUCCEEDED(app->getModuleD3D12()->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+    return SUCCEEDED(moduleD3d12->getDevice()->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pso)));
 }
+
+
+bool ModuleExercise3::cleanUp()
+{
+    debugDrawPass.reset();
+    return true;
+}
+
+// ---------------- GUI ----------------
 
 void ModuleExercise3::drawGUI()
 {
@@ -169,11 +188,3 @@ void ModuleExercise3::drawGUI()
     }
     ImGui::End();
 }
-
-bool ModuleExercise3::cleanUp()
-{
-    delete imguiPass;
-    imguiPass = nullptr;
-    return true;
-}
-
