@@ -70,6 +70,9 @@
     <ClCompile Include="ModuleExercise2.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleExercise3.cpp">
+      <Filter>Exercises</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -160,6 +163,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="Module.h" />
+    <ClInclude Include="ModuleExercise3.h">
+      <Filter>Exercises</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -213,6 +219,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Exercise2PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Exercise3PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Exercise3VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

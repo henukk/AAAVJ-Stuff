@@ -8,7 +8,6 @@
 #include "EditorConsole.h"
 #include "EditorMenuBar.h"
 
-
 bool ModuleEditor::init() {
     d3d12 = app->getModuleD3D12();
     imguiPass = new ImGuiPass(d3d12->getDevice(), d3d12->getHWnd());
