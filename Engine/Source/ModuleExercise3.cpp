@@ -11,52 +11,64 @@
 #include <d3dcompiler.h>
 #include "d3dx12.h"
 
-bool ModuleExercise3::init()
-{
-    d3d12 = app->getModuleD3D12();
-    moduleResources = app->getModuleResources();
+#include "ImGuiPass.h"
 
-    struct Vertex
-    {
-        Vector3 position;
+bool ModuleExercise3::init() {
+    struct Vertex { Vector3 position; };
+    static Vertex vertices[3] = {
+        { Vector3(-1, -1, 0) },
+        { Vector3(0,  1, 0) },
+        { Vector3(1, -1, 0) }
     };
 
-    static Vertex vertices[3] =
-    {
-        Vector3(-1.0f, -1.0f, 0.0f),  // 0
-        Vector3(0.0f, 1.0f, 0.0f),    // 1
-        Vector3(1.0f, -1.0f, 0.0f)    // 2
-    };
-
-    bool ok = createVertexBuffer(&vertices[0], sizeof(vertices), sizeof(Vertex));
+    bool ok = createVertexBuffer(vertices, sizeof(vertices), sizeof(Vertex));
     ok = ok && createRootSignature();
     ok = ok && createPSO();
 
-    if (ok)
-    {
-        debugDrawPass = std::make_unique<DebugDrawPass>(d3d12->getDevice(), d3d12->getCommandQueue(), false);
-    }
+    moduleD3d12 = app->getModuleD3D12();
+    debugDrawPass = std::make_unique<DebugDrawPass>(moduleD3d12->getDevice(), moduleD3d12->getDrawCommandQueue());
 
-    return true;
+    imguiPass = new ImGuiPass(moduleD3d12->getDevice(), moduleD3d12->getHWnd());
+
+    return ok;
+}
+
+void ModuleExercise3::preRender()
+{
+    imguiPass->startFrame();
+
+    drawGUI();
 }
 
 void ModuleExercise3::render()
 {
-    ID3D12GraphicsCommandList* commandList = d3d12->getCommandList();
+    if (camPos == camTarget) {
+        camTarget.x += 0.001f;
+    }
 
-    commandList->Reset(d3d12->getCommandAllocator(), pso.Get());
+    ID3D12GraphicsCommandList* commandList = moduleD3d12->getCommandList();
 
-    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(d3d12->getBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-    commandList->ResourceBarrier(1, &barrier);
+    unsigned width = moduleD3d12->getWindowWidth();
+    unsigned height = moduleD3d12->getWindowHeight();
 
-    unsigned width = d3d12->getWindowWidth();
-    unsigned height = d3d12->getWindowHeight();
+    // Matrix con los valores actualizados desde ImGui
+    Matrix model =
+        Matrix::CreateScale(triScale) *
+        Matrix::CreateFromYawPitchRoll(
+            XMConvertToRadians(triRot.y),
+            XMConvertToRadians(triRot.x),
+            XMConvertToRadians(triRot.z)
+        ) *
+        Matrix::CreateTranslation(triPos);
 
-    Matrix model = Matrix::Identity;
-    Matrix view = Matrix::CreateLookAt(Vector3(0.0f, 10.0f, 10.0f), Vector3::Zero, Vector3::Up);
+    Matrix view = Matrix::CreateLookAt(camPos, camTarget, Vector3::Up);
     Matrix proj = Matrix::CreatePerspectiveFieldOfView(XM_PIDIV4, float(width) / float(height), 0.1f, 1000.0f);
 
     mvp = (model * view * proj).Transpose();
+
+    //Exercise
+    commandList->SetPipelineState(pso.Get());
+    commandList->SetGraphicsRootSignature(rootSignature.Get());
 
     D3D12_VIEWPORT viewport;
     viewport.TopLeftX = viewport.TopLeftY = 0;
@@ -72,8 +84,8 @@ void ModuleExercise3::render()
     scissor.bottom = height;
 
     float clearColor[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv = d3d12->getRtvHandle();
-    D3D12_CPU_DESCRIPTOR_HANDLE dsv = d3d12->getDepthStencilDescriptor();
+    D3D12_CPU_DESCRIPTOR_HANDLE rtv = moduleD3d12->getRenderTargetDescriptor();
+    D3D12_CPU_DESCRIPTOR_HANDLE dsv = moduleD3d12->getDepthStencilDescriptor();
 
     commandList->OMSetRenderTargets(1, &rtv, false, &dsv);
     commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
@@ -94,19 +106,14 @@ void ModuleExercise3::render()
 
     debugDrawPass->record(commandList, width, height, view, proj);
 
-    barrier = CD3DX12_RESOURCE_BARRIER::Transition(d3d12->getBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-    commandList->ResourceBarrier(1, &barrier);
-
-    if (SUCCEEDED(commandList->Close()))
-    {
-        ID3D12CommandList* commandLists[] = { commandList };
-        d3d12->getDrawCommandQueue()->ExecuteCommandLists(UINT(std::size(commandLists)), commandLists);
-    }
+    imguiPass->record(commandList);
 }
 
 bool ModuleExercise3::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride)
 {
-    vertexBuffer = moduleResources->createDefaultBuffer(bufferData, bufferSize, "Triangle");
+    ModuleResources* resources = app->getModuleResources();
+
+    vertexBuffer = resources->createDefaultBuffer(bufferData, bufferSize, "Triangle");
     bool ok = vertexBuffer;
 
     if (ok)
@@ -132,7 +139,7 @@ bool ModuleExercise3::createRootSignature()
         return false;
     }
 
-    if (FAILED(app->getD3D12()->getDevice()->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
+    if (FAILED(app->getModuleD3D12()->getDevice()->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
     {
         return false;
     }
@@ -144,8 +151,8 @@ bool ModuleExercise3::createPSO()
 {
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = { {"MY_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0} };
 
-    auto dataVS = DX::ReadData(L"ModuleExercise3VS.cso");
-    auto dataPS = DX::ReadData(L"ModuleExercise3PS.cso");
+    auto dataVS = DX::ReadData(L"Exercise3VS.cso");
+    auto dataPS = DX::ReadData(L"Exercise3PS.cso");
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.InputLayout = { inputLayout, sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC) };  // the structure describing our input layout
@@ -163,5 +170,33 @@ bool ModuleExercise3::createPSO()
     psoDesc.NumRenderTargets = 1;                                                                   // we are only binding one render target
 
     // create the pso
-    return SUCCEEDED(app->getD3D12()->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+    return SUCCEEDED(app->getModuleD3D12()->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 }
+
+void ModuleExercise3::drawGUI()
+{
+    if (ImGui::Begin("Exercise 3 Controls"))
+    {
+        if (ImGui::CollapsingHeader("Camera"))
+        {
+            ImGui::DragFloat3("Position###CameraPos", &camPos.x, 0.1f);
+            ImGui::DragFloat3("LookAt###CameraLookAt", &camTarget.x, 0.1f);
+        }
+
+        if (ImGui::CollapsingHeader("Triangle"))
+        {
+            ImGui::DragFloat3("Position###TriPos", &triPos.x, 0.1f);
+            ImGui::DragFloat3("Rotation###TriRot", &triRot.x, 0.5f);
+            ImGui::DragFloat3("Scale###TriScale", &triScale.x, 0.1f);
+        }
+    }
+    ImGui::End();
+}
+
+bool ModuleExercise3::cleanUp()
+{
+    delete imguiPass;
+    imguiPass = nullptr;
+    return true;
+}
+
