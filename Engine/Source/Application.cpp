@@ -17,17 +17,18 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(d3d12);
     modules.push_back(moduleResources = new ModuleResources());
     
-    //Ex1 - Paint the background
+    // Ex1 - Paint the background
     //modules.push_back(new ModuleExercise1());
 
-    //Ex2 - Paint a triangle
+    // Ex2 - Paint a triangle
     //modules.push_back(new ModuleExercise2());
     
-    //Ex3 - Paint triangle with transformations and grid
-    modules.push_back(new ModuleExercise3());
+    // Ex3 - Paint triangle with transformations and grid
+    // INCOMPATIBLE WITH MODULE EDITOR
+    //modules.push_back(new ModuleExercise3());
 
     // Module Editor
-    //modules.push_back(moduleEditor = new ModuleEditor());
+    modules.push_back(moduleEditor = new ModuleEditor());
 
 }
 
