@@ -10,8 +10,7 @@
 #include "ModuleExercise2.h"
 
 
-Application::Application(int argc, wchar_t** argv, void* hWnd)
-{
+Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));
     d3d12 = new ModuleD3D12((HWND)hWnd);
     modules.push_back(d3d12);
@@ -21,11 +20,12 @@ Application::Application(int argc, wchar_t** argv, void* hWnd)
     //modules.push_back(new ModuleExercise1());
 
     //Ex2 - Paint a triangle
-    modules.push_back(new ModuleExercise2());
+    //modules.push_back(new ModuleExercise2());
     
-    //Ex3
+    //Ex3 - Paint triangle with transformations and grid
+    //modules.push_back(new ModuleExercise3());
 
-
+    // Module Editor
     modules.push_back(moduleEditor = new ModuleEditor());
 
 }

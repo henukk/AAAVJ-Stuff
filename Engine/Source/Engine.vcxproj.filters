@@ -93,9 +93,6 @@
     <ClInclude Include="Keyboard.h">
       <Filter>TeacherStuff</Filter>
     </ClInclude>
-    <ClInclude Include="Module.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
     <ClInclude Include="ModuleInput.h">
       <Filter>TeacherStuff</Filter>
     </ClInclude>
@@ -162,6 +159,7 @@
     <ClInclude Include="Chrono.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Module.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
