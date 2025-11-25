@@ -81,31 +81,16 @@ bool ModuleExercise2::init() {
 
 void ModuleExercise2::render()
 {
-	auto commandList = d3d12->getCommandList();
-	auto rtvHandle = d3d12->getRenderTargetDescriptor();
-	UINT width = d3d12->getWindowWidth();
-	UINT height = d3d12->getWindowHeight();
+	ID3D12GraphicsCommandList* commandList = d3d12->getCommandList();
 
+	// Pipeline
 	commandList->SetPipelineState(pso.Get());
 	commandList->SetGraphicsRootSignature(rootSignature.Get());
 
-	// viewport + scissor
-	D3D12_VIEWPORT viewport{ 0, 0, (float)width, (float)height, 0.0f, 1.0f };
-	D3D12_RECT scissor{ 0, 0, (LONG)width, (LONG)height };
-	commandList->RSSetViewports(1, &viewport);
-	commandList->RSSetScissorRects(1, &scissor);
-
-	// Clear RT
-	const float clearColor[4] = { 0.2f, 0.2f, 0.2f, 1.f };
-	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-
-	// Bind triangle data
+	// Input Assembler
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	commandList->IASetIndexBuffer(nullptr);
 
-
-	// draw
+	// Draw
 	commandList->DrawInstanced(3, 1, 0, 0);
 }

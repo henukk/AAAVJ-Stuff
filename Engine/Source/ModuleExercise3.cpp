@@ -42,70 +42,47 @@ void ModuleExercise3::preRender()
 
 void ModuleExercise3::render()
 {
-    if (camPos == camTarget) {
-        camTarget.x += 0.001f;
-    }
+    if (camPos == camTarget) camTarget.x += 0.001f;
 
     ID3D12GraphicsCommandList* commandList = moduleD3d12->getCommandList();
-
     unsigned width = moduleD3d12->getWindowWidth();
     unsigned height = moduleD3d12->getWindowHeight();
 
-    // Matrix con los valores actualizados desde ImGui
+    // --- Compute MVP ---
     Matrix model =
         Matrix::CreateScale(triScale) *
         Matrix::CreateFromYawPitchRoll(
             XMConvertToRadians(triRot.y),
             XMConvertToRadians(triRot.x),
-            XMConvertToRadians(triRot.z)
-        ) *
+            XMConvertToRadians(triRot.z)) *
         Matrix::CreateTranslation(triPos);
 
     Matrix view = Matrix::CreateLookAt(camPos, camTarget, Vector3::Up);
-    Matrix proj = Matrix::CreatePerspectiveFieldOfView(XM_PIDIV4, float(width) / float(height), 0.1f, 1000.0f);
+    Matrix proj = Matrix::CreatePerspectiveFieldOfView(
+        XM_PIDIV4, float(width) / float(height), 0.1f, 1000.0f);
 
     mvp = (model * view * proj).Transpose();
 
-    //Exercise
+    // ---- Pipeline ----
     commandList->SetPipelineState(pso.Get());
     commandList->SetGraphicsRootSignature(rootSignature.Get());
 
-    D3D12_VIEWPORT viewport;
-    viewport.TopLeftX = viewport.TopLeftY = 0;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    viewport.Width = float(width);
-    viewport.Height = float(height);
+    // ---- Triangle ----
+    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-    D3D12_RECT scissor;
-    scissor.left = 0;
-    scissor.top = 0;
-    scissor.right = width;
-    scissor.bottom = height;
+    commandList->SetGraphicsRoot32BitConstants(
+        0, sizeof(XMMATRIX) / sizeof(UINT32), &mvp, 0);
 
-    float clearColor[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv = moduleD3d12->getRenderTargetDescriptor();
-    D3D12_CPU_DESCRIPTOR_HANDLE dsv = moduleD3d12->getDepthStencilDescriptor();
+    commandList->DrawInstanced(3, 1, 0, 0);
 
-    commandList->OMSetRenderTargets(1, &rtv, false, &dsv);
-    commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-    commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-
-    commandList->SetGraphicsRootSignature(rootSignature.Get());
-    commandList->RSSetViewports(1, &viewport);
-    commandList->RSSetScissorRects(1, &scissor);
-    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);   // set the primitive topology
-    commandList->IASetVertexBuffers(0, 1, &vertexBufferView);                   // set the vertex buffer (using the vertex buffer view)
-
-    commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / sizeof(UINT32), &mvp, 0);
-
-    commandList->DrawInstanced(3, 1, 0, 0);                                     // finally draw 3 vertices (draw the triangle)
-
-    dd::xzSquareGrid(-10.0f, 10.0f, 0.0f, 1.0f, dd::colors::LightGray);
+    // ---- DebugDraw ----
+    dd::xzSquareGrid(-10.f, 10.f, 0.f, 1.f, dd::colors::LightGray);
     dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
 
     debugDrawPass->record(commandList, width, height, view, proj);
 
+    // ---- IMGUI ----
     imguiPass->record(commandList);
 }
 

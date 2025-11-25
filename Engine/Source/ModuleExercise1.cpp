@@ -9,10 +9,9 @@ bool ModuleExercise1::init(){
 }
 
 void ModuleExercise1::render() {
-	ComPtr<ID3D12GraphicsCommandList> commandList = d3d12->getCommandList();
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = d3d12->getRenderTargetDescriptor();
+	ID3D12GraphicsCommandList* commandList = d3d12->getCommandList();
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = d3d12->getRenderTargetDescriptor();
 
-	const float clearColor[4] = { 1.f, 0.f, 0.f, 1.f };
-	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-	commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+    const float clearColor[4] = { 1.f, 0.f, 0.f, 1.f };
+    commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 }
