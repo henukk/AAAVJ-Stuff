@@ -8,5 +8,4 @@ private:
 public:
 	bool init() override;
 	void render() override;
-	bool cleanUp() override;
 };

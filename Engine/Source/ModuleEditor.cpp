@@ -11,7 +11,7 @@
 
 bool ModuleEditor::init() {
     d3d12 = app->getModuleD3D12();
-    imguiPass = new ImGuiPass(d3d12->getDevice(), d3d12->getHWND());
+    imguiPass = new ImGuiPass(d3d12->getDevice(), d3d12->getHWnd());
     console = new EditorConsole();
     menuBar = new EditorMenuBar();
     return true;
@@ -27,7 +27,7 @@ void ModuleEditor::preRender() {
 }
 
 void ModuleEditor::render() {
-    D3D12_CPU_DESCRIPTOR_HANDLE handle = d3d12->getRtvHandle();
+    D3D12_CPU_DESCRIPTOR_HANDLE handle = d3d12->getRenderTargetDescriptor();
 
     d3d12->getCommandList()->OMSetRenderTargets(1, &handle, FALSE, nullptr);
 

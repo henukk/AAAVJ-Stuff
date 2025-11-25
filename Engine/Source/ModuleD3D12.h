@@ -1,80 +1,96 @@
 #pragma once
+
 #include "Module.h"
 
-//#include <dxgi1_6.h> //No necesario y ahorramos mediante forward declaration
-
-constexpr int N = 2;
-
-class IDXGIFactory6;
-class IDXGIAdapter4;
-class IDXGISwapChain3;
-
-class ImGuiPass;
-//class ModuleD3D12;
+#include <dxgi1_6.h>
+#include <cstdint>
+#include <chrono>
 
 class ModuleD3D12 : public Module {
 private:
-	HWND hWnd;
-	ComPtr<IDXGIFactory6> factory;
-	ComPtr<IDXGIAdapter4> adapter;
-	ComPtr<ID3D12Device5> device;
+    HWND                                hWnd = NULL;
+    ComPtr<IDXGIFactory6>               factory;
+    ComPtr<IDXGIAdapter4>               adapter;
+    ComPtr<ID3D12Device5>               device;
 
-	ComPtr<ID3D12CommandQueue> commandQueue;
-	ComPtr<ID3D12CommandAllocator> commandAllocators[N];
-	ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap;
-	UINT rtvDescriptorSize = 0;
-	ComPtr<ID3D12Resource> renderTargets[N];
-	ComPtr<ID3D12GraphicsCommandList> commandList;
-	ComPtr<IDXGISwapChain3> swapChain;
-	ComPtr<ID3D12Fence> fence;
-	UINT64 fenceValues[N] = {};
-    UINT64 fenceValue = 0;
-    HANDLE fenceEvent = nullptr;
-    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
+    ComPtr<IDXGISwapChain4>             swapChain;
+    ComPtr<ID3D12DescriptorHeap>        rtDescriptorHeap;
+    ComPtr<ID3D12Resource>              backBuffers[FRAMES_IN_FLIGHT];
+    ComPtr<ID3D12DescriptorHeap>        dsDescriptorHeap;
+    ComPtr<ID3D12Resource>              depthStencilBuffer;
 
-	UINT currentIndex;
+    ComPtr<ID3D12CommandAllocator>      commandAllocators[FRAMES_IN_FLIGHT];
+    ComPtr<ID3D12GraphicsCommandList4>  commandList;
+    ComPtr<ID3D12CommandQueue>          drawCommandQueue;
 
-    unsigned windowWidth = 0;
-    unsigned windowHeight = 0;
-    bool fullscreen = false;
+    ComPtr<ID3D12Fence1>                drawFence;
+    HANDLE                              drawEvent = NULL;
+    unsigned                            drawFenceCounter = 0;
+    unsigned                            drawFenceValues[FRAMES_IN_FLIGHT] = { 0, 0, 0 };
+
+    unsigned                            frameValues[FRAMES_IN_FLIGHT] = { 0, 0, 0 };
+    unsigned                            frameIndex = 0;
+    unsigned                            lastCompletedFrame = 0;
+
+    bool                                allowTearing = false;
+    bool                                supportsRT = false;
+    unsigned                            currentBackBufferIdx = 0;
+
+    unsigned                            windowWidth = 0;
+    unsigned                            windowHeight = 0;
+    bool                                fullscreen = false;
+    RECT                                lastWindowRect;
 
 public:
-	ModuleD3D12(HWND hWnd);
-	~ModuleD3D12();
+    ModuleD3D12(HWND hWnd);
+    ~ModuleD3D12();
 
-    bool init() override;
-    void preRender() override;
-    void postRender() override;
-    bool cleanUp() override;
+    bool                        init() override;
+    bool                        cleanUp() override;
+
+    void                        preRender() override;
+    void                        postRender() override;
+
+    void                        resize();
+    void                        toogleFullscreen();
+    void                        flush();
+
+    HWND                        getHWnd() { return hWnd; }
+    IDXGISwapChain4* getSwapChain() { return swapChain.Get(); }
+    ID3D12Device5* getDevice() { return device.Get(); }
+    ID3D12GraphicsCommandList* getCommandList() { return commandList.Get(); }
+    ID3D12CommandAllocator* getCommandAllocator() { return commandAllocators[currentBackBufferIdx].Get(); }
+    ID3D12Resource* getBackBuffer() { return backBuffers[currentBackBufferIdx].Get(); }
+    ID3D12CommandQueue* getDrawCommandQueue() { return drawCommandQueue.Get(); }
+
+    unsigned                    getCurrentBackBufferIdx() const { return currentBackBufferIdx; }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE getRenderTargetDescriptor();
+    D3D12_CPU_DESCRIPTOR_HANDLE getDepthStencilDescriptor();
+
+    UINT                        signalDrawQueue();
+
+    unsigned                    getCurrentFrame() const { return frameIndex; }
+    unsigned                    getLastCompletedFrame() const { return lastCompletedFrame; }
+
+    unsigned                    getWindowWidth() const { return windowWidth; }
+    unsigned                    getWindowHeight() const { return windowHeight; }
+
+    ID3D12GraphicsCommandList* beginFrameRender();
+    void                        setBackBufferRenderTarget(const Vector4& clearColor = Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+    void                        endFrameRender();
 
 private:
-    void initDXGIFactoryAndDevice();
-
-    void createCommandQueue();
-    void createCommandAllocators();
-    void createCommandList();
-
-    void createSwapChain();
-    void createRTVDescriptorHeap();
-    void createRenderTargets();
-
-    void initSynchronization();
-    void waitForFence(UINT64 value);
-
     void getWindowSize(unsigned& width, unsigned& height);
 
-public:
-    HWND getHWND() const { return hWnd; }
-    ID3D12Device5* getDevice() const { return device.Get(); }
-    ID3D12GraphicsCommandList* getCommandList() const { return commandList.Get(); }
-    IDXGISwapChain3* getSwapChain() const { return swapChain.Get(); }
-    ID3D12CommandQueue* getCommandQueue() const { return commandQueue.Get(); }
-
-    D3D12_CPU_DESCRIPTOR_HANDLE getRtvHandle() const { return rtvHandle; }
-
-    unsigned getWindowWidth() const { return windowWidth; }
-    unsigned getWindowHeight() const { return windowHeight; }
-   
-    void resize();
-    void flush();
+    void enableDebugLayer();
+    bool createFactory();
+    bool createDevice(bool useWarp);
+    bool setupInfoQueue();
+    bool createDrawCommandQueue();
+    bool createSwapChain();
+    bool createRenderTargets();
+    bool createDepthStencil();
+    bool createCommandList();
+    bool createDrawFence();
 };

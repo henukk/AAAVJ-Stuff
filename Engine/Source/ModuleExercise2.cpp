@@ -56,16 +56,6 @@ bool ModuleExercise2::init() {
 	auto dataVS = DX::ReadData(L"Exercise2VS.cso");
 	auto dataPS = DX::ReadData(L"Exercise2PS.cso");
 
-	if (dataVS.empty()) {
-		LOG("ERROR: Exercise2VS.cso está vacío o no encontrado");
-	}
-	if (dataPS.empty()) {
-		LOG("ERROR: Exercise2PS.cso está vacío o no encontrado");
-	}
-
-	LOG("VS size = %llu", dataVS.size());
-	LOG("PS size = %llu", dataPS.size());
-
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
 	{ "MY_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
 	  0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
@@ -85,10 +75,6 @@ bool ModuleExercise2::init() {
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
 	d3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso));
-	HRESULT hr = d3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso));
-	if (FAILED(hr) || pso == nullptr) {
-		throw std::runtime_error("CreateGraphicsPipelineState failed");
-	}
 
 	return true;
 }
@@ -96,7 +82,7 @@ bool ModuleExercise2::init() {
 void ModuleExercise2::render()
 {
 	auto commandList = d3d12->getCommandList();
-	auto rtvHandle = d3d12->getRtvHandle();
+	auto rtvHandle = d3d12->getRenderTargetDescriptor();
 	UINT width = d3d12->getWindowWidth();
 	UINT height = d3d12->getWindowHeight();
 
