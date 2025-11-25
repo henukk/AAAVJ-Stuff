@@ -9,6 +9,7 @@
 class Module;
 class ModuleD3D12;
 class ModuleInput;
+class ModuleUI;
 class ModuleEditor;
 class ModuleResources;
 
@@ -34,6 +35,7 @@ public:
 
     ModuleD3D12* getModuleD3D12();
     ModuleInput* getModuleInput();
+    ModuleUI* getModuleUI();
     ModuleEditor* getModuleEditor();
     ModuleResources* getModuleResources();
 
@@ -44,6 +46,7 @@ private:
     std::vector<Module*> modules;
     ModuleD3D12* d3d12 = nullptr;
     ModuleInput* moduleInput;
+    ModuleUI* moduleUI;
     ModuleEditor* moduleEditor;
     ModuleResources* moduleResources;
 
