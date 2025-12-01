@@ -4,6 +4,7 @@
 #include "ModuleD3D12.h"
 #include "ModuleResources.h"
 #include "ModuleUI.h"
+#include "ModuleRender.h"
 #include "ReadData.h"
 #include "imgui.h"
 #include "d3dx12.h"
@@ -13,8 +14,9 @@ bool ModuleExercise2::init()
     d3d12 = app->getModuleD3D12();
     moduleResources = app->getModuleResources();
     ui = app->getModuleUI();
+    moduleRender = app->getModuleRender();
 
-    // Register UI window
+    // Register window in UI
     ui->registerWindow([this]() { drawWindow(); });
 
     // Save initial state
@@ -30,8 +32,8 @@ bool ModuleExercise2::init()
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
     );
 
-    ComPtr<ID3DBlob> sig;
-    ComPtr<ID3DBlob> err;
+    Microsoft::WRL::ComPtr<ID3DBlob> sig;
+    Microsoft::WRL::ComPtr<ID3DBlob> err;
     D3D12SerializeRootSignature(
         &rootDesc,
         D3D_ROOT_SIGNATURE_VERSION_1,
@@ -83,6 +85,30 @@ void ModuleExercise2::update()
     }
 }
 
+void ModuleExercise2::render()
+{
+    // Register a world pass in the renderer
+    moduleRender->registerWorldPass(
+        [this](ID3D12GraphicsCommandList* cmd)
+        {
+            // Clear background
+            D3D12_CPU_DESCRIPTOR_HANDLE rtv = d3d12->getRenderTargetDescriptor();
+            cmd->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+
+            // Pipeline
+            cmd->SetPipelineState(pso.Get());
+            cmd->SetGraphicsRootSignature(rootSignature.Get());
+
+            // Input Assembler
+            cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            cmd->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+            // Draw
+            cmd->DrawInstanced(3, 1, 0, 0);
+        }
+    );
+}
+
 void ModuleExercise2::recreateVertexBuffer()
 {
     UINT size = sizeof(vertices);
@@ -92,26 +118,6 @@ void ModuleExercise2::recreateVertexBuffer()
     vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
     vertexBufferView.StrideInBytes = sizeof(Vertex);
     vertexBufferView.SizeInBytes = size;
-}
-
-void ModuleExercise2::render()
-{
-    ID3D12GraphicsCommandList* cmd = d3d12->getCommandList();
-
-    // Clear
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv = d3d12->getRenderTargetDescriptor();
-    cmd->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-
-    // Pipeline
-    cmd->SetPipelineState(pso.Get());
-    cmd->SetGraphicsRootSignature(rootSignature.Get());
-
-    // Input Assembler
-    cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    cmd->IASetVertexBuffers(0, 1, &vertexBufferView);
-
-    // Draw
-    cmd->DrawInstanced(3, 1, 0, 0);
 }
 
 void ModuleExercise2::drawWindow()

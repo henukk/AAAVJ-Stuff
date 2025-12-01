@@ -6,12 +6,14 @@
 class ModuleD3D12;
 class ModuleResources;
 class ModuleUI;
+class ModuleRender;
 
 class ModuleExercise3 : public Module {
 private:
-    ModuleD3D12* moduleD3d12 = nullptr;
-    ModuleResources* moduleResources = nullptr;
-    ModuleUI* ui = nullptr;
+    ModuleD3D12* moduleD3d12;
+    ModuleResources* moduleResources;
+    ModuleUI* ui;
+    ModuleRender* moduleRender;
 
     ComPtr<ID3D12Resource> vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -23,7 +25,6 @@ private:
 
 public:
     bool init() override;
-    void update() override {}
     void render() override;
     bool cleanUp() override;
 

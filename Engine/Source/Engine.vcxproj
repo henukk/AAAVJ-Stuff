@@ -188,6 +188,7 @@
     <ClInclude Include="ModuleExercise2.h" />
     <ClInclude Include="ModuleExercise3.h" />
     <ClInclude Include="ModuleInput.h" />
+    <ClInclude Include="ModuleRender.h" />
     <ClInclude Include="ModuleResources.h" />
     <ClInclude Include="ModuleUI.h" />
     <ClInclude Include="Mouse.h" />
@@ -287,6 +288,7 @@
     <ClCompile Include="ModuleExercise2.cpp" />
     <ClCompile Include="ModuleExercise3.cpp" />
     <ClCompile Include="ModuleInput.cpp" />
+    <ClCompile Include="ModuleRender.cpp" />
     <ClCompile Include="ModuleResources.cpp" />
     <ClCompile Include="ModuleUI.cpp" />
     <ClCompile Include="Mouse.cpp" />

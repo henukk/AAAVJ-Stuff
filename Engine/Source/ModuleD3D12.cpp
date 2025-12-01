@@ -74,51 +74,9 @@ void ModuleD3D12::preRender()
 
     // 3) Reset del allocator y de la command list
     commandAllocators[currentBackBufferIdx]->Reset();
-    commandList->Reset(commandAllocators[currentBackBufferIdx].Get(), nullptr);
-
-    // 4) Transición PRESENT -> RENDER_TARGET
-    auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        getBackBuffer(),
-        D3D12_RESOURCE_STATE_PRESENT,
-        D3D12_RESOURCE_STATE_RENDER_TARGET
-    );
-    commandList->ResourceBarrier(1, &barrier);
-
-    // 5) Configurar RTV + DSV
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv = getRenderTargetDescriptor();
-    D3D12_CPU_DESCRIPTOR_HANDLE dsv = getDepthStencilDescriptor();
-    commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-
-    // 6) Clear base (por defecto gris oscuro)
-    const float clearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-    commandList->ClearDepthStencilView(
-        dsv,
-        D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
-        1.0f, 0, 0, nullptr
-    );
-
-    // 7) Viewport + Scissor
-    D3D12_VIEWPORT viewport{ 0.0f, 0.0f, float(windowWidth), float(windowHeight), 0.0f, 1.0f };
-    D3D12_RECT scissor{ 0, 0, LONG(windowWidth), LONG(windowHeight) };
-    commandList->RSSetViewports(1, &viewport);
-    commandList->RSSetScissorRects(1, &scissor);
 }
 
 void ModuleD3D12::postRender() {
-    // Transición RENDER_TARGET -> PRESENT
-    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-        getBackBuffer(),
-        D3D12_RESOURCE_STATE_RENDER_TARGET,
-        D3D12_RESOURCE_STATE_PRESENT
-    );
-    commandList->ResourceBarrier(1, &barrier);
-
-    // Cerrar y ejecutar la command list
-    commandList->Close();
-    ID3D12CommandList* commandLists[] = { commandList.Get() };
-    drawCommandQueue->ExecuteCommandLists(UINT(std::size(commandLists)), commandLists);
-
     // Present
     swapChain->Present(0, allowTearing ? DXGI_PRESENT_ALLOW_TEARING : 0);
 

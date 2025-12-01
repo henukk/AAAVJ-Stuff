@@ -21,7 +21,6 @@ private:
 public:
     bool init() override;
     void preRender() override;
-    void render() override;
     bool cleanUp() override;
 
     void registerWindow(const WindowCallback& callback);

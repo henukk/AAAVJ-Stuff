@@ -2,6 +2,7 @@
 #include "ModuleUI.h"
 #include "Application.h"
 #include "ModuleD3D12.h"
+#include "ModuleRender.h"
 #include "ImGuiPass.h"
 #include "imgui.h"
 
@@ -18,12 +19,13 @@ void ModuleUI::preRender()
 
     for (auto& current : windows)
         current();
-}
 
-void ModuleUI::render()
-{
-    ID3D12GraphicsCommandList* cmd = d3d12->getCommandList();
-    imguiPass->record(cmd);
+    ModuleRender* render = app->getModuleRender();
+    render->registerUIPass(
+        [this](ID3D12GraphicsCommandList* cmd) {
+            imguiPass->record(cmd);
+        }
+    );
 }
 
 bool ModuleUI::cleanUp()
