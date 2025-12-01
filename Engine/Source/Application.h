@@ -7,11 +7,12 @@
 #include <chrono>
 
 class Module;
-class ModuleD3D12;
 class ModuleInput;
+class ModuleD3D12;
+class ModuleRender;
+class ModuleResources;
 class ModuleUI;
 class ModuleEditor;
-class ModuleResources;
 
 class Application
 {
@@ -21,7 +22,6 @@ public:
 	~Application();
 
 	bool         init();
-    bool         preinit();
 	void         update();
 	bool         cleanUp();
 
@@ -33,22 +33,24 @@ public:
     bool                        isPaused() const { return paused; }
     bool                        setPaused(bool p) { paused = p; return paused; }
 
-    ModuleD3D12* getModuleD3D12();
-    ModuleInput* getModuleInput();
-    ModuleUI* getModuleUI();
-    ModuleEditor* getModuleEditor();
-    ModuleResources* getModuleResources();
+    inline ModuleInput* getModuleInput() const noexcept { return moduleInput; }
+    inline ModuleD3D12* getModuleD3D12() const noexcept { return d3d12; }
+    inline ModuleRender* getModuleRender() const noexcept { return moduleRender; }
+    inline ModuleResources* getModuleResources() const noexcept { return moduleResources; }
+    inline ModuleUI* getModuleUI() const noexcept { return moduleUI; }
+    inline ModuleEditor* getModuleEditor() const noexcept { return moduleEditor; }
 
 private:
     enum { MAX_FPS_TICKS = 30 };
     typedef std::array<uint64_t, MAX_FPS_TICKS> TickList;
 
     std::vector<Module*> modules;
-    ModuleD3D12* d3d12 = nullptr;
     ModuleInput* moduleInput;
+    ModuleD3D12* d3d12;
+    ModuleRender* moduleRender;
+    ModuleResources* moduleResources;
     ModuleUI* moduleUI;
     ModuleEditor* moduleEditor;
-    ModuleResources* moduleResources;
 
 
     uint64_t  lastMilis = 0;

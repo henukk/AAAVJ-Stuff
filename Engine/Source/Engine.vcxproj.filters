@@ -72,6 +72,7 @@
     </ClCompile>
     <ClCompile Include="ModuleUI.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="ModuleRender.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug_draw.hpp">
@@ -164,6 +165,7 @@
     </ClInclude>
     <ClInclude Include="ModuleUI.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="ModuleRender.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
