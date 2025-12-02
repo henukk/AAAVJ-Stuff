@@ -6,6 +6,7 @@
 #include "ModuleResources.h"
 #include "ModuleUI.h"
 #include "ModuleRender.h"
+#include "ModuleCamera.h"
 
 #include "ReadData.h"
 #include <d3dcompiler.h>
@@ -17,6 +18,7 @@ bool ModuleExercise3::init()
     moduleResources = app->getModuleResources();
     ui = app->getModuleUI();
     moduleRender = app->getModuleRender();
+    moduleCamera = app->getModuleCamera();
 
     // Register UI window
     ui->registerWindow([this]() { drawGUI(); });
@@ -48,10 +50,6 @@ void ModuleExercise3::render()
             unsigned width = moduleD3d12->getWindowWidth();
             unsigned height = moduleD3d12->getWindowHeight();
 
-            // Avoid NaN view vector (when camPos == camTarget)
-            if (camPos == camTarget)
-                camTarget.x += 0.001f;
-
             // --- Compute MVP ---
             Matrix model =
                 Matrix::CreateScale(triScale) *
@@ -62,10 +60,8 @@ void ModuleExercise3::render()
                 ) *
                 Matrix::CreateTranslation(triPos);
 
-            Matrix view = Matrix::CreateLookAt(camPos, camTarget, Vector3::Up);
-            Matrix proj = Matrix::CreatePerspectiveFieldOfView(
-                XM_PIDIV4, float(width) / float(height), 0.1f, 1000.0f
-            );
+            Matrix view = moduleCamera->getView();
+            Matrix proj = moduleCamera->getProjection();
 
             mvp = (model * view * proj).Transpose();
 
@@ -165,12 +161,6 @@ void ModuleExercise3::drawGUI()
 {
     if (ImGui::Begin("Exercise 3 Controls"))
     {
-        if (ImGui::CollapsingHeader("Camera"))
-        {
-            ImGui::DragFloat3("Position###CameraPos", &camPos.x, 0.1f);
-            ImGui::DragFloat3("LookAt###CameraLookAt", &camTarget.x, 0.1f);
-        }
-
         if (ImGui::CollapsingHeader("Triangle"))
         {
             ImGui::DragFloat3("Position###TriPos", &triPos.x, 0.1f);
