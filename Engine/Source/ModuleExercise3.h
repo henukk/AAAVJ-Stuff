@@ -7,6 +7,7 @@ class ModuleD3D12;
 class ModuleResources;
 class ModuleUI;
 class ModuleRender;
+class ModuleCamera;
 
 class ModuleExercise3 : public Module {
 private:
@@ -14,6 +15,7 @@ private:
     ModuleResources* moduleResources;
     ModuleUI* ui;
     ModuleRender* moduleRender;
+    ModuleCamera* moduleCamera;
 
     ComPtr<ID3D12Resource> vertexBuffer;
     D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -38,7 +40,4 @@ private:
     Vector3 triPos = { 0.0f, 0.0f, 0.0f };
     Vector3 triRot = { 0.0f, 0.0f, 0.0f };
     Vector3 triScale = { 1.0f, 1.0f, 1.0f };
-
-    Vector3 camPos = { 0.0f, 10.0f, 10.0f };
-    Vector3 camTarget = { 0.0f, 0.0f, 0.0f };
 };

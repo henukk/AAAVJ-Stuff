@@ -13,6 +13,7 @@ class ModuleRender;
 class ModuleResources;
 class ModuleUI;
 class ModuleEditor;
+class ModuleCamera;
 
 class Application
 {
@@ -39,6 +40,7 @@ public:
     inline ModuleResources* getModuleResources() const noexcept { return moduleResources; }
     inline ModuleUI* getModuleUI() const noexcept { return moduleUI; }
     inline ModuleEditor* getModuleEditor() const noexcept { return moduleEditor; }
+    inline ModuleCamera* getModuleCamera() const noexcept { return moduleCamera; }
 
 private:
     enum { MAX_FPS_TICKS = 30 };
@@ -51,7 +53,7 @@ private:
     ModuleResources* moduleResources;
     ModuleUI* moduleUI;
     ModuleEditor* moduleEditor;
-
+    ModuleCamera* moduleCamera;
 
     uint64_t  lastMilis = 0;
     TickList  tickList;

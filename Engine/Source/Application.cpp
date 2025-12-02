@@ -9,6 +9,7 @@
 
 #include "ModuleUI.h"
 #include "ModuleEditor.h"
+#include "ModuleCamera.h"
 
 #include "ModuleExercise1.h"
 #include "ModuleExercise2.h"
@@ -22,7 +23,7 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
 
     // Editor stuff
     //modules.push_back(moduleEditor = new ModuleEditor());
-    //modules.push_back(moduleCamera = new ModuleCamera());
+    modules.push_back(moduleCamera = new ModuleCamera());
     
     // Ex1 - Paint the background
     //modules.push_back(new ModuleExercise1());
