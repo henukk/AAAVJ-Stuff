@@ -109,7 +109,7 @@ void ModuleD3D12::resize()
             backBuffers[i].Reset();
             drawFenceValues[i] = 0;
         }
-
+ 
         DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 
         bool ok = SUCCEEDED(swapChain->GetDesc(&swapChainDesc));
