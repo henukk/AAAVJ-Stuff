@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+#include "EditorToolbar.h"
+
 class EditorMenuBar {
 public:
     EditorMenuBar();
@@ -14,4 +16,6 @@ public:
 private:
     bool showConsole = true;
     bool showDemo = true;
+
+    EditorToolbar toolbar;
 };

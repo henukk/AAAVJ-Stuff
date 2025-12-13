@@ -81,7 +81,12 @@
     <ClCompile Include="ModuleEditor.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleCamera.cpp" />
+    <ClCompile Include="ModuleCamera.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorToolbar.cpp">
+      <Filter>Engine_UI\BarMenu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug_draw.hpp">
@@ -185,7 +190,12 @@
     <ClInclude Include="ModuleEditor.h">
       <Filter>Modules</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleCamera.h" />
+    <ClInclude Include="ModuleCamera.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorToolbar.h">
+      <Filter>Engine_UI\BarMenu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
