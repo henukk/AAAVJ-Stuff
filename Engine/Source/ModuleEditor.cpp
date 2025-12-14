@@ -72,8 +72,8 @@ void ModuleEditor::handleKeyboardShortcuts() {
 
     if (mouseState.rightButton) {
 		setMode(NAVIGATION, FREE_LOOK);
-    } else if (buttonStateTracker.leftButton == DirectX::Mouse::ButtonStateTracker::PRESSED && (keyboardState.LeftAlt || keyboardState.RightAlt)) {
-        setMode(NAVIGATION, PAN);
+    } else if (mouseState.leftButton && (keyboardState.LeftAlt || keyboardState.RightAlt)) {
+        setMode(NAVIGATION, ORBIT);
     } else if (!mouseState.leftButton) {
         resetMode();
         handleQWERTYCases(keyboardState, mouseState);

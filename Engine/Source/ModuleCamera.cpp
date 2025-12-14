@@ -1,252 +1,449 @@
-    #include "Globals.h"
-    #include "ModuleCamera.h"
+#include "Globals.h"
+#include "ModuleCamera.h"
 
-    #include "Application.h"
-    #include "ModuleD3D12.h"
-    #include "ModuleEditor.h"
-    #include "ModuleUI.h"
+#include "Application.h"
+#include "ModuleD3D12.h"
+#include "ModuleEditor.h"
+#include "ModuleUI.h"
 
-    #include "Mouse.h"
-    #include "Keyboard.h"
+#include "Mouse.h"
+#include "Keyboard.h"
 
-    #include <algorithm>
+#include <algorithm>
+#include <cmath>
 
-    bool ModuleCamera::init() {
-        moduleInput = app->getModuleInput();
-        moduleD3D12 = app->getModuleD3D12();
-        moduleEditor = app->getModuleEditor();
+bool ModuleCamera::init() {
+    moduleInput = app->getModuleInput();
+    moduleD3D12 = app->getModuleD3D12();
+    moduleEditor = app->getModuleEditor();
 
-        app->getModuleUI()->registerWindow([this]() { drawGUI(); });
+    app->getModuleUI()->registerWindow([this]() { drawGUI(); });
 
-        Vector3 dir = target - position;
-        distanceToTarget = dir.Length();
-        dir.Normalize();
+    syncYawPitchFromLookAt();
+    syncDistanceFromLookAt();
 
-        float yawRad = atan2f(dir.z, dir.x);
-        float pitchRad = asinf(dir.y);
+    // init wheel baseline
+    Mouse::State mouseState = Mouse::Get().GetState();
+    lastWheel = mouseState.scrollWheelValue;
 
-        return true;
+    rebuildViewProj();
+    return true;
+}
+
+void ModuleCamera::update() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    unsigned width = moduleD3D12->getWindowWidth();
+    unsigned height = moduleD3D12->getWindowHeight();
+    float dt = app->getElapsedMilis() * 0.001f;
+
+    // Reset per-mode mouse state when changing tool/mode
+    int navMode = -1;
+    if (moduleEditor->getCurrentSceneTool() == ModuleEditor::SCENE_TOOL::NAVIGATION) {
+        navMode = (int)moduleEditor->getCurrentNavigationMode();
+    }
+    if (navMode != lastNavMode) {
+        if (lastNavMode == (int)ModuleEditor::NAVIGATION_MODE::FREE_LOOK) {
+
+            Vector3 forward = getForwardFromYawPitch();
+
+            if (distanceToTarget < minDistance || distanceToTarget > maxDistance)
+                distanceToTarget = 10.0f;
+
+            target = position + forward * distanceToTarget;
+            syncDistanceFromLookAt();
+        }
+
+        panFirst = orbitFirst = zoomFirst = flyFirst = true;
+        lastNavMode = navMode;
     }
 
-
-    void ModuleCamera::update() {
-        ImGuiIO& io = ImGui::GetIO();
-
-        unsigned width = moduleD3D12->getWindowWidth();
-        unsigned height = moduleD3D12->getWindowHeight();
-        float dt = app->getElapsedMilis() * 0.001f;
-    
-        if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
-            if (moduleEditor->getCurrentSceneTool() == ModuleEditor::SCENE_TOOL::NAVIGATION) {
-                switch (moduleEditor->getCurrentNavigationMode()) {
-                    case (ModuleEditor::NAVIGATION_MODE::PAN):
-                        test = 1;
-                        panMode(dt);
-                        break;
-                    case (ModuleEditor::NAVIGATION_MODE::ORBIT):
-                        test = 2;
-                        //orbitMode(dt);
-                        break;
-                    case (ModuleEditor::NAVIGATION_MODE::ZOOM):
-                        test = 3;
-                        zoomMode(dt);
-                        break;
-				    case (ModuleEditor::NAVIGATION_MODE::FREE_LOOK):
-                        test = 4;
-						flythroughMode(dt);
-                        break;
-                    default:
-                        test = -1;
-                }
+    if (!io.WantCaptureKeyboard && !io.WantCaptureMouse) {
+        if (moduleEditor->getCurrentSceneTool() == ModuleEditor::SCENE_TOOL::NAVIGATION) {
+            switch (moduleEditor->getCurrentNavigationMode()) {
+            case (ModuleEditor::NAVIGATION_MODE::PAN):
+                test = 1;
+                panMode(dt);
+                break;
+            case (ModuleEditor::NAVIGATION_MODE::ORBIT):
+                test = 2;
+                orbitMode(dt);
+                break;
+            case (ModuleEditor::NAVIGATION_MODE::ZOOM):
+                test = 3;
+                zoomMode(dt);
+                break;
+            case (ModuleEditor::NAVIGATION_MODE::FREE_LOOK):
+                test = 4;
+                flythroughMode(dt);
+                break;
+            default:
+                test = -1;
+                break;
             }
-
-            handleAutoFocus(dt);
-            handleMouseWheel(dt);
         }
 
-        if (position == target)
-            target.z += 0.001f;
-
-        view = Matrix::CreateLookAt(position, target, up);
-        projection = Matrix::CreatePerspectiveFieldOfView(XM_PIDIV4, float(width) / float(height), 0.1f, 1000.0f);
+        handleAutoFocus(dt);
+        handleMouseWheel(dt);
+    } else {
+        lastWheel = Mouse::Get().GetState().scrollWheelValue;
     }
 
-    void ModuleCamera::panMode(float dt) {
-        Mouse::State mouseState = Mouse::Get().GetState();
-
-        static bool isFirstClick = true;
-        static int initialMouseX = 0;
-        static int initialMouseY = 0;
-
-        // Velocidad de movimiento ajustada
-        float mouseSpeed = 0.1f;
-
-        // Si el botón del ratón está presionado (izquierdo o medio)
-        if (mouseState.middleButton == Mouse::ButtonStateTracker::HELD || mouseState.leftButton == Mouse::ButtonStateTracker::HELD) {
-            if (isFirstClick) {
-                initialMouseX = mouseState.x;
-                initialMouseY = mouseState.y;
-                isFirstClick = false;
-            }
-
-            // Calcular el desplazamiento en los ejes X y Y
-            int deltaX = mouseState.x - initialMouseX;
-            int deltaY = mouseState.y - initialMouseY;
-
-            // La distancia de la cámara al objetivo o al origen (dependiendo de cómo lo quieras)
-            float distance = position.Length();  // Esto es la distancia desde la cámara al origen (0, 0, 0)
-
-            // Calcular las direcciones de movimiento
-            Vector3 forward = target - position;  // Dirección hacia el objetivo
-            forward.Normalize();
-
-            Vector3 right = forward.Cross(Vector3::Up);  // Dirección a la derecha (perpendicular a 'forward')
-            right.Normalize();
-
-            // Mover la cámara proporcional a la distancia al origen
-            position += right * -deltaX * mouseSpeed * distance;  // Movimiento en el eje X (izquierda/derecha)
-            position += Vector3::Up * deltaY * mouseSpeed * distance;  // Movimiento en el eje Y (arriba/abajo)
-
-            // Mantener el target sincronizado con la cámara
-            target += right * -deltaX * mouseSpeed * distance;
-            target += Vector3::Up * deltaY * mouseSpeed * distance;
-
-            // Actualizar la posición del ratón para el siguiente frame
-            initialMouseX = mouseState.x;
-            initialMouseY = mouseState.y;
-        }
-        else {
-            isFirstClick = true;
-        }
+    Keyboard::State ks = Keyboard::Get().GetState();
+    if (ks.IsKeyDown(Keyboard::Keys::F)) {
+        focusOnTarget();
     }
 
+    // Safety
+    if (position == target) target.z += 0.001f;
 
+    Vector3 viewTarget = target;
 
-    void ModuleCamera::handleMouseWheel(float dt) {
-        // Obtener el estado del ratón
-        Mouse::State mouseState = Mouse::Get().GetState();
-
-        float increment = 0.05f; // Mayor velocidad de cambio para el zoom
-
-        if (mouseState.scrollWheelValue != 0) {
-            float targetDistance = distanceToTarget + (mouseState.scrollWheelValue > 0 ? -increment : increment);
-
-            // Limitar la distancia de zoom
-            targetDistance = std::clamp(targetDistance, 5.0f, 50.0f);
-
-            // Interpolación suave entre la distancia actual y la nueva
-            distanceToTarget = std::lerp(distanceToTarget, targetDistance, 0.1f);
-
-            Vector3 forward = target - position;
-            forward.Normalize();
-
-            position = target - forward * distanceToTarget;
-        }
+    if (moduleEditor->getCurrentSceneTool() == ModuleEditor::SCENE_TOOL::NAVIGATION &&
+        moduleEditor->getCurrentNavigationMode() == ModuleEditor::NAVIGATION_MODE::FREE_LOOK) {
+        viewTarget = position + getForwardFromYawPitch();
     }
 
+    // Rebuild view/projection
+    view = Matrix::CreateLookAt(position, viewTarget, up);
+    projection = Matrix::CreatePerspectiveFieldOfView(
+        fovY,
+        (height > 0) ? (float(width) / float(height)) : 1.0f,
+        nearPlane,
+        farPlane
+    );
 
 
-    void ModuleCamera::zoomMode(float dt) {
+}
 
+void ModuleCamera::rebuildViewProj() {
+    unsigned width = moduleD3D12->getWindowWidth();
+    unsigned height = moduleD3D12->getWindowHeight();
+
+    Vector3 viewTarget = target;
+
+    if (moduleEditor && moduleEditor->getCurrentSceneTool() == ModuleEditor::SCENE_TOOL::NAVIGATION && moduleEditor->getCurrentNavigationMode() == ModuleEditor::NAVIGATION_MODE::FREE_LOOK) {
+        viewTarget = position + getForwardFromYawPitch();
     }
 
-    void ModuleCamera::handleAutoFocus(float dt) {
+    view = Matrix::CreateLookAt(position, viewTarget, up);
+    projection = Matrix::CreatePerspectiveFieldOfView(
+        fovY,
+        (height > 0) ? (float(width) / float(height)) : 1.0f,
+        nearPlane,
+        farPlane
+    );
+}
 
+void ModuleCamera::syncYawPitchFromLookAt() {
+    Vector3 dir = target - position;
+    if (dir.LengthSquared() < 1e-8f) {
+        yaw = 0.0f;
+        pitch = 0.0f;
+        return;
+    }
+    dir.Normalize();
+    yaw = atan2f(dir.z, dir.x);
+    pitch = asinf(dir.y);
+}
+
+void ModuleCamera::syncDistanceFromLookAt() {
+    distanceToTarget = (target - position).Length();
+    distanceToTarget = std::clamp(distanceToTarget, minDistance, maxDistance);
+}
+
+Vector3 ModuleCamera::getForwardFromYawPitch() const {
+    Vector3 fwd;
+    fwd.x = cosf(pitch) * cosf(yaw);
+    fwd.y = sinf(pitch);
+    fwd.z = cosf(pitch) * sinf(yaw);
+    fwd.Normalize();
+    return fwd;
+}
+
+Vector3 ModuleCamera::getRightFromForward(const Vector3& fwd) const {
+    Vector3 right = fwd.Cross(Vector3::Up);
+    if (right.LengthSquared() < 1e-8f) right = Vector3::Right;
+    right.Normalize();
+    return right;
+}
+
+// -------------------- PAN --------------------
+void ModuleCamera::panMode(float dt)
+{
+    Mouse::State ms = Mouse::Get().GetState();
+
+    // Botón de pan (en tu caso viene de Alt+LMB desde el Editor)
+    const bool down =
+        (ms.middleButton == Mouse::ButtonStateTracker::HELD) ||
+        (ms.leftButton == Mouse::ButtonStateTracker::HELD);
+
+    if (!down) {
+        panFirst = true;
+        return;
     }
 
+    if (panFirst) {
+        panLastX = ms.x;
+        panLastY = ms.y;
+        panFirst = false;
+        return;
+    }
 
-    void ModuleCamera::drawGUI() {
-        if (ImGui::Begin("Camera")) {
-            if (ImGui::CollapsingHeader("Position"))
-            {
-                ImGui::DragFloat3("Position###CamPos", &position.x, 0.1f);
-		    }
-            if (ImGui::CollapsingHeader("Target"))
-            {
-                ImGui::DragFloat3("Target###CamTarget", &target.x, 0.1f);
-		    }
-            ImGui::DragFloat("Distance", &distanceToTarget, 0.1f);
-			ImGui::Text("Current Mode: %d", test);
-        }
+    // Mouse delta
+    int dx = ms.x - panLastX;
+    int dy = ms.y - panLastY;
+    panLastX = ms.x;
+    panLastY = ms.y;
+
+    float sx = panInvertX ? -1.0f : 1.0f;
+    float sy = panInvertY ? -1.0f : 1.0f;
+
+    // Camera axes
+    Vector3 forward = target - position;
+    if (forward.LengthSquared() < 1e-8f)
+        return;
+
+    forward.Normalize();
+
+    Vector3 right = forward.Cross(Vector3::Up);
+    right.Normalize();
+
+    Vector3 camUp = right.Cross(forward);
+    camUp.Normalize();
+
+    // Scale pan by distance for editor feel
+    float dist = (target - position).Length();
+
+    Vector3 delta =
+        (right * (-float(dx) * sx) +
+            camUp * (float(dy) * sy)) * (panSpeed * dist);
+
+    // Apply
+    position += delta;
+    target += delta;
+
+    // Keep orbit data coherent
+    syncDistanceFromLookAt();
+}
+
+
+// -------------------- ORBIT --------------------
+void ModuleCamera::orbitMode(float dt) {
+    Mouse::State ms = Mouse::Get().GetState();
+
+    if (orbitFirst) {
+        orbitLastX = ms.x;
+        orbitLastY = ms.y;
+        orbitFirst = false;
+        syncYawPitchFromLookAt();
+        syncDistanceFromLookAt();
+        return;
+    }
+
+    int dx = ms.x - orbitLastX;
+    int dy = ms.y - orbitLastY;
+    orbitLastX = ms.x;
+    orbitLastY = ms.y;
+
+    yaw += dx * orbitSpeed;
+    pitch += dy * orbitSpeed;
+    pitch = std::clamp(pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);
+
+    Vector3 forward = getForwardFromYawPitch();
+    position = target - forward * distanceToTarget;
+}
+
+
+// -------------------- ZOOM (drag) --------------------
+void ModuleCamera::zoomMode(float /*dt*/) {
+    Mouse::State ms = Mouse::Get().GetState();
+
+    // Zoom por arrastre con botón derecho (o el que prefieras)
+    const bool down = (ms.rightButton == Mouse::ButtonStateTracker::HELD);
+
+    if (!down) {
+        zoomFirst = true;
+        return;
+    }
+
+    if (zoomFirst) {
+        zoomLastX = ms.x;
+        zoomLastY = ms.y;
+        zoomFirst = false;
+        syncDistanceFromLookAt();
+        return;
+    }
+
+    int dx = ms.x - zoomLastX;
+    int dy = ms.y - zoomLastY;
+    zoomLastX = ms.x;
+    zoomLastY = ms.y;
+
+    // Usamos dy principalmente (arriba/abajo). dx también podría valer si quieres.
+    float dist = (target - position).Length();
+    float delta = float(dy) * zoomDragSpeed * dist;
+
+    distanceToTarget = std::clamp(distanceToTarget + delta, minDistance, maxDistance);
+
+    Vector3 fwd = (target - position);
+    if (fwd.LengthSquared() < 1e-8f) return;
+    fwd.Normalize();
+    position = target - fwd * distanceToTarget;
+}
+
+// -------------------- WHEEL ZOOM --------------------
+void ModuleCamera::handleMouseWheel(float dt) {
+    Mouse::State ms = Mouse::Get().GetState();
+
+    int delta = ms.scrollWheelValue - lastWheel;
+    lastWheel = ms.scrollWheelValue;
+
+    if (delta == 0) return;
+
+    Vector3 forward = getForwardFromYawPitch();
+
+    // --- FREE LOOK: dolly FPS ---
+    if (moduleEditor->getCurrentNavigationMode() == ModuleEditor::NAVIGATION_MODE::FREE_LOOK) {
+        float d = delta * zoomWheelSpeed * flyMoveSpeed;
+        position += forward * d;
+
+        // Mantén distanceToTarget razonable para cuando sueltes RMB
+        distanceToTarget = std::clamp(distanceToTarget - d, minDistance, maxDistance);
+        return;
+    }
+
+    // --- EDITOR MODES: pivot zoom ---
+    distanceToTarget -= delta * zoomWheelSpeed;
+    distanceToTarget = std::clamp(distanceToTarget, minDistance, maxDistance);
+
+    position = target - forward * distanceToTarget;
+}
+
+
+// -------------------- FLYTHROUGH (FPS) --------------------
+void ModuleCamera::flythroughMode(float dt) {
+    Keyboard::State ks = Keyboard::Get().GetState();
+    Mouse::State ms = Mouse::Get().GetState();
+
+    float speed = flyMoveSpeed;
+    if (ks.LeftShift || ks.RightShift)
+        speed *= flyBoostMult;
+
+    // Mouse look
+    if (flyFirst) {
+        flyLastX = ms.x;
+        flyLastY = ms.y;
+        flyFirst = false;
+        return;
+    }
+
+    int dx = ms.x - flyLastX;
+    int dy = ms.y - flyLastY;
+    flyLastX = ms.x;
+    flyLastY = ms.y;
+
+    float sx = flyInvertX ? -1.0f : 1.0f;
+    float sy = flyInvertY ? -1.0f : 1.0f;
+
+    yaw += dx * flyRotSpeed * sx;
+    pitch += dy * flyRotSpeed * sy;
+
+    pitch = std::clamp(pitch, -XM_PIDIV2 + 0.01f, XM_PIDIV2 - 0.01f);
+
+    Vector3 forward = getForwardFromYawPitch();
+    Vector3 right = forward.Cross(Vector3::Up);
+    right.Normalize();
+
+    // Movement
+    if (ks.IsKeyDown(Keyboard::Keys::W)) position += forward * speed * dt;
+    if (ks.IsKeyDown(Keyboard::Keys::S)) position -= forward * speed * dt;
+    if (ks.IsKeyDown(Keyboard::Keys::A)) position -= right * speed * dt;
+    if (ks.IsKeyDown(Keyboard::Keys::D)) position += right * speed * dt;
+    if (ks.IsKeyDown(Keyboard::Keys::Q)) position -= Vector3::Up * speed * dt;
+    if (ks.IsKeyDown(Keyboard::Keys::E)) position += Vector3::Up * speed * dt;
+}
+
+
+// -------------------- AUTOFOCUS --------------------
+void ModuleCamera::handleAutoFocus(float dt) {
+    Keyboard::State ks = Keyboard::Get().GetState();
+    if (ks.IsKeyDown(Keyboard::Keys::F)) {
+        focusOnTarget();
+    }
+}
+
+void ModuleCamera::focusOnTarget() {
+    // Si no tienes selección, enfoca al origen
+    Vector3 focusPoint = Vector3(0.f, 0.f, 0.f);
+
+    distanceToTarget = 10.0f; // o según bounding box
+    Vector3 forward = getForwardFromYawPitch();
+
+    target = focusPoint;
+    position = target - forward * distanceToTarget;
+}
+
+// -------------------- GUI --------------------
+void ModuleCamera::drawGUI() {
+    if (!ImGui::Begin("Camera")) {
         ImGui::End();
+        return;
     }
 
-    void ModuleCamera::flythroughMode(float dt) {
-        Keyboard::State keyboardState = Keyboard::Get().GetState();
+    ImGui::Text("Current Mode: %d", test);
+    ImGui::Separator();
 
-        float movementSpeed = 10.0f; // Ajusta esto según el comportamiento que desees
-        float rotationSpeed = 0.01f;  // Ajusta la velocidad de rotación de la cámara
+    if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::DragFloat3("Position###CamPos", &position.x, 0.1f);
+        ImGui::DragFloat3("Target###CamTarget", &target.x, 0.1f);
 
-        Vector3 forward = target - position;
-        forward.Normalize();
+        if (ImGui::Button("Sync yaw/pitch from LookAt")) syncYawPitchFromLookAt();
+        ImGui::SameLine();
+        if (ImGui::Button("Sync distance from LookAt")) syncDistanceFromLookAt();
 
-        Vector3 right = forward.Cross(Vector3::Up);
-        right.Normalize();
-
-        Vector3 up = Vector3::Up;
-
-        // Movimiento hacia adelante y hacia atrás (W, S)
-        if (keyboardState.IsKeyDown(Keyboard::Keys::W)) {
-            position += forward * movementSpeed * dt;
-            target += forward * movementSpeed * dt;
-        }
-        if (keyboardState.IsKeyDown(Keyboard::Keys::S)) {
-            position -= forward * movementSpeed * dt;
-            target -= forward * movementSpeed * dt;
-        }
-
-        // Movimiento lateral (A, D)
-        if (keyboardState.IsKeyDown(Keyboard::Keys::A)) {
-            position -= right * movementSpeed * dt;
-            target -= right * movementSpeed * dt;  // Mantener el target sincronizado
-        }
-        if (keyboardState.IsKeyDown(Keyboard::Keys::D)) {
-            position += right * movementSpeed * dt;
-            target += right * movementSpeed * dt;  // Mantener el target sincronizado
-        }
-
-        // Movimiento hacia arriba y hacia abajo (Q, E)
-        if (keyboardState.IsKeyDown(Keyboard::Keys::Q)) {
-            position += up * movementSpeed * dt;
-            target += up * movementSpeed * dt;  // Mantener el target sincronizado
-        }
-        if (keyboardState.IsKeyDown(Keyboard::Keys::E)) {
-            position -= up * movementSpeed * dt;
-            target -= up * movementSpeed * dt;  // Mantener el target sincronizado
-        }
-
-        // Rotación: movimiento del ratón para rotar la cámara
-        Mouse::State mouseState = Mouse::Get().GetState();
-
-        static bool isFirstClick = true;
-        static float lastX = 0.0f;
-        static float lastY = 0.0f;
-
-        // Verificar si es el primer clic del ratón
-        if (isFirstClick) {
-            // Guardamos la posición inicial del ratón para calcular el delta cuando se mueva por primera vez
-            lastX = mouseState.x;
-            lastY = mouseState.y;
-            isFirstClick = false; // Después del primer movimiento, desactivamos el primer clic
-        }
-
-        // Obtener la diferencia en los movimientos del ratón
-        float deltaX = -float(mouseState.x - lastX);
-        float deltaY = -float(mouseState.y - lastY);
-
-        // Ajustar la rotación en función del movimiento del ratón
-        float yaw = deltaX * rotationSpeed;
-        float pitch = deltaY * rotationSpeed;
-
-        // Rotar la dirección del "target"
-        Vector3 direction = target - position;
-        Matrix rotationMatrix = Matrix::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
-
-        direction = Vector3::TransformNormal(direction, rotationMatrix);
-        target = position + direction;
-
-        // Actualizar la posición del ratón para el siguiente frame
-        lastX = mouseState.x;
-        lastY = mouseState.y;
+        ImGui::DragFloat("Distance###CamDist", &distanceToTarget, 0.05f, minDistance, maxDistance);
+        ImGui::DragFloat("Yaw###CamYaw", &yaw, 0.005f);
+        ImGui::DragFloat("Pitch###CamPitch", &pitch, 0.005f);
     }
+
+    if (ImGui::CollapsingHeader("Projection")) {
+        ImGui::DragFloat("FOV (rad)", &fovY, 0.001f, 0.1f, 2.5f);
+        ImGui::DragFloat("Near", &nearPlane, 0.01f, 0.01f, 10.0f);
+        ImGui::DragFloat("Far", &farPlane, 1.0f, 10.0f, 100000.0f);
+    }
+
+    if (ImGui::CollapsingHeader("Pan")) {
+        ImGui::DragFloat("Pan Speed", &panSpeed, 0.0001f, 0.00001f, 0.05f);
+        ImGui::Checkbox("Invert X###PanInvX", &panInvertX);
+        ImGui::Checkbox("Invert Y###PanInvY", &panInvertY);
+    }
+
+    if (ImGui::CollapsingHeader("Orbit")) {
+        ImGui::DragFloat("Orbit Speed", &orbitSpeed, 0.0001f, 0.0001f, 0.05f);
+        ImGui::Checkbox("Invert X###OrbInvX", &orbitInvertX);
+        ImGui::Checkbox("Invert Y###OrbInvY", &orbitInvertY);
+
+        ImGui::DragFloat("Min Distance", &minDistance, 0.1f, 0.01f, 1000.0f);
+        ImGui::DragFloat("Max Distance", &maxDistance, 0.1f, 0.1f, 5000.0f);
+    }
+
+    if (ImGui::CollapsingHeader("Zoom")) {
+        ImGui::DragFloat("Zoom Drag Speed", &zoomDragSpeed, 0.0001f, 0.00001f, 0.1f);
+        ImGui::DragFloat("Zoom Wheel Speed", &zoomWheelSpeed, 0.0001f, 0.000001f, 0.1f);
+    }
+
+    if (ImGui::CollapsingHeader("Flythrough")) {
+        ImGui::DragFloat("Move Speed", &flyMoveSpeed, 0.1f, 0.1f, 500.0f);
+        ImGui::DragFloat("Boost Mult", &flyBoostMult, 0.1f, 1.0f, 20.0f);
+        ImGui::DragFloat("Rotation Speed", &flyRotSpeed, 0.0001f, 0.0001f, 0.05f);
+
+        ImGui::Checkbox("Invert X###FlyInvX", &flyInvertX);
+        ImGui::Checkbox("Invert Y###FlyInvY", &flyInvertY);
+
+        ImGui::DragFloat("Pitch Clamp", &flyPitchClamp, 0.01f, 0.1f, XM_PIDIV2 - 0.01f);
+    }
+
+    ImGui::End();
+}
 
