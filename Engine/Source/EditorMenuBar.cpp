@@ -2,7 +2,11 @@
 #include "EditorMenuBar.h"
 #include "imgui.h"
 
-EditorMenuBar::EditorMenuBar() {}
+EditorMenuBar::EditorMenuBar() {
+    showConsole = true;
+    showSettings = true;
+}
+
 EditorMenuBar::~EditorMenuBar() {}
 
 void EditorMenuBar::draw() {
@@ -30,7 +34,7 @@ void EditorMenuBar::draw() {
 
         if (ImGui::BeginMenu("View")) {
             ImGui::MenuItem("Console", nullptr, &showConsole);
-            ImGui::MenuItem("ImGui Demo", nullptr, &showDemo);
+            ImGui::MenuItem("Settings", nullptr, &showSettings);
             ImGui::EndMenu();
         }
 

@@ -1,5 +1,6 @@
 #include "Globals.h"
 #include "Application.h"
+#include "Settings.h"
 
 #include "ModuleInput.h"
 
@@ -37,21 +38,25 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());
     modules.push_back(moduleRender = new ModuleRender());
+
+    settings = new Settings();
 }
 
-Application::~Application()
-{
+Application::~Application() {
     cleanUp();
 
 	for(auto it = modules.rbegin(); it != modules.rend(); ++it)
     {
         delete *it;
     }
+
+    delete settings;
 }
  
-bool Application::init()
-{
+bool Application::init() {
 	bool ret = true;
+
+    settings->LoadSettings();
 
     for (auto it = modules.begin(); it != modules.end() && ret; ++it)
         ret = (*it)->init();

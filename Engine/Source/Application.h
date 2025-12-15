@@ -15,6 +15,8 @@ class ModuleUI;
 class ModuleEditor;
 class ModuleCamera;
 
+class Settings;
+
 class Application
 {
 public:
@@ -42,6 +44,8 @@ public:
     inline ModuleEditor* getModuleEditor() const noexcept { return moduleEditor; }
     inline ModuleCamera* getModuleCamera() const noexcept { return moduleCamera; }
 
+    inline Settings* getSettings() const noexcept { return settings; }
+
 private:
     enum { MAX_FPS_TICKS = 30 };
     typedef std::array<uint64_t, MAX_FPS_TICKS> TickList;
@@ -54,6 +58,8 @@ private:
     ModuleUI* moduleUI;
     ModuleEditor* moduleEditor;
     ModuleCamera* moduleCamera;
+
+    Settings* settings;
 
     uint64_t  lastMilis = 0;
     TickList  tickList;

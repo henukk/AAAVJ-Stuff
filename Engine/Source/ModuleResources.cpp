@@ -22,7 +22,7 @@ bool ModuleResources::cleanUp() {
 }
 
 ComPtr<ID3D12Resource> ModuleResources::createUploadBuffer(const void* data, size_t size, const char* name) {
-    ID3D12CommandQueue* queue = d3d12->getDrawCommandQueue();
+    //ID3D12CommandQueue* queue = d3d12->getDrawCommandQueue();
 
     ComPtr<ID3D12Resource> buffer;
 

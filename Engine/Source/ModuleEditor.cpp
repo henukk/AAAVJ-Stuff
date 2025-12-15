@@ -10,12 +10,14 @@
 
 #include "EditorConsole.h"
 #include "EditorMenuBar.h"
+#include "EditorSettings.h"
 
 bool ModuleEditor::init() {
 	moduleInput = app->getModuleInput();
 
     console = new EditorConsole();
     menuBar = new EditorMenuBar();
+    editorSettings = new EditorSettings();
 
     ModuleUI* ui = app->getModuleUI();
 
@@ -34,25 +36,24 @@ bool ModuleEditor::init() {
 bool ModuleEditor::cleanUp() {
     delete console;
     delete menuBar;
+    delete editorSettings;
+
     return true;
 }
 
-void ModuleEditor::drawDockSpace()
-{
-    ImGuiIO& io = ImGui::GetIO();
+void ModuleEditor::drawDockSpace() {
     static bool open = true;
 
     ImGuiID dockID = ImGui::GetID("MainDockspace");
     ImGui::DockSpaceOverViewport(dockID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
-void ModuleEditor::drawPanels()
-{
+void ModuleEditor::drawPanels() {
     if (menuBar->isConsoleVisible())
         console->draw("Console");
 
-    if (menuBar->isDemoVisible())
-        ImGui::ShowDemoWindow();
+    if (menuBar->isSettingsVisible())
+        editorSettings->draw("Settings");
 }
 
 
@@ -72,15 +73,18 @@ void ModuleEditor::handleKeyboardShortcuts() {
 
     if (mouseState.rightButton) {
 		setMode(NAVIGATION, FREE_LOOK);
-    } else if (mouseState.leftButton && (keyboardState.LeftAlt || keyboardState.RightAlt)) {
+    }
+    else if (mouseState.leftButton && (keyboardState.LeftAlt || keyboardState.RightAlt)) {
         setMode(NAVIGATION, ORBIT);
+    } else if (mouseState.middleButton) {
+        setMode(NAVIGATION, PAN);
     } else if (!mouseState.leftButton) {
         resetMode();
-        handleQWERTYCases(keyboardState, mouseState);
+        handleQWERTYCases(keyboardState);
     }
 }
 
-void ModuleEditor::handleQWERTYCases(Keyboard::State keyboardState, Mouse::State mouseState) {
+void ModuleEditor::handleQWERTYCases(Keyboard::State keyboardState) {
     if (keyboardState.IsKeyDown(Keyboard::Keys::Q)) {
         currentSceneTool = NAVIGATION;
         currentNavigationMode = PAN;

@@ -175,6 +175,7 @@
     <ClInclude Include="debug_draw.hpp" />
     <ClInclude Include="EditorConsole.h" />
     <ClInclude Include="EditorMenuBar.h" />
+    <ClInclude Include="EditorSettings.h" />
     <ClInclude Include="EditorToolbar.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="framework.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="PlatformHelpers.h" />
     <ClInclude Include="ReadData.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="SimpleMath.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
@@ -269,6 +271,7 @@
     </ClCompile>
     <ClCompile Include="EditorConsole.cpp" />
     <ClCompile Include="EditorMenuBar.cpp" />
+    <ClCompile Include="EditorSettings.cpp" />
     <ClCompile Include="EditorToolbar.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="GamePad.cpp">

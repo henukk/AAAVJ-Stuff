@@ -205,7 +205,7 @@ bool ModuleD3D12::createDevice(bool useWarp)
     else
     {
         ComPtr<IDXGIAdapter4> adapter;
-        SIZE_T maxDedicatedVideoMemory = 0;
+        //SIZE_T maxDedicatedVideoMemory = 0;
         factory->EnumAdapterByGpuPreference(0, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter));
         ok = SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&device)));
     }

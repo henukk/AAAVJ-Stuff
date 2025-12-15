@@ -51,7 +51,7 @@
     </ClCompile>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EditorConsole.cpp">
-      <Filter>Engine_UI\Console</Filter>
+      <Filter>Engine_UI\Editor</Filter>
     </ClCompile>
     <ClCompile Include="EditorMenuBar.cpp">
       <Filter>Engine_UI\BarMenu</Filter>
@@ -86,6 +86,9 @@
     </ClCompile>
     <ClCompile Include="EditorToolbar.cpp">
       <Filter>Engine_UI\BarMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorSettings.cpp">
+      <Filter>Engine_UI\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -151,7 +154,7 @@
     </ClInclude>
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EditorConsole.h">
-      <Filter>Engine_UI\Console</Filter>
+      <Filter>Engine_UI\Editor</Filter>
     </ClInclude>
     <ClInclude Include="EditorMenuBar.h">
       <Filter>Engine_UI\BarMenu</Filter>
@@ -196,6 +199,12 @@
     <ClInclude Include="EditorToolbar.h">
       <Filter>Engine_UI\BarMenu</Filter>
     </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorSettings.h">
+      <Filter>Engine_UI\Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -218,9 +227,6 @@
     <Filter Include="External\ImGui">
       <UniqueIdentifier>{16a66a20-a85f-4f52-9a86-037c9b102e14}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine_UI\Console">
-      <UniqueIdentifier>{7f21b140-45a6-46e0-8cbf-17b02e6a26b4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine_UI\BarMenu">
       <UniqueIdentifier>{e0a1ec63-8aef-432f-9832-e312e46207ae}</UniqueIdentifier>
     </Filter>
@@ -235,6 +241,12 @@
     </Filter>
     <Filter Include="Modules">
       <UniqueIdentifier>{f0b97f36-5656-4fc8-a4f7-02199447e5b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities">
+      <UniqueIdentifier>{51dffe68-0010-4c6f-884d-4fd6fed9b727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine_UI\Editor">
+      <UniqueIdentifier>{7f21b140-45a6-46e0-8cbf-17b02e6a26b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

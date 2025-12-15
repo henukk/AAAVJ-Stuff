@@ -6,6 +6,7 @@
 class ModuleInput;
 class EditorConsole;
 class EditorMenuBar;
+class EditorSettings;
 
 class ModuleEditor : public Module {
 public:
@@ -30,6 +31,8 @@ private:
 
     EditorConsole* console;
     EditorMenuBar* menuBar;
+    EditorSettings* editorSettings;
+
 	SCENE_TOOL currentSceneTool;
 	NAVIGATION_MODE currentNavigationMode;
 	SCENE_TOOL previousSceneTool;
@@ -47,7 +50,7 @@ private:
     void resetMode();
 
     void handleKeyboardShortcuts();
-    void handleQWERTYCases(Keyboard::State keyboardState, Mouse::State mouseState);
+    void handleQWERTYCases(Keyboard::State keyboardState);
 
 public:
     SCENE_TOOL getCurrentSceneTool() const { return currentSceneTool; }
