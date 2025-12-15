@@ -12,4 +12,7 @@ public:
     ~EditorSettings();
 
     void draw(const char* title, bool* p_open = nullptr);
+
+    void drawCameraSettings();
+    void drawSceneSettings();
 };

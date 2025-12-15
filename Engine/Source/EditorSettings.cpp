@@ -11,13 +11,7 @@ EditorSettings::~EditorSettings() {
 
 }
 
-void EditorSettings::draw(const char* title, bool* p_open) {
-    if (!ImGui::Begin(title, p_open)) {
-        ImGui::End();
-        return;
-    }
-
-    ImGui::Separator();
+void EditorSettings::drawCameraSettings() {
     if (ImGui::CollapsingHeader("Camera")) {
         if (ImGui::CollapsingHeader("Pan")) {
             ImGui::DragFloat("Pan Speed", &settings->camera.panSpeed, 0.0001f, 0.00001f, 0.05f);
@@ -50,6 +44,25 @@ void EditorSettings::draw(const char* title, bool* p_open) {
             ImGui::DragFloat("Pitch Clamp", &settings->camera.flyPitchClamp, 0.01f, 0.1f, XM_PIDIV2 - 0.01f);
         }
     }
+}
+
+void EditorSettings::drawSceneSettings() {
+    if (ImGui::CollapsingHeader("Scene")) {
+        ImGui::Checkbox("Show Grid###SceneShowGrid", &settings->sceneEditor.showGrid);
+        ImGui::Checkbox("Show Axis###SceneShowAxis", &settings->sceneEditor.showAxis);
+    }
+}
+
+void EditorSettings::draw(const char* title, bool* p_open) {
+    if (!ImGui::Begin(title, p_open)) {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Separator();
+    drawCameraSettings();
+    ImGui::Separator();
+    drawSceneSettings();
 
     ImGui::End();
 }

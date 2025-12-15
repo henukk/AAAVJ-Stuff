@@ -90,6 +90,9 @@
     <ClCompile Include="EditorSettings.cpp">
       <Filter>Engine_UI\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleExercise4.cpp">
+      <Filter>Exercises</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug_draw.hpp">
@@ -205,6 +208,9 @@
     <ClInclude Include="EditorSettings.h">
       <Filter>Engine_UI\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="ModuleExercise4.h">
+      <Filter>Exercises</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -266,10 +272,16 @@
     <FxCompile Include="Shaders\Exercise2PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Exercise3PS.hlsl">
+    <FxCompile Include="Shaders\Exercise3PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Exercise3VS.hlsl">
+    <FxCompile Include="Shaders\Exercise3VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Exercise4PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Exercise4VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

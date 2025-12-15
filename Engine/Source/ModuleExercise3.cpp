@@ -2,18 +2,20 @@
 #include "ModuleExercise3.h"
 
 #include "Application.h"
+#include "Settings.h"
 #include "ModuleD3D12.h"
 #include "ModuleResources.h"
-#include "ModuleUI.h"
 #include "ModuleRender.h"
 #include "ModuleCamera.h"
+#include "ModuleUI.h"
 
 #include "ReadData.h"
 #include <d3dcompiler.h>
 #include "d3dx12.h"
 
-bool ModuleExercise3::init()
-{
+bool ModuleExercise3::init() {
+    settings = app->getSettings();
+
     moduleD3d12 = app->getModuleD3D12();
     moduleResources = app->getModuleResources();
     ui = app->getModuleUI();
@@ -45,8 +47,7 @@ bool ModuleExercise3::init()
 
 void ModuleExercise3::render()
 {
-    moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd)
-        {
+    moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
             unsigned width = moduleD3d12->getWindowWidth();
             unsigned height = moduleD3d12->getWindowHeight();
 
@@ -79,8 +80,11 @@ void ModuleExercise3::render()
             cmd->DrawInstanced(3, 1, 0, 0);
 
             // ---- DebugDraw ----
-            dd::xzSquareGrid(-10.f, 10.f, 0.f, 1.f, dd::colors::LightGray);
-            dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
+            if (settings->sceneEditor.showGrid)
+                dd::xzSquareGrid(-10.f, 10.f, 0.f, 1.f, dd::colors::LightGray);
+
+            if (settings->sceneEditor.showAxis)
+                dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
 
             debugDrawPass->record(cmd, width, height, view, proj);
         });
@@ -157,8 +161,7 @@ bool ModuleExercise3::cleanUp()
     return true;
 }
 
-void ModuleExercise3::drawGUI()
-{
+void ModuleExercise3::drawGUI() {
     if (ImGui::Begin("Exercise 3 Controls"))
     {
         if (ImGui::CollapsingHeader("Triangle"))

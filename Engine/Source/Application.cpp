@@ -15,6 +15,7 @@
 #include "ModuleExercise1.h"
 #include "ModuleExercise2.h"
 #include "ModuleExercise3.h"
+#include "ModuleExercise4.h"
 
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
@@ -33,7 +34,10 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     //modules.push_back(new ModuleExercise2());
     
     // Ex3 - Paint triangle with transformations and grid
-    modules.push_back(new ModuleExercise3());
+    //modules.push_back(new ModuleExercise3());
+
+    // Ex4 - Paint quad with texture
+    modules.push_back(new ModuleExercise4());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());

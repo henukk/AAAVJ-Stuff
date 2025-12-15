@@ -23,9 +23,15 @@ struct CameraSettings {
     float flyPitchClamp = XM_PIDIV2 - 1.55f;
 };
 
+struct SceneEditorSettings {
+    bool showGrid = true;
+    bool showAxis = true;
+};
+
 class Settings {
 public:
     CameraSettings camera;
+    SceneEditorSettings sceneEditor;
 
 public:
     void LoadSettings() {
