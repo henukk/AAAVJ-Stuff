@@ -99,8 +99,27 @@ ComPtr<ID3D12Resource> ModuleResources::createTextureFromFile(const std::filesys
     ok = ok || SUCCEEDED(LoadFromTGAFile(fileName, defaultSRGB ? TGA_FLAGS_DEFAULT_SRGB : TGA_FLAGS_NONE, nullptr, image));
     ok = ok || SUCCEEDED(LoadFromWICFile(fileName, defaultSRGB ? DirectX::WIC_FLAGS_DEFAULT_SRGB : DirectX::WIC_FLAGS_NONE, nullptr, image));
 
-    if (ok)
-    {
+    if (ok) {
+        const TexMetadata& meta = image.GetMetadata();
+
+        if (meta.mipLevels <= 1 && meta.dimension == TEX_DIMENSION_TEXTURE2D) {
+            ScratchImage mipChain;
+
+            HRESULT hr = GenerateMipMaps(
+                image.GetImages(),
+                image.GetImageCount(),
+                meta,
+                TEX_FILTER_DEFAULT,
+                0,
+                mipChain
+            );
+
+            if (SUCCEEDED(hr))
+            {
+                image = std::move(mipChain);
+            }
+        }
+
         return createTextureFromImage(image, path.string().c_str());
     }
 

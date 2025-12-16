@@ -49,7 +49,7 @@ bool ModuleAssigment1::init() {
     ok = ok && createPSO();
 
     if (ok) {
-        textureDog = moduleResources->createTextureFromFile(L"Assets/Textures/dog.dds");
+        textureDog = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg");//dog.dds");
         ok = (textureDog != nullptr);
     }
 
@@ -216,7 +216,7 @@ bool ModuleAssigment1::createPSO()
 }
 
 void ModuleAssigment1::drawGUI() {
-    if (ImGui::Begin("Exercise 4 Controls"))
+    if (ImGui::Begin("Assigment 1 Controlls"))
     {
         if (ImGui::CollapsingHeader("Texture position"))
         {
