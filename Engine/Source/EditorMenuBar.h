@@ -7,6 +7,8 @@ class EditorMenuBar {
 private:
     bool showConsole;
     bool showSettings;
+    bool showPerformance;
+    bool showAbout;
 
     EditorToolbar toolbar;
 public:
@@ -15,6 +17,10 @@ public:
 
     void draw();
 
+	bool* getAboutVisible() { return &showAbout; }
+
     bool isConsoleVisible() const { return showConsole; }
     bool isSettingsVisible() const { return showSettings; }
+    bool isPerformanceVisible() const { return showPerformance; }
+	bool isAboutVisible() const { return showAbout; }
 };

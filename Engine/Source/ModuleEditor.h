@@ -7,6 +7,8 @@ class ModuleInput;
 class EditorConsole;
 class EditorMenuBar;
 class EditorSettings;
+class EditorPerformance;
+class EditorAbout;
 
 class ModuleEditor : public Module {
 public:
@@ -32,6 +34,8 @@ private:
     EditorConsole* console;
     EditorMenuBar* menuBar;
     EditorSettings* editorSettings;
+	EditorPerformance* editorPerformance;
+	EditorAbout* editorAbout;
 
 	SCENE_TOOL currentSceneTool;
 	NAVIGATION_MODE currentNavigationMode;

@@ -93,6 +93,12 @@
     <ClCompile Include="ModuleExercise4.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
+    <ClCompile Include="EditorPerformance.cpp">
+      <Filter>Engine_UI\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorAbout.cpp">
+      <Filter>Engine_UI\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug_draw.hpp">
@@ -210,6 +216,12 @@
     </ClInclude>
     <ClInclude Include="ModuleExercise4.h">
       <Filter>Exercises</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorPerformance.h">
+      <Filter>Engine_UI\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorAbout.h">
+      <Filter>Engine_UI\Editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

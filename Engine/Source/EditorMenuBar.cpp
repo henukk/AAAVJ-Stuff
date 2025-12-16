@@ -5,6 +5,8 @@
 EditorMenuBar::EditorMenuBar() {
     showConsole = true;
     showSettings = true;
+    showPerformance = true;
+    showAbout = false;
 }
 
 EditorMenuBar::~EditorMenuBar() {}
@@ -12,21 +14,24 @@ EditorMenuBar::~EditorMenuBar() {}
 void EditorMenuBar::draw() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Exit")) {
-                LOG("\n\n------------------------------------------------------------------------------------\nNOT IMPLEMENTED FILE>EXIT\n------------------------------------------------------------------------------------\n\n")
+            if (ImGui::MenuItem("Exit", "(Not implemented)")) {
+            
+            }
+			ImGui::Separator();
+            if (ImGui::MenuItem("Load", "(Not implemented)")) {
+
+            }
+            if (ImGui::MenuItem("Save", "(Not implemented)")) {
+
+            }
+            if (ImGui::MenuItem("Save as", "(Not implemented)")) {
+
             }
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Edit")) {
-            if (ImGui::MenuItem("Undo", "Ctrl+Z")) {
-
-            }
-            if (ImGui::MenuItem("Redo", "Ctrl+Y")) {
-
-            }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Settings")) {
+            if (ImGui::MenuItem("To do...", "(Not implemented)")) {
 
             }
             ImGui::EndMenu();
@@ -35,13 +40,12 @@ void EditorMenuBar::draw() {
         if (ImGui::BeginMenu("View")) {
             ImGui::MenuItem("Console", nullptr, &showConsole);
             ImGui::MenuItem("Settings", nullptr, &showSettings);
+            ImGui::MenuItem("Performance", nullptr, &showPerformance);
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Help")) {
-            if (ImGui::MenuItem("About...")) {
-
-            }
+            ImGui::MenuItem("About", nullptr, &showAbout);
             ImGui::EndMenu();
         }
 

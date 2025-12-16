@@ -11,6 +11,8 @@
 #include "EditorConsole.h"
 #include "EditorMenuBar.h"
 #include "EditorSettings.h"
+#include "EditorPerformance.h"
+#include "EditorAbout.h"
 
 bool ModuleEditor::init() {
 	moduleInput = app->getModuleInput();
@@ -18,6 +20,8 @@ bool ModuleEditor::init() {
     console = new EditorConsole();
     menuBar = new EditorMenuBar();
     editorSettings = new EditorSettings();
+    editorPerformance = new EditorPerformance();
+	editorAbout = new EditorAbout(*(menuBar->getAboutVisible()));
 
     ModuleUI* ui = app->getModuleUI();
 
@@ -54,6 +58,12 @@ void ModuleEditor::drawPanels() {
 
     if (menuBar->isSettingsVisible())
         editorSettings->draw("Settings");
+
+    if (menuBar->isPerformanceVisible())
+        editorPerformance->draw("Performance");
+
+    if (menuBar->isAboutVisible())
+		editorAbout->draw("About");
 }
 
 
