@@ -5,6 +5,7 @@
 #include "Settings.h"
 #include "ModuleD3D12.h"
 #include "ModuleResources.h"
+#include "ModuleSamplers.h"
 #include "ModuleRender.h"
 #include "ModuleCamera.h"
 #include "ModuleUI.h"
@@ -15,12 +16,17 @@
 #include <d3d12.h>
 #include "d3dx12.h"
 
+ModuleAssigment1::ModuleAssigment1() {
+    sampler = int(ModuleSamplers::LINEAR_WRAP);
+}
 
 bool ModuleAssigment1::init() {
     settings = app->getSettings();
 
     moduleD3d12 = app->getModuleD3D12();
     moduleResources = app->getModuleResources();
+	moduleSamplers = app->getModuleSamplers();
+
     moduleRender = app->getModuleRender();
     moduleCamera = app->getModuleCamera();
 
@@ -72,6 +78,7 @@ bool ModuleAssigment1::init() {
         srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         srvDesc.Texture2D.MipLevels = textureDog->GetDesc().MipLevels;
 
+
         moduleD3d12->getDevice()->CreateShaderResourceView(textureDog.Get(), &srvDesc, srvHeap->GetCPUDescriptorHandleForHeapStart());
 
         srvGPUHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
@@ -115,8 +122,8 @@ void ModuleAssigment1::render() {
         cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         cmd->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-        ID3D12DescriptorHeap* heaps[] = { srvHeap.Get() };
-        cmd->SetDescriptorHeaps(1, heaps);
+        ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get(), moduleSamplers->getHeap() };
+        cmd->SetDescriptorHeaps(2, descriptorHeaps);
 
         cmd->SetGraphicsRoot32BitConstants(
             0,
@@ -125,7 +132,12 @@ void ModuleAssigment1::render() {
             0
         );
 
+        //cmd->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
+
+        cmd->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
         cmd->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
+        cmd->SetGraphicsRootDescriptorTable(2, moduleSamplers->getGPUHandle(ModuleSamplers::Type(sampler)));
+
 
         cmd->DrawInstanced(6, 1, 0, 0);
 
@@ -158,31 +170,32 @@ bool ModuleAssigment1::createVertexBuffer(void* bufferData, unsigned bufferSize,
 
 
 bool ModuleAssigment1::createRootSignature() {
-    CD3DX12_ROOT_PARAMETER rootParameters[2] = {};
-    CD3DX12_DESCRIPTOR_RANGE srvRange;
+    CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
+    CD3DX12_ROOT_PARAMETER rootParameters[3] = {};
+    CD3DX12_DESCRIPTOR_RANGE srvRange, sampRange;
 
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+    sampRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER, ModuleSamplers::COUNT, 0);
 
-    // b0
-    rootParameters[0].InitAsConstants(sizeof(Matrix) / sizeof(UINT32), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
-
-    // t0
+    rootParameters[0].InitAsConstants((sizeof(Matrix) / sizeof(UINT32)), 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
     rootParameters[1].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
+    rootParameters[2].InitAsDescriptorTable(1, &sampRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
-    // --- STATIC SAMPLER s0 ---
-    CD3DX12_STATIC_SAMPLER_DESC staticSampler;
-    staticSampler.Init(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP);
+    rootSignatureDesc.Init(3, rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
-    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc;
-    rootSigDesc.Init(2, rootParameters, 1, &staticSampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+    ComPtr<ID3DBlob> rootSignatureBlob;
 
-    ComPtr<ID3DBlob> blob;
-    if (FAILED(D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &blob, nullptr)))
+    if (FAILED(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &rootSignatureBlob, nullptr)))
+    {
         return false;
+    }
 
-    return SUCCEEDED(
-        moduleD3d12->getDevice()->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(), IID_PPV_ARGS(&rootSignature))
-    );
+    if (FAILED(moduleD3d12->getDevice()->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -216,19 +229,14 @@ bool ModuleAssigment1::createPSO()
 }
 
 void ModuleAssigment1::drawGUI() {
-    if (ImGui::Begin("Assigment 1 Controlls"))
-    {
-        if (ImGui::CollapsingHeader("Texture position"))
-        {
+    if (ImGui::Begin("Assigment 1 Controlls")) {
+        if (ImGui::CollapsingHeader("Texture position")) {
             ImGui::DragFloat3("Position###TextPos", &textPos.x, 0.1f);
             ImGui::DragFloat3("Rotation###TextRot", &textRot.x, 0.5f);
             ImGui::DragFloat3("Scale###TextScale", &textScale.x, 0.1f);
         }
-        if (ImGui::CollapsingHeader("Samplers"))
-        {
-            ImGui::Begin("Texture Viewer Options");
-            //ImGui::Combo("Sampler", &sampler, "Linear/Wrap\0Point/Wrap\0Linear/Clamp\0Point/Clamp", ModuleSamplers::COUNT);
-            ImGui::End();
+        if (ImGui::CollapsingHeader("Samplers")) {
+            ImGui::Combo("Sampler", &sampler, "Linear/Wrap\0Point/Wrap\0Linear/Clamp\0Point/Clamp", ModuleSamplers::COUNT);
         }
     }
     ImGui::End();

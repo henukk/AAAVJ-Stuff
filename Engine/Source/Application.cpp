@@ -7,6 +7,7 @@
 #include "ModuleD3D12.h"
 #include "ModuleRender.h"
 #include "ModuleResources.h"
+#include "ModuleSamplers.h"
 
 #include "ModuleUI.h"
 #include "ModuleEditor.h"
@@ -24,6 +25,7 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));
     modules.push_back(d3d12 = new ModuleD3D12((HWND)hWnd));
     modules.push_back(moduleResources = new ModuleResources());
+	modules.push_back(moduleSamplers = new ModuleSamplers());
 
     // Editor stuff
     modules.push_back(moduleEditor = new ModuleEditor());

@@ -2,10 +2,12 @@
 
 #include "Module.h"
 #include "DebugDrawPass.h"
+
 class Settings;
 
 class ModuleD3D12;
 class ModuleResources;
+class ModuleSamplers;
 class ModuleRender;
 class ModuleCamera;
 
@@ -16,6 +18,7 @@ private:
     Settings* settings;
     ModuleD3D12* moduleD3d12;
     ModuleResources* moduleResources;
+	ModuleSamplers* moduleSamplers;
     ModuleRender* moduleRender;
     ModuleCamera* moduleCamera;
 
@@ -32,11 +35,14 @@ private:
     Vector3 textPos = { 0.0f, 0.0f, 0.0f };
     Vector3 textRot = { 0.0f, 0.0f, 0.0f };
     Vector3 textScale = { 1.0f, 1.0f, 1.0f };
+    int sampler;
 
     ComPtr<ID3D12DescriptorHeap> srvHeap;
     D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle{};
 
+
 public:
+    ModuleAssigment1();
     virtual bool init() override;
     virtual bool cleanUp() override;
     virtual void render() override;

@@ -102,6 +102,7 @@
     <ClCompile Include="ModuleAssigment1.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleSamplers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug_draw.hpp">
@@ -229,6 +230,7 @@
     <ClInclude Include="ModuleAssigment1.h">
       <Filter>Exercises</Filter>
     </ClInclude>
+    <ClInclude Include="ModuleSamplers.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
