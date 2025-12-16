@@ -18,6 +18,9 @@
 
 ModuleAssigment1::ModuleAssigment1() {
     sampler = int(ModuleSamplers::LINEAR_WRAP);
+
+    textureVector.resize(ModuleAssigment1_TextureList::COUNT);
+	selectedTexture = ModuleAssigment1_TextureList::DOG;
 }
 
 bool ModuleAssigment1::init() {
@@ -55,16 +58,13 @@ bool ModuleAssigment1::init() {
     ok = ok && createPSO();
 
     if (ok) {
-        textureDog = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg");//dog.dds");
-        ok = (textureDog != nullptr);
+        ok = loadTextures();
     }
 
+    ID3D12Device* device = moduleD3d12->getDevice();
     if (ok) {
-        ID3D12Device* device = moduleD3d12->getDevice();
-
-        // Descriptor heap para 1 SRV
         D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-        heapDesc.NumDescriptors = 1;
+        heapDesc.NumDescriptors = ModuleAssigment1_TextureList::COUNT;
         heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
@@ -72,14 +72,26 @@ bool ModuleAssigment1::init() {
     }
 
     if (ok) {
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Format = textureDog->GetDesc().Format;
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = textureDog->GetDesc().MipLevels;
+        D3D12_CPU_DESCRIPTOR_HANDLE handle = srvHeap->GetCPUDescriptorHandleForHeapStart();
+        UINT descriptorSize = device->GetDescriptorHandleIncrementSize(
+            D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+        );
 
+        for (int i = 0; i < ModuleAssigment1_TextureList::COUNT; ++i)
+        {
+            ID3D12Resource* tex = textureVector[i].Get();
+            const D3D12_RESOURCE_DESC& desc = tex->GetDesc();
 
-        moduleD3d12->getDevice()->CreateShaderResourceView(textureDog.Get(), &srvDesc, srvHeap->GetCPUDescriptorHandleForHeapStart());
+            D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+            srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            srvDesc.Format = desc.Format;
+            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.Texture2D.MipLevels = desc.MipLevels;
+
+            device->CreateShaderResourceView(tex, &srvDesc, handle);
+
+            handle.ptr += descriptorSize;
+        }
 
         srvGPUHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
     }
@@ -89,6 +101,29 @@ bool ModuleAssigment1::init() {
             moduleD3d12->getDevice(),
             moduleD3d12->getDrawCommandQueue()
         );
+    }
+
+    return ok;
+}
+
+bool ModuleAssigment1::loadTextures() {
+    textureVector[ModuleAssigment1_TextureList::CHECKERBOARD_NO_MIPMAPS]    = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg", false, false);
+    textureVector[ModuleAssigment1_TextureList::CHECKERBOARD]               = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg");
+    textureVector[ModuleAssigment1_TextureList::THIN_GRID_NO_MIPMAPS]       = moduleResources->createTextureFromFile(L"Assets/Textures/thingrid.jpg", false, false);
+    textureVector[ModuleAssigment1_TextureList::THIN_GRID]                  = moduleResources->createTextureFromFile(L"Assets/Textures/thingrid.jpg");
+    textureVector[ModuleAssigment1_TextureList::SMALL_TEXT_NO_MIPMAPS]      = moduleResources->createTextureFromFile(L"Assets/Textures/small_text.png", false, false);
+    textureVector[ModuleAssigment1_TextureList::SMALL_TEXT]                 = moduleResources->createTextureFromFile(L"Assets/Textures/small_text.png");
+    textureVector[ModuleAssigment1_TextureList::NOISE_NO_MIPMAPS]           = moduleResources->createTextureFromFile(L"Assets/Textures/noise.jpg", false, false);
+    textureVector[ModuleAssigment1_TextureList::NOISE]                      = moduleResources->createTextureFromFile(L"Assets/Textures/noise.jpg");
+    textureVector[ModuleAssigment1_TextureList::UV_TEST_NO_MIPMAPS]         = moduleResources->createTextureFromFile(L"Assets/Textures/uvTest.png", false, false);
+    textureVector[ModuleAssigment1_TextureList::UV_TEST]                    = moduleResources->createTextureFromFile(L"Assets/Textures/uvTest.png");
+    textureVector[ModuleAssigment1_TextureList::METAL_GRATE_NO_MIPMAPS]     = moduleResources->createTextureFromFile(L"Assets/Textures/metalgrate.jpg", false, false);
+    textureVector[ModuleAssigment1_TextureList::METAL_GRATE]                = moduleResources->createTextureFromFile(L"Assets/Textures/metalgrate.jpg");
+    textureVector[ModuleAssigment1_TextureList::DOG]                        = moduleResources->createTextureFromFile(L"Assets/Textures/dog.dds");
+
+    bool ok = true;
+    for (int i = 0; i < ModuleAssigment1_TextureList::COUNT && ok; ++i) {
+        ok = (textureVector[i] != nullptr);
     }
 
     return ok;
@@ -135,7 +170,12 @@ void ModuleAssigment1::render() {
         //cmd->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
 
         cmd->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
-        cmd->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
+
+        UINT descriptorSize = moduleD3d12->getDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        D3D12_GPU_DESCRIPTOR_HANDLE textureHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
+        textureHandle.ptr += selectedTexture * descriptorSize;
+
+        cmd->SetGraphicsRootDescriptorTable(1, textureHandle);
         cmd->SetGraphicsRootDescriptorTable(2, moduleSamplers->getGPUHandle(ModuleSamplers::Type(sampler)));
 
 
@@ -237,6 +277,14 @@ void ModuleAssigment1::drawGUI() {
         }
         if (ImGui::CollapsingHeader("Samplers")) {
             ImGui::Combo("Sampler", &sampler, "Linear/Wrap\0Point/Wrap\0Linear/Clamp\0Point/Clamp", ModuleSamplers::COUNT);
+        }
+        if (ImGui::CollapsingHeader("Textures")) {
+            ImGui::Combo(
+                "Texture",
+                &selectedTexture,
+                "CHECKERBOARD (no mipmaps)\0CHECKERBOARD\0THIN_GRID (no mipmaps)\0THIN_GRID\0SMALL_TEXT (no mipmaps)\0SMALL_TEXT\0NOISE (no mipmaps)\0NOISE\0UV_TEST (no mipmaps)\0UV_TEST\0METAL_GRATE (no mipmaps)\0METAL_GRATE\0DOG",
+                ModuleAssigment1_TextureList::COUNT
+            );
         }
     }
     ImGui::End();

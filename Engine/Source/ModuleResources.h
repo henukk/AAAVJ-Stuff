@@ -22,7 +22,7 @@ public:
 public:
     ComPtr<ID3D12Resource> createUploadBuffer(const void* data, size_t size, const char* name);
     ComPtr<ID3D12Resource> createDefaultBuffer(const void* data, size_t size, const char* name);
-    ComPtr<ID3D12Resource> createTextureFromFile(const std::filesystem::path& path, bool defaultSRGB = false);
+    ComPtr<ID3D12Resource> createTextureFromFile(const std::filesystem::path& path, bool defaultSRGB = false, bool createMipmaps = true);
 
     ComPtr<ID3D12Resource> getUploadHeap(size_t size);
 

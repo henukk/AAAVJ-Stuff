@@ -91,7 +91,7 @@ ComPtr<ID3D12Resource> ModuleResources::getUploadHeap(size_t size) {
     return uploadHeap;
 }
 
-ComPtr<ID3D12Resource> ModuleResources::createTextureFromFile(const std::filesystem::path& path, bool defaultSRGB) {
+ComPtr<ID3D12Resource> ModuleResources::createTextureFromFile(const std::filesystem::path& path, bool defaultSRGB, bool createMipmaps) {
     const wchar_t* fileName = path.c_str();
     ScratchImage image;
     bool ok = SUCCEEDED(LoadFromDDSFile(fileName, DDS_FLAGS_NONE, nullptr, image));
@@ -102,7 +102,7 @@ ComPtr<ID3D12Resource> ModuleResources::createTextureFromFile(const std::filesys
     if (ok) {
         const TexMetadata& meta = image.GetMetadata();
 
-        if (meta.mipLevels <= 1 && meta.dimension == TEX_DIMENSION_TEXTURE2D) {
+        if (createMipmaps && meta.mipLevels <= 1 && meta.dimension == TEX_DIMENSION_TEXTURE2D) {
             ScratchImage mipChain;
 
             HRESULT hr = GenerateMipMaps(
