@@ -14,7 +14,7 @@ void EditorAbout::draw(const char* title, bool* p_open) {
     }
 
     ImGui::Text("Software Name: %s", "ClangClin");
-    ImGui::Text("Version: %s", "v0.1.0 (Delivery 1)");
+    ImGui::Text("Version: %s", "v0.1.0 (Assignment 1)");
 
     ImGui::Separator();
 

@@ -17,6 +17,8 @@
 #include "ModuleExercise3.h"
 #include "ModuleExercise4.h"
 
+#include "ModuleAssigment1.h"
+
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));
@@ -37,7 +39,10 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     //modules.push_back(new ModuleExercise3());
 
     // Ex4 - Paint quad with texture
-    modules.push_back(new ModuleExercise4());
+    //modules.push_back(new ModuleExercise4());
+
+	// Assigment 1
+	modules.push_back(new ModuleAssigment1());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());

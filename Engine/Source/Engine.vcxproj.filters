@@ -99,6 +99,7 @@
     <ClCompile Include="EditorAbout.cpp">
       <Filter>Engine_UI\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="ModuleAssigment1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debug_draw.hpp">
@@ -223,6 +224,7 @@
     <ClInclude Include="EditorAbout.h">
       <Filter>Engine_UI\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="ModuleAssigment1.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
