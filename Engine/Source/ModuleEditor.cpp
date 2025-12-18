@@ -14,10 +14,12 @@
 #include "EditorPerformance.h"
 #include "EditorAbout.h"
 
+EditorConsole* Console = nullptr;
+
 bool ModuleEditor::init() {
 	moduleInput = app->getModuleInput();
 
-    console = new EditorConsole();
+    Console = new EditorConsole();
     menuBar = new EditorMenuBar();
     editorSettings = new EditorSettings();
     editorPerformance = new EditorPerformance();
@@ -38,7 +40,7 @@ bool ModuleEditor::init() {
 }
 
 bool ModuleEditor::cleanUp() {
-    delete console;
+    delete Console;
     delete menuBar;
     delete editorSettings;
 
@@ -54,7 +56,7 @@ void ModuleEditor::drawDockSpace() {
 
 void ModuleEditor::drawPanels() {
     if (menuBar->isConsoleVisible())
-        console->draw("Console");
+        Console->draw("Console");
 
     if (menuBar->isSettingsVisible())
         editorSettings->draw("Settings");

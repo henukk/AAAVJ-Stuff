@@ -1,6 +1,8 @@
 #include "Globals.h"
 #include "EditorAbout.h"
 
+#include "EditorConsole.h"
+
 #include <windows.h>
 #include <shellapi.h>
 
@@ -28,19 +30,22 @@ void EditorAbout::draw(const char* title, bool* p_open) {
 
     if (ImGui::Button("Author GitHub (Click to copy link)")) {
         ImGui::SetClipboardText("https://github.com/henukk");
-		//Console.log("Author GitHub link copied to clipboard.");
+		Console->PrintLog("Author GitHub link copied to clipboard.");
     }
 
     if (ImGui::Button("Project Repository (Click to copy link)")) {
         ImGui::SetClipboardText("https://github.com/henukk/AAAVJ-Stuff");
+        Console->PrintLog("Project Repository link copied to clipboard.");
     }
 
     if (ImGui::Button("Documentation (Click to copy link)")) {
         ImGui::SetClipboardText("https://github.com/henukk/AAAVJ-Stuff/wiki");
+        Console->PrintLog("Documentation link copied to clipboard.");
     }
 
-    if (ImGui::Button("Creative Commons License (Click to copy link)")) {
+    if (ImGui::Button("License (Click to copy link)")) {
         ImGui::SetClipboardText("https://github.com/henukk/AAAVJ-Stuff/blob/main/LICENSE");
+        Console->PrintLog("License link copied to clipboard.");
     }
 
     ImGui::Separator();

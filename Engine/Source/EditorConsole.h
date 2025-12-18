@@ -48,3 +48,5 @@ private:
     bool showWarnings = true;
     bool showErrors = true;
 };
+
+extern EditorConsole* Console;

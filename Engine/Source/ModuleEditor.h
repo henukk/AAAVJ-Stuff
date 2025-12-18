@@ -4,7 +4,7 @@
 #include "Mouse.h"
 
 class ModuleInput;
-class EditorConsole;
+//class EditorConsole;
 class EditorMenuBar;
 class EditorSettings;
 class EditorPerformance;
@@ -31,7 +31,7 @@ public:
 private:
     ModuleInput* moduleInput;
 
-    EditorConsole* console;
+    //EditorConsole* console;
     EditorMenuBar* menuBar;
     EditorSettings* editorSettings;
 	EditorPerformance* editorPerformance;

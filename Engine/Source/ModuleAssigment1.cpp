@@ -244,8 +244,8 @@ bool ModuleAssigment1::createPSO()
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
                                               {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0} };
 
-    auto dataVS = DX::ReadData(L"Exercise4VS.cso");
-    auto dataPS = DX::ReadData(L"Exercise4PS.cso");
+    auto dataVS = DX::ReadData(L"Assigment1VS.cso");
+    auto dataPS = DX::ReadData(L"Assigment1PS.cso");
 
     assert(!dataVS.empty() && !dataPS.empty());
 
@@ -276,13 +276,13 @@ void ModuleAssigment1::drawGUI() {
             ImGui::DragFloat3("Scale###TextScale", &textScale.x, 0.1f);
         }
         if (ImGui::CollapsingHeader("Samplers")) {
-            ImGui::Combo("Sampler", &sampler, "Linear/Wrap\0Point/Wrap\0Linear/Clamp\0Point/Clamp", ModuleSamplers::COUNT);
+            ImGui::Combo("Sampler", &sampler, "Linear/Wrap\0Point/Wrap\0Linear/Clamp\0Point/Clamp\0", ModuleSamplers::COUNT);
         }
         if (ImGui::CollapsingHeader("Textures")) {
             ImGui::Combo(
                 "Texture",
                 &selectedTexture,
-                "CHECKERBOARD (no mipmaps)\0CHECKERBOARD\0THIN_GRID (no mipmaps)\0THIN_GRID\0SMALL_TEXT (no mipmaps)\0SMALL_TEXT\0NOISE (no mipmaps)\0NOISE\0UV_TEST (no mipmaps)\0UV_TEST\0METAL_GRATE (no mipmaps)\0METAL_GRATE\0DOG",
+                "CHECKERBOARD (no mipmaps)\0CHECKERBOARD\0THIN_GRID (no mipmaps)\0THIN_GRID\0SMALL_TEXT (no mipmaps)\0SMALL_TEXT\0NOISE (no mipmaps)\0NOISE\0UV_TEST (no mipmaps)\0UV_TEST\0METAL_GRATE (no mipmaps)\0METAL_GRATE\0DOG\0",
                 ModuleAssigment1_TextureList::COUNT
             );
         }

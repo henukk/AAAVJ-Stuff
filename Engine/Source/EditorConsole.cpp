@@ -5,6 +5,8 @@
 EditorConsole::EditorConsole() {}
 EditorConsole::~EditorConsole() {}
 
+//to improve
+
 void EditorConsole::clear() {
     items.clear();
 }
@@ -147,7 +149,7 @@ void EditorConsole::drawMessage(const ConsoleItem& item) {
     }
 
     ImGui::PushStyleColor(ImGuiCol_Text, color);
-    std::string fullLine = std::string(prefix) + item.message;
+    std::string fullLine = std::string(prefix) + item.message + "###console_item_" + std::to_string(&item - &items[0]);
 
     size_t index = &item - &items[0];
     bool isSelected = selectedIndices.count(index) > 0;
