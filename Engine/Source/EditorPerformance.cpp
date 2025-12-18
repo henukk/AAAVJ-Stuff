@@ -20,8 +20,8 @@ void EditorPerformance::draw(const char* title, bool* p_open)
 
     float width = ImGui::GetContentRegionAvail().x;
 
-    float fps = app->getFPS()/100;
-    float avgMs = app->getAvgElapsedMs()*100;
+    float fps = app->getFPS();
+    float avgMs = app->getAvgElapsedMs();
 
     fpsHistory[current] = fps;
     msHistory[current] = avgMs;

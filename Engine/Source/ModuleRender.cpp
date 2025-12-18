@@ -9,8 +9,7 @@ bool ModuleRender::init()
     return true;
 }
 
-void ModuleRender::preRender()
-{
+void ModuleRender::preRender() {
     auto commandList = d3d12->getCommandList();
 
     commandList->Reset(d3d12->getCommandAllocator(), nullptr);
