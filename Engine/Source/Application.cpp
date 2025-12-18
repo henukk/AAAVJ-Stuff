@@ -13,10 +13,10 @@
 #include "ModuleEditor.h"
 #include "ModuleCamera.h"
 
-#include "ModuleExercise1.h"
-#include "ModuleExercise2.h"
-#include "ModuleExercise3.h"
-#include "ModuleExercise4.h"
+//#include "ModuleExercise1.h"
+//#include "ModuleExercise2.h"
+//#include "ModuleExercise3.h"
+//#include "ModuleExercise4.h"
 
 #include "ModuleAssigment1.h"
 
