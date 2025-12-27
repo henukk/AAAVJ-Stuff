@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "ModuleExercise3.h"
+#include "Exercise3.h"
 
 #include "Application.h"
 #include "Settings.h"
@@ -13,7 +13,7 @@
 #include <d3dcompiler.h>
 #include "d3dx12.h"
 
-bool ModuleExercise3::init() {
+bool Exercise3::init() {
     settings = app->getSettings();
 
     moduleD3d12 = app->getModuleD3D12();
@@ -45,7 +45,7 @@ bool ModuleExercise3::init() {
     return ok;
 }
 
-void ModuleExercise3::render()
+void Exercise3::render()
 {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
             unsigned width = moduleD3d12->getWindowWidth();
@@ -90,7 +90,7 @@ void ModuleExercise3::render()
         });
 }
 
-bool ModuleExercise3::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride)
+bool Exercise3::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride)
 {
     vertexBuffer = moduleResources->createDefaultBuffer(bufferData, bufferSize, "Triangle");
 
@@ -104,7 +104,7 @@ bool ModuleExercise3::createVertexBuffer(void* bufferData, unsigned bufferSize, 
     return true;
 }
 
-bool ModuleExercise3::createRootSignature()
+bool Exercise3::createRootSignature()
 {
     CD3DX12_ROOT_PARAMETER params[1];
     params[0].InitAsConstants(sizeof(Matrix) / sizeof(UINT32), 0);
@@ -123,7 +123,7 @@ bool ModuleExercise3::createRootSignature()
     ));
 }
 
-bool ModuleExercise3::createPSO()
+bool Exercise3::createPSO()
 {
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
         { "MY_POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
@@ -155,13 +155,13 @@ bool ModuleExercise3::createPSO()
     );
 }
 
-bool ModuleExercise3::cleanUp()
+bool Exercise3::cleanUp()
 {
     debugDrawPass.reset();
     return true;
 }
 
-void ModuleExercise3::drawGUI() {
+void Exercise3::drawGUI() {
     if (ImGui::Begin("Exercise 3 Controls"))
     {
         if (ImGui::CollapsingHeader("Triangle"))

@@ -4,7 +4,7 @@
 class ModuleD3D12;
 class ModuleUI;
 
-class ModuleExercise1 : public Module {
+class Exercise1 : public Module {
 private:
     ModuleD3D12* d3d12 = nullptr;
     ModuleUI* ui = nullptr;

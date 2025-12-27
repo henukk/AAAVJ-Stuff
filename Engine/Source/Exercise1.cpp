@@ -1,11 +1,11 @@
 #include "Globals.h"
-#include "ModuleExercise1.h"
+#include "Exercise1.h"
 #include "Application.h"
 #include "ModuleD3D12.h"
 #include "ModuleUI.h"
 #include "imgui.h"
 
-bool ModuleExercise1::init()
+bool Exercise1::init()
 {
     d3d12 = app->getModuleD3D12();
     ui = app->getModuleUI();
@@ -15,7 +15,7 @@ bool ModuleExercise1::init()
     return true;
 }
 
-void ModuleExercise1::render()
+void Exercise1::render()
 {
     ID3D12GraphicsCommandList* commandList = d3d12->getCommandList();
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = d3d12->getRenderTargetDescriptor();
@@ -23,7 +23,7 @@ void ModuleExercise1::render()
     commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 }
 
-void ModuleExercise1::drawWindow()
+void Exercise1::drawWindow()
 {
     if (ImGui::Begin("Exercise 1 Settings"))
     {

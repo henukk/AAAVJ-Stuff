@@ -56,13 +56,13 @@
     <ClCompile Include="EditorMenuBar.cpp">
       <Filter>Engine_UI\BarMenu</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleExercise1.cpp">
+    <ClCompile Include="Exercise1.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleExercise2.cpp">
+    <ClCompile Include="Exercise2.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleExercise3.cpp">
+    <ClCompile Include="Exercise3.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
     <ClCompile Include="Application.cpp" />
@@ -90,7 +90,7 @@
     <ClCompile Include="EditorSettings.cpp">
       <Filter>Engine_UI\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleExercise4.cpp">
+    <ClCompile Include="Exercise4.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
     <ClCompile Include="EditorPerformance.cpp">
@@ -99,7 +99,7 @@
     <ClCompile Include="EditorAbout.cpp">
       <Filter>Engine_UI\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleAssigment1.cpp">
+    <ClCompile Include="Assigment1.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
     <ClCompile Include="ModuleSamplers.cpp" />
@@ -172,10 +172,10 @@
     <ClInclude Include="EditorMenuBar.h">
       <Filter>Engine_UI\BarMenu</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleExercise1.h">
+    <ClInclude Include="Exercise1.h">
       <Filter>Exercises</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleExercise2.h">
+    <ClInclude Include="Exercise2.h">
       <Filter>Exercises</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
@@ -184,7 +184,7 @@
     <ClInclude Include="Chrono.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleExercise3.h">
+    <ClInclude Include="Exercise3.h">
       <Filter>Exercises</Filter>
     </ClInclude>
     <ClInclude Include="Application.h" />
@@ -218,7 +218,7 @@
     <ClInclude Include="EditorSettings.h">
       <Filter>Engine_UI\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleExercise4.h">
+    <ClInclude Include="Exercise4.h">
       <Filter>Exercises</Filter>
     </ClInclude>
     <ClInclude Include="EditorPerformance.h">
@@ -227,7 +227,7 @@
     <ClInclude Include="EditorAbout.h">
       <Filter>Engine_UI\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleAssigment1.h">
+    <ClInclude Include="Assigment1.h">
       <Filter>Exercises</Filter>
     </ClInclude>
     <ClInclude Include="ModuleSamplers.h" />

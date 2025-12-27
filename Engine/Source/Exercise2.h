@@ -7,7 +7,7 @@ class ModuleResources;
 class ModuleUI;
 class ModuleRender;
 
-class ModuleExercise2 : public Module {
+class Exercise2 : public Module {
 public:
     struct Vertex { float x, y, z; };
 

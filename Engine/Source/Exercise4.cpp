@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "ModuleExercise4.h"
+#include "Exercise4.h"
 
 #include "Application.h"
 #include "Settings.h"
@@ -16,7 +16,7 @@
 #include "d3dx12.h"
 
 
-bool ModuleExercise4::init() {
+bool Exercise4::init() {
     settings = app->getSettings();
 
     moduleD3d12 = app->getModuleD3D12();
@@ -87,11 +87,11 @@ bool ModuleExercise4::init() {
     return ok;
 }
 
-bool ModuleExercise4::cleanUp() {
+bool Exercise4::cleanUp() {
     return true;
 }
 
-void ModuleExercise4::render() {
+void Exercise4::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
         unsigned width = moduleD3d12->getWindowWidth();
         unsigned height = moduleD3d12->getWindowHeight();
@@ -141,7 +141,7 @@ void ModuleExercise4::render() {
 }
 
 
-bool ModuleExercise4::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride) {
+bool Exercise4::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride) {
     vertexBuffer = moduleResources->createDefaultBuffer(bufferData, bufferSize, "QuadVB");
 
     if (vertexBuffer)
@@ -157,7 +157,7 @@ bool ModuleExercise4::createVertexBuffer(void* bufferData, unsigned bufferSize, 
 }
 
 
-bool ModuleExercise4::createRootSignature() {
+bool Exercise4::createRootSignature() {
     CD3DX12_ROOT_PARAMETER rootParameters[2] = {};
     CD3DX12_DESCRIPTOR_RANGE srvRange;
 
@@ -186,7 +186,7 @@ bool ModuleExercise4::createRootSignature() {
 }
 
 
-bool ModuleExercise4::createPSO()
+bool Exercise4::createPSO()
 {
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
                                               {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0} };
@@ -215,7 +215,7 @@ bool ModuleExercise4::createPSO()
     return SUCCEEDED(moduleD3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 }
 
-void ModuleExercise4::drawGUI() {
+void Exercise4::drawGUI() {
     if (ImGui::Begin("Exercise 4 Controls"))
     {
         if (ImGui::CollapsingHeader("Texture position"))
@@ -224,12 +224,10 @@ void ModuleExercise4::drawGUI() {
             ImGui::DragFloat3("Rotation###TextRot", &textRot.x, 0.5f);
             ImGui::DragFloat3("Scale###TextScale", &textScale.x, 0.1f);
         }
-        if (ImGui::CollapsingHeader("Samplers"))
-        {
-            ImGui::Begin("Texture Viewer Options");
-            //ImGui::Combo("Sampler", &sampler, "Linear/Wrap\0Point/Wrap\0Linear/Clamp\0Point/Clamp", ModuleSamplers::COUNT);
+        /*if (ImGui::CollapsingHeader("Samplers")) {
+            ImGui::Combo("Sampler", &sampler, "Linear/Wrap\0Point/Wrap\0Linear/Clamp\0Point/Clamp", ModuleSamplers::COUNT);
             ImGui::End();
-        }
+        }*/
     }
     ImGui::End();
 }

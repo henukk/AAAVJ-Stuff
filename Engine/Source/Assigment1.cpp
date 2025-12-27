@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "ModuleAssigment1.h"
+#include "Assigment1.h"
 
 #include "Application.h"
 #include "Settings.h"
@@ -16,14 +16,14 @@
 #include <d3d12.h>
 #include "d3dx12.h"
 
-ModuleAssigment1::ModuleAssigment1() {
+Assigment1::Assigment1() {
     sampler = int(ModuleSamplers::LINEAR_WRAP);
 
-    textureVector.resize(ModuleAssigment1_TextureList::COUNT);
-	selectedTexture = ModuleAssigment1_TextureList::DOG;
+    textureVector.resize(Assigment1_TextureList::COUNT);
+	selectedTexture = Assigment1_TextureList::DOG;
 }
 
-bool ModuleAssigment1::init() {
+bool Assigment1::init() {
     settings = app->getSettings();
 
     moduleD3d12 = app->getModuleD3D12();
@@ -64,7 +64,7 @@ bool ModuleAssigment1::init() {
     ID3D12Device* device = moduleD3d12->getDevice();
     if (ok) {
         D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-        heapDesc.NumDescriptors = ModuleAssigment1_TextureList::COUNT;
+        heapDesc.NumDescriptors = Assigment1_TextureList::COUNT;
         heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
@@ -77,7 +77,7 @@ bool ModuleAssigment1::init() {
             D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
         );
 
-        for (int i = 0; i < ModuleAssigment1_TextureList::COUNT; ++i)
+        for (int i = 0; i < Assigment1_TextureList::COUNT; ++i)
         {
             ID3D12Resource* tex = textureVector[i].Get();
             const D3D12_RESOURCE_DESC& desc = tex->GetDesc();
@@ -106,34 +106,34 @@ bool ModuleAssigment1::init() {
     return ok;
 }
 
-bool ModuleAssigment1::loadTextures() {
-    textureVector[ModuleAssigment1_TextureList::CHECKERBOARD_NO_MIPMAPS]    = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg", false, false);
-    textureVector[ModuleAssigment1_TextureList::CHECKERBOARD]               = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg");
-    textureVector[ModuleAssigment1_TextureList::THIN_GRID_NO_MIPMAPS]       = moduleResources->createTextureFromFile(L"Assets/Textures/thingrid.jpg", false, false);
-    textureVector[ModuleAssigment1_TextureList::THIN_GRID]                  = moduleResources->createTextureFromFile(L"Assets/Textures/thingrid.jpg");
-    textureVector[ModuleAssigment1_TextureList::SMALL_TEXT_NO_MIPMAPS]      = moduleResources->createTextureFromFile(L"Assets/Textures/small_text.png", false, false);
-    textureVector[ModuleAssigment1_TextureList::SMALL_TEXT]                 = moduleResources->createTextureFromFile(L"Assets/Textures/small_text.png");
-    textureVector[ModuleAssigment1_TextureList::NOISE_NO_MIPMAPS]           = moduleResources->createTextureFromFile(L"Assets/Textures/noise.jpg", false, false);
-    textureVector[ModuleAssigment1_TextureList::NOISE]                      = moduleResources->createTextureFromFile(L"Assets/Textures/noise.jpg");
-    textureVector[ModuleAssigment1_TextureList::UV_TEST_NO_MIPMAPS]         = moduleResources->createTextureFromFile(L"Assets/Textures/uvTest.png", false, false);
-    textureVector[ModuleAssigment1_TextureList::UV_TEST]                    = moduleResources->createTextureFromFile(L"Assets/Textures/uvTest.png");
-    textureVector[ModuleAssigment1_TextureList::METAL_GRATE_NO_MIPMAPS]     = moduleResources->createTextureFromFile(L"Assets/Textures/metalgrate.jpg", false, false);
-    textureVector[ModuleAssigment1_TextureList::METAL_GRATE]                = moduleResources->createTextureFromFile(L"Assets/Textures/metalgrate.jpg");
-    textureVector[ModuleAssigment1_TextureList::DOG]                        = moduleResources->createTextureFromFile(L"Assets/Textures/dog.dds");
+bool Assigment1::loadTextures() {
+    textureVector[Assigment1_TextureList::CHECKERBOARD_NO_MIPMAPS]    = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg", false, false);
+    textureVector[Assigment1_TextureList::CHECKERBOARD]               = moduleResources->createTextureFromFile(L"Assets/Textures/checkboard.jpg");
+    textureVector[Assigment1_TextureList::THIN_GRID_NO_MIPMAPS]       = moduleResources->createTextureFromFile(L"Assets/Textures/thingrid.jpg", false, false);
+    textureVector[Assigment1_TextureList::THIN_GRID]                  = moduleResources->createTextureFromFile(L"Assets/Textures/thingrid.jpg");
+    textureVector[Assigment1_TextureList::SMALL_TEXT_NO_MIPMAPS]      = moduleResources->createTextureFromFile(L"Assets/Textures/small_text.png", false, false);
+    textureVector[Assigment1_TextureList::SMALL_TEXT]                 = moduleResources->createTextureFromFile(L"Assets/Textures/small_text.png");
+    textureVector[Assigment1_TextureList::NOISE_NO_MIPMAPS]           = moduleResources->createTextureFromFile(L"Assets/Textures/noise.jpg", false, false);
+    textureVector[Assigment1_TextureList::NOISE]                      = moduleResources->createTextureFromFile(L"Assets/Textures/noise.jpg");
+    textureVector[Assigment1_TextureList::UV_TEST_NO_MIPMAPS]         = moduleResources->createTextureFromFile(L"Assets/Textures/uvTest.png", false, false);
+    textureVector[Assigment1_TextureList::UV_TEST]                    = moduleResources->createTextureFromFile(L"Assets/Textures/uvTest.png");
+    textureVector[Assigment1_TextureList::METAL_GRATE_NO_MIPMAPS]     = moduleResources->createTextureFromFile(L"Assets/Textures/metalgrate.jpg", false, false);
+    textureVector[Assigment1_TextureList::METAL_GRATE]                = moduleResources->createTextureFromFile(L"Assets/Textures/metalgrate.jpg");
+    textureVector[Assigment1_TextureList::DOG]                        = moduleResources->createTextureFromFile(L"Assets/Textures/dog.dds");
 
     bool ok = true;
-    for (int i = 0; i < ModuleAssigment1_TextureList::COUNT && ok; ++i) {
+    for (int i = 0; i < Assigment1_TextureList::COUNT && ok; ++i) {
         ok = (textureVector[i] != nullptr);
     }
 
     return ok;
 }
 
-bool ModuleAssigment1::cleanUp() {
+bool Assigment1::cleanUp() {
     return true;
 }
 
-void ModuleAssigment1::render() {
+void Assigment1::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
         unsigned width = moduleD3d12->getWindowWidth();
         unsigned height = moduleD3d12->getWindowHeight();
@@ -193,7 +193,7 @@ void ModuleAssigment1::render() {
 }
 
 
-bool ModuleAssigment1::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride) {
+bool Assigment1::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride) {
     vertexBuffer = moduleResources->createDefaultBuffer(bufferData, bufferSize, "QuadVB");
 
     if (vertexBuffer)
@@ -209,7 +209,7 @@ bool ModuleAssigment1::createVertexBuffer(void* bufferData, unsigned bufferSize,
 }
 
 
-bool ModuleAssigment1::createRootSignature() {
+bool Assigment1::createRootSignature() {
     CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
     CD3DX12_ROOT_PARAMETER rootParameters[3] = {};
     CD3DX12_DESCRIPTOR_RANGE srvRange, sampRange;
@@ -239,7 +239,7 @@ bool ModuleAssigment1::createRootSignature() {
 }
 
 
-bool ModuleAssigment1::createPSO()
+bool Assigment1::createPSO()
 {
     D3D12_INPUT_ELEMENT_DESC inputLayout[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
                                               {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0} };
@@ -268,7 +268,7 @@ bool ModuleAssigment1::createPSO()
     return SUCCEEDED(moduleD3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 }
 
-void ModuleAssigment1::drawGUI() {
+void Assigment1::drawGUI() {
     if (ImGui::Begin("Assigment 1 Controlls")) {
         if (ImGui::CollapsingHeader("Texture position")) {
             ImGui::DragFloat3("Position###TextPos", &textPos.x, 0.1f);
@@ -283,7 +283,7 @@ void ModuleAssigment1::drawGUI() {
                 "Texture",
                 &selectedTexture,
                 "CHECKERBOARD (no mipmaps)\0CHECKERBOARD\0THIN_GRID (no mipmaps)\0THIN_GRID\0SMALL_TEXT (no mipmaps)\0SMALL_TEXT\0NOISE (no mipmaps)\0NOISE\0UV_TEST (no mipmaps)\0UV_TEST\0METAL_GRATE (no mipmaps)\0METAL_GRATE\0DOG\0",
-                ModuleAssigment1_TextureList::COUNT
+                Assigment1_TextureList::COUNT
             );
         }
     }

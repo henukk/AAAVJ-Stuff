@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "ModuleExercise2.h"
+#include "Exercise2.h"
 #include "Application.h"
 #include "ModuleD3D12.h"
 #include "ModuleResources.h"
@@ -9,7 +9,7 @@
 #include "imgui.h"
 #include "d3dx12.h"
 
-bool ModuleExercise2::init()
+bool Exercise2::init()
 {
     d3d12 = app->getModuleD3D12();
     moduleResources = app->getModuleResources();
@@ -75,7 +75,7 @@ bool ModuleExercise2::init()
     return true;
 }
 
-void ModuleExercise2::update()
+void Exercise2::update()
 {
     // If vertices changed, re-upload buffer
     if (memcmp(lastVertices, vertices, sizeof(vertices)) != 0)
@@ -85,7 +85,7 @@ void ModuleExercise2::update()
     }
 }
 
-void ModuleExercise2::render()
+void Exercise2::render()
 {
     // Register a world pass in the renderer
     moduleRender->registerWorldPass(
@@ -109,7 +109,7 @@ void ModuleExercise2::render()
     );
 }
 
-void ModuleExercise2::recreateVertexBuffer()
+void Exercise2::recreateVertexBuffer()
 {
     UINT size = sizeof(vertices);
 
@@ -120,7 +120,7 @@ void ModuleExercise2::recreateVertexBuffer()
     vertexBufferView.SizeInBytes = size;
 }
 
-void ModuleExercise2::drawWindow()
+void Exercise2::drawWindow()
 {
     if (ImGui::Begin("Exercise 2 Settings"))
     {

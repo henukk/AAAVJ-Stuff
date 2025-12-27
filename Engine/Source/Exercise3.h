@@ -12,7 +12,7 @@ class ModuleCamera;
 
 class ModuleUI;
 
-class ModuleExercise3 : public Module {
+class Exercise3 : public Module {
 private:
     Settings* settings;
 

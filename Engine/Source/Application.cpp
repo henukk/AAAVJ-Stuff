@@ -13,12 +13,12 @@
 #include "ModuleEditor.h"
 #include "ModuleCamera.h"
 
-//#include "ModuleExercise1.h"
-//#include "ModuleExercise2.h"
-//#include "ModuleExercise3.h"
-//#include "ModuleExercise4.h"
+#include "Exercise1.h"
+#include "Exercise2.h"
+#include "Exercise3.h"
+#include "Exercise4.h"
 
-#include "ModuleAssigment1.h"
+#include "Assigment1.h"
 
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
@@ -32,19 +32,19 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(moduleCamera = new ModuleCamera());
     
     // Ex1 - Paint the background
-    //modules.push_back(new ModuleExercise1());
+    //modules.push_back(new Exercise1());
 
     // Ex2 - Paint a triangle
-    //modules.push_back(new ModuleExercise2());
+    //modules.push_back(new Exercise2());
     
     // Ex3 - Paint triangle with transformations and grid
-    //modules.push_back(new ModuleExercise3());
+    //modules.push_back(new Exercise3());
 
     // Ex4 - Paint quad with texture
-    //modules.push_back(new ModuleExercise4());
+    //modules.push_back(new Exercise4());
 
 	// Assigment 1
-	modules.push_back(new ModuleAssigment1());
+	//modules.push_back(new Assigment1());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());
