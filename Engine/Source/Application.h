@@ -12,6 +12,7 @@ class ModuleD3D12;
 class ModuleRender;
 class ModuleResources;
 class ModuleSamplers;
+class ModuleShaderDescriptors;
 class ModuleUI;
 class ModuleEditor;
 class ModuleCamera;
@@ -29,6 +30,7 @@ private:
     ModuleRender* moduleRender;
     ModuleResources* moduleResources;
     ModuleSamplers* moduleSamplers;
+    ModuleShaderDescriptors* moduleShaderDescriptors;
     ModuleUI* moduleUI;
     ModuleEditor* moduleEditor;
     ModuleCamera* moduleCamera;
@@ -63,6 +65,7 @@ public:
     inline ModuleRender* getModuleRender() const noexcept { return moduleRender; }
     inline ModuleResources* getModuleResources() const noexcept { return moduleResources; }
     inline ModuleSamplers* getModuleSamplers() const noexcept { return moduleSamplers; }
+    inline ModuleShaderDescriptors* getModuleShaderDescriptors() const noexcept { return moduleShaderDescriptors; }
     inline ModuleUI* getModuleUI() const noexcept { return moduleUI; }
     inline ModuleEditor* getModuleEditor() const noexcept { return moduleEditor; }
     inline ModuleCamera* getModuleCamera() const noexcept { return moduleCamera; }

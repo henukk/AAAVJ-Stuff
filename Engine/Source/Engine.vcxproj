@@ -170,7 +170,6 @@
     <ClInclude Include="3rdParty\imgui-docking\imgui_internal.h" />
     <ClInclude Include="3rdParty\ImGuizmo\ImGuizmo.h" />
     <ClInclude Include="Application.h" />
-    <ClInclude Include="BasicMaterial.h" />
     <ClInclude Include="Chrono.h" />
     <ClInclude Include="DebugDrawPass.h" />
     <ClInclude Include="debug_draw.hpp" />
@@ -203,6 +202,7 @@
     <ClInclude Include="ModuleRender.h" />
     <ClInclude Include="ModuleResources.h" />
     <ClInclude Include="ModuleSamplers.h" />
+    <ClInclude Include="ModuleShaderDescriptors.h" />
     <ClInclude Include="ModuleUI.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="PlatformHelpers.h" />
@@ -275,7 +275,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="BasicMaterial.cpp" />
     <ClCompile Include="DebugDrawPass.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -316,6 +315,7 @@
     <ClCompile Include="ModuleRender.cpp" />
     <ClCompile Include="ModuleResources.cpp" />
     <ClCompile Include="ModuleSamplers.cpp" />
+    <ClCompile Include="ModuleShaderDescriptors.cpp" />
     <ClCompile Include="ModuleUI.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="SimpleMath.cpp">

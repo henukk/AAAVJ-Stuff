@@ -6,6 +6,7 @@
 #include "ModuleD3D12.h"
 #include "ModuleResources.h"
 #include "ModuleRender.h"
+#include "ModuleShaderDescriptors.h"
 #include "ModuleCamera.h"
 #include "ModuleUI.h"
 
@@ -23,6 +24,7 @@ bool Exercise4::init() {
     moduleResources = app->getModuleResources();
     moduleRender = app->getModuleRender();
     moduleCamera = app->getModuleCamera();
+    moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
     moduleUI = app->getModuleUI();
 
@@ -54,27 +56,8 @@ bool Exercise4::init() {
     }
 
     if (ok) {
-        ID3D12Device* device = moduleD3d12->getDevice();
-
-        // Descriptor heap para 1 SRV
-        D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-        heapDesc.NumDescriptors = 1;
-        heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-
-        ok = SUCCEEDED(device->CreateDescriptorHeap(&heapDesc,IID_PPV_ARGS(&srvHeap)));
-    }
-
-    if (ok) {
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Format = textureDog->GetDesc().Format;
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = textureDog->GetDesc().MipLevels;
-
-        moduleD3d12->getDevice()->CreateShaderResourceView(textureDog.Get(), &srvDesc, srvHeap->GetCPUDescriptorHandleForHeapStart());
-
-        srvGPUHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
+        textureTable = moduleShaderDescriptors->alloc(1);
+        moduleShaderDescriptors->createTextureSRV(textureTable, 0, textureDog.Get());
     }
 
     if (ok) {
@@ -115,17 +98,10 @@ void Exercise4::render() {
         cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         cmd->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-        ID3D12DescriptorHeap* heaps[] = { srvHeap.Get() };
+        ID3D12DescriptorHeap* heaps[] = { moduleShaderDescriptors->getHeap() };
+        cmd->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
         cmd->SetDescriptorHeaps(1, heaps);
-
-        cmd->SetGraphicsRoot32BitConstants(
-            0,
-            sizeof(Matrix) / sizeof(UINT32),
-            &mvp,
-            0
-        );
-
-        cmd->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
+        cmd->SetGraphicsRootDescriptorTable(1, moduleShaderDescriptors->getGPUHandle(textureTable));
 
         cmd->DrawInstanced(6, 1, 0, 0);
 

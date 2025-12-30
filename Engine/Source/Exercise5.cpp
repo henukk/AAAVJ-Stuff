@@ -32,10 +32,7 @@ bool Exercise5::init() {
         moduleResources = app->getModuleResources();
         moduleCamera = app->getModuleCamera();
         moduleSamplers = app->getModuleSamplers();
-        moduleDescriptors = app->getShaderDescriptor();
-
-        debugDrawPass = std::make_unique<DebugDrawPass>(moduleD3d12->getDevice(), moduleD3d12->getDrawCommandQueue(), false);
-        imguiPass = std::make_unique<ImGuiPass>(moduleD3d12->getDevice(), moduleD3d12->getHWnd());
+        moduleDescriptors = app->getModuleShaderDescriptors();
     }
 
     return true;
@@ -107,11 +104,11 @@ void Exercise5::imGuiCommands()
 
     if (showGuizmo)
     {
-        unsigned width = d3d12->getWindowWidth();
-        unsigned height = d3d12->getWindowHeight();
+        unsigned width = moduleD3d12->getWindowWidth();
+        unsigned height = moduleD3d12->getWindowHeight();
 
-        const Matrix& viewMatrix = camera->getView();
-        Matrix projMatrix = ModuleCamera::getPerspectiveProj(float(width) / float(height));
+        const Matrix& viewMatrix = moduleCamera->getView();
+        Matrix projMatrix = moduleCamera->getProjection();
 
         // Manipulate the object
         ImGuizmo::Manipulate((const float*)&viewMatrix, (const float*)&projMatrix, gizmoOperation, ImGuizmo::LOCAL, (float*)&objectMatrix);
@@ -119,10 +116,9 @@ void Exercise5::imGuiCommands()
 
     ImGuiIO& io = ImGui::GetIO();
 
-    camera->setEnable(!io.WantCaptureMouse && !ImGuizmo::IsUsing());
+    //camera->setEnable(!io.WantCaptureMouse && !ImGuizmo::IsUsing());
 
-    if (ImGuizmo::IsUsing())
-    {
+    if (ImGuizmo::IsUsing()) {
         model->setModelMatrix(objectMatrix);
     }
 }
@@ -160,8 +156,8 @@ void Exercise5::render() {
     scissor.bottom = height;
 
     float clearColor[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv = d3d12->getRenderTargetDescriptor();
-    D3D12_CPU_DESCRIPTOR_HANDLE dsv = d3d12->getDepthStencilDescriptor();
+    D3D12_CPU_DESCRIPTOR_HANDLE rtv = moduleD3d12->getRenderTargetDescriptor();
+    D3D12_CPU_DESCRIPTOR_HANDLE dsv = moduleD3d12->getDepthStencilDescriptor();
 
     commandList->OMSetRenderTargets(1, &rtv, false, &dsv);
 
@@ -172,24 +168,23 @@ void Exercise5::render() {
     commandList->RSSetViewports(1, &viewport);
     commandList->RSSetScissorRects(1, &scissor);
     commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // set the primitive topology
-    ID3D12DescriptorHeap* descriptorHeaps[] = { descriptors->getHeap(), samplers->getHeap() };
+    ID3D12DescriptorHeap* descriptorHeaps[] = { moduleDescriptors->getHeap(), moduleSamplers->getHeap() };
     commandList->SetDescriptorHeaps(2, descriptorHeaps);
-    commandList->SetGraphicsRootDescriptorTable(3, samplers->getGPUHandle(ModuleSamplers::LINEAR_WRAP));
+    commandList->SetGraphicsRootDescriptorTable(3, moduleSamplers->getGPUHandle(ModuleSamplers::LINEAR_WRAP));
     commandList->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
 
     BEGIN_EVENT(commandList, "Model Render Pass");
 
     for (const BasicMesh& mesh : model->getMeshes())
     {
-        if (UINT(mesh.getMaterialIndex()) < model->getNumMaterials())
-        {
+        /*if (UINT(mesh.getMaterialIndex()) < model->getNumMaterials()) {
             const BasicMaterial& material = model->getMaterials()[mesh.getMaterialIndex()];
 
             commandList->SetGraphicsRootConstantBufferView(1, materialBuffers[mesh.getMaterialIndex()]->GetGPUVirtualAddress());
             commandList->SetGraphicsRootDescriptorTable(2, material.getTexturesTableDesc().getGPUHandle());
 
-            mesh.draw(commandList);
-        }
+        }*/
+        mesh.draw(commandList);
     }
 
     END_EVENT(commandList);
@@ -200,13 +195,13 @@ void Exercise5::render() {
     debugDrawPass->record(commandList, width, height, view, proj);
     imguiPass->record(commandList);
 
-    barrier = CD3DX12_RESOURCE_BARRIER::Transition(d3d12->getBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    barrier = CD3DX12_RESOURCE_BARRIER::Transition(moduleD3d12->getBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     commandList->ResourceBarrier(1, &barrier);
 
     if (SUCCEEDED(commandList->Close()))
     {
         ID3D12CommandList* commandLists[] = { commandList };
-        d3d12->getDrawCommandQueue()->ExecuteCommandLists(UINT(std::size(commandLists)), commandLists);
+        moduleD3d12->getDrawCommandQueue()->ExecuteCommandLists(UINT(std::size(commandLists)), commandLists);
     }
 }
 
@@ -234,7 +229,7 @@ bool Exercise5::createRootSignature()
         return false;
     }
 
-    if (FAILED(app->getD3D12()->getDevice()->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
+    if (FAILED(moduleD3d12->getDevice()->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature))))
     {
         return false;
     }
@@ -247,16 +242,18 @@ bool Exercise5::loadModel()
     model = std::make_unique<BasicModel>();
     //model->load("Assets/Models/BoxInterleaved/BoxInterleaved.gltf", "Assets/Models/BoxInterleaved/");
     //model->load("Assets/Models/BoxTextured/BoxTextured.gltf", "Assets/Models/BoxTextured/");
-    model->load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/", BasicMaterial::BASIC);
+    model->load("Assets/Models/Duck/duck.gltf");//;, "Assets/Models/Duck/", BasicMaterial::BASIC);
     model->setModelMatrix(Matrix::CreateScale(0.01f, 0.01f, 0.01f));
 
 
     for (int i = 0, count = model->getNumMaterials(); i < count; ++i)
     {
+        /*
         const BasicMaterial& material = model->getMaterials()[i];
         const BasicMaterialData& data = material.getBasicMaterial();
 
         materialBuffers.push_back(resources->createDefaultBuffer(&data, alignUp(sizeof(BasicMaterialData), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT), material.getName()));
+        */
     }
 
     return true;
@@ -288,5 +285,5 @@ bool Exercise5::createPSO()
     psoDesc.NumRenderTargets = 1;                                                                   // we are only binding one render target
 
     // create the pso
-    return SUCCEEDED(app->getD3D12()->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+    return SUCCEEDED(moduleD3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 }

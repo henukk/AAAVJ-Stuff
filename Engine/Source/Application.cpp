@@ -8,6 +8,7 @@
 #include "ModuleRender.h"
 #include "ModuleResources.h"
 #include "ModuleSamplers.h"
+#include "ModuleShaderDescriptors.h"
 
 #include "ModuleUI.h"
 #include "ModuleEditor.h"
@@ -17,8 +18,8 @@
 #include "Exercise2.h"
 #include "Exercise3.h"
 #include "Exercise4.h"
-
 #include "Assigment1.h"
+#include "Exercise5.h"
 
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
@@ -26,6 +27,7 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(d3d12 = new ModuleD3D12((HWND)hWnd));
     modules.push_back(moduleResources = new ModuleResources());
 	modules.push_back(moduleSamplers = new ModuleSamplers());
+    modules.push_back(moduleShaderDescriptors = new ModuleShaderDescriptors());
 
     // Editor stuff
     modules.push_back(moduleEditor = new ModuleEditor());
@@ -44,7 +46,10 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     //modules.push_back(new Exercise4());
 
 	// Assigment 1
-	//modules.push_back(new Assigment1());
+	modules.push_back(new Assigment1());
+
+    // Ex5 - Paint duck model
+    //modules.push_back(new Exercise5());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());

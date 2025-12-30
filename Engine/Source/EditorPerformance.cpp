@@ -33,7 +33,7 @@ void EditorPerformance::draw(const char* title, bool* p_open)
 
     ImVec2 fpsGraphSize(width, 100);
 
-    ImGui::PlotHistogram("##FPS", fpsHistory.data(), maxSamples, 0, nullptr, 0.0f, 120.0f, fpsGraphSize);
+    ImGui::PlotHistogram("##FPS", fpsHistory.data(), (int) maxSamples, 0, nullptr, 0.0f, 120.0f, fpsGraphSize);
 
     {
         ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -55,7 +55,7 @@ void EditorPerformance::draw(const char* title, bool* p_open)
     ImGui::Separator();
     ImVec2 msGraphSize(width, 80);
 
-    ImGui::PlotHistogram("##MS", msHistory.data(), maxSamples, 0, nullptr, 0.0f, 40.0f, msGraphSize);
+    ImGui::PlotHistogram("##MS", msHistory.data(), (int) maxSamples, 0, nullptr, 0.0f, 40.0f, msGraphSize);
 
     {
         ImDrawList* drawList = ImGui::GetWindowDrawList();

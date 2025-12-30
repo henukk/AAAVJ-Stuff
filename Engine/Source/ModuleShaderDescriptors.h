@@ -1,0 +1,31 @@
+#pragma once
+#include "Globals.h"
+#include "Module.h"
+
+class ModuleShaderDescriptors : public Module {
+public:
+    bool init() override;
+
+    // Reserva N descriptores contiguos
+    UINT alloc(UINT count = 1);
+
+    // Crear SRV en un slot concreto
+    void createTextureSRV(
+        UINT baseIndex,
+        UINT slot,
+        ID3D12Resource* texture
+    );
+
+    D3D12_GPU_DESCRIPTOR_HANDLE getGPUHandle(UINT baseIndex, UINT slot = 0) const;
+    D3D12_CPU_DESCRIPTOR_HANDLE getCPUHandle(UINT baseIndex, UINT slot = 0) const;
+
+    ID3D12DescriptorHeap* getHeap() const { return heap.Get(); }
+
+private:
+    ComPtr<ID3D12DescriptorHeap> heap;
+    UINT descriptorSize = 0;
+    UINT nextFree = 0;
+
+    D3D12_CPU_DESCRIPTOR_HANDLE cpuStart{};
+    D3D12_GPU_DESCRIPTOR_HANDLE gpuStart{};
+};

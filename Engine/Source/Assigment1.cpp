@@ -6,6 +6,7 @@
 #include "ModuleD3D12.h"
 #include "ModuleResources.h"
 #include "ModuleSamplers.h"
+#include "ModuleShaderDescriptors.h"
 #include "ModuleRender.h"
 #include "ModuleCamera.h"
 #include "ModuleUI.h"
@@ -28,7 +29,8 @@ bool Assigment1::init() {
 
     moduleD3d12 = app->getModuleD3D12();
     moduleResources = app->getModuleResources();
-	moduleSamplers = app->getModuleSamplers();
+    moduleSamplers = app->getModuleSamplers();
+    moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
     moduleRender = app->getModuleRender();
     moduleCamera = app->getModuleCamera();
@@ -61,39 +63,12 @@ bool Assigment1::init() {
         ok = loadTextures();
     }
 
-    ID3D12Device* device = moduleD3d12->getDevice();
     if (ok) {
-        D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
-        heapDesc.NumDescriptors = Assigment1_TextureList::COUNT;
-        heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+        textureTable = moduleShaderDescriptors->alloc(Assigment1_TextureList::COUNT);
 
-        ok = SUCCEEDED(device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&srvHeap)));
-    }
-
-    if (ok) {
-        D3D12_CPU_DESCRIPTOR_HANDLE handle = srvHeap->GetCPUDescriptorHandleForHeapStart();
-        UINT descriptorSize = device->GetDescriptorHandleIncrementSize(
-            D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
-        );
-
-        for (int i = 0; i < Assigment1_TextureList::COUNT; ++i)
-        {
-            ID3D12Resource* tex = textureVector[i].Get();
-            const D3D12_RESOURCE_DESC& desc = tex->GetDesc();
-
-            D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-            srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-            srvDesc.Format = desc.Format;
-            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-            srvDesc.Texture2D.MipLevels = desc.MipLevels;
-
-            device->CreateShaderResourceView(tex, &srvDesc, handle);
-
-            handle.ptr += descriptorSize;
+        for (int i = 0; i < Assigment1_TextureList::COUNT; ++i) {
+            moduleShaderDescriptors->createTextureSRV(textureTable, i, textureVector[i].Get());
         }
-
-        srvGPUHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
     }
 
     if (ok) {
@@ -157,28 +132,11 @@ void Assigment1::render() {
         cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         cmd->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-        ID3D12DescriptorHeap* descriptorHeaps[] = { srvHeap.Get(), moduleSamplers->getHeap() };
+        ID3D12DescriptorHeap* descriptorHeaps[] = { moduleShaderDescriptors->getHeap(), moduleSamplers->getHeap()};
         cmd->SetDescriptorHeaps(2, descriptorHeaps);
-
-        cmd->SetGraphicsRoot32BitConstants(
-            0,
-            sizeof(Matrix) / sizeof(UINT32),
-            &mvp,
-            0
-        );
-
-        //cmd->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
-
         cmd->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
-
-        UINT descriptorSize = moduleD3d12->getDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-        D3D12_GPU_DESCRIPTOR_HANDLE textureHandle = srvHeap->GetGPUDescriptorHandleForHeapStart();
-        textureHandle.ptr += selectedTexture * descriptorSize;
-
-        cmd->SetGraphicsRootDescriptorTable(1, textureHandle);
+        cmd->SetGraphicsRootDescriptorTable(1, moduleShaderDescriptors->getGPUHandle(textureTable, selectedTexture));
         cmd->SetGraphicsRootDescriptorTable(2, moduleSamplers->getGPUHandle(ModuleSamplers::Type(sampler)));
-
-
         cmd->DrawInstanced(6, 1, 0, 0);
 
         // ---- DebugDraw ----
@@ -191,6 +149,7 @@ void Assigment1::render() {
         debugDrawPass->record(cmd, width, height, view, proj);
         });
 }
+
 
 
 bool Assigment1::createVertexBuffer(void* bufferData, unsigned bufferSize, unsigned stride) {

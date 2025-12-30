@@ -10,6 +10,7 @@ class Settings;
 class ModuleD3D12;
 class ModuleResources;
 class ModuleSamplers;
+class ModuleShaderDescriptors;
 class ModuleRender;
 class ModuleCamera;
 
@@ -39,6 +40,7 @@ private:
     ModuleD3D12* moduleD3d12;
     ModuleResources* moduleResources;
 	ModuleSamplers* moduleSamplers;
+    ModuleShaderDescriptors* moduleShaderDescriptors;
     ModuleRender* moduleRender;
     ModuleCamera* moduleCamera;
 
@@ -62,6 +64,7 @@ private:
     ComPtr<ID3D12DescriptorHeap> srvHeap;
     D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle{};
 
+    UINT textureTable = UINT(-1);
 
 public:
     Assigment1();
