@@ -1,30 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="DebugDrawPass.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
-    <ClCompile Include="GamePad.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
-    <ClCompile Include="Globals.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
-    <ClCompile Include="3rdParty\imgui-docking\imgui.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
-    <ClCompile Include="ModuleInput.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
-    <ClCompile Include="Mouse.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
-    <ClCompile Include="SimpleMath.cpp">
-      <Filter>TeacherStuff</Filter>
-    </ClCompile>
     <ClCompile Include="3rdParty\imgui-docking\imgui_demo.cpp">
       <Filter>External\ImGui</Filter>
     </ClCompile>
@@ -102,43 +78,49 @@
     <ClCompile Include="Assigment1.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleSamplers.cpp" />
+    <ClCompile Include="Exercise5.cpp">
+      <Filter>Exercises</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleSamplers.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugDrawPass.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleInput.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePad.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="3rdParty\imgui-docking\imgui.cpp">
+      <Filter>External\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleMath.cpp">
+      <Filter>External\SimpleMath</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicModel.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicMesh.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicMaterial.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="debug_draw.hpp">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugDrawPass.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
     <ClInclude Include="framework.h">
       <Filter>TeacherStuff</Filter>
     </ClInclude>
-    <ClInclude Include="GamePad.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="Globals.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="ModuleInput.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="Mouse.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
     <ClInclude Include="PlatformHelpers.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="ReadData.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>TeacherStuff</Filter>
-    </ClInclude>
-    <ClInclude Include="SimpleMath.h">
       <Filter>TeacherStuff</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
@@ -230,7 +212,52 @@
     <ClInclude Include="Assigment1.h">
       <Filter>Exercises</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleSamplers.h" />
+    <ClInclude Include="Exercise5.h">
+      <Filter>Exercises</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleSamplers.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugDrawPass.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleInput.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePad.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Globals.h" />
+    <ClInclude Include="Resource.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleMath.h">
+      <Filter>External\SimpleMath</Filter>
+    </ClInclude>
+    <ClInclude Include="ReadData.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="debug_draw.hpp">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicModel.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicMesh.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="gltf_utils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicMaterial.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -246,12 +273,6 @@
     </Filter>
     <Filter Include="Engine_UI">
       <UniqueIdentifier>{522d4bde-c44c-4447-ac67-1e8827c08620}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="External">
-      <UniqueIdentifier>{33a66c4b-258e-4166-bb52-43a31601f2c8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="External\ImGui">
-      <UniqueIdentifier>{16a66a20-a85f-4f52-9a86-037c9b102e14}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine_UI\BarMenu">
       <UniqueIdentifier>{e0a1ec63-8aef-432f-9832-e312e46207ae}</UniqueIdentifier>
@@ -274,16 +295,20 @@
     <Filter Include="Engine_UI\Editor">
       <UniqueIdentifier>{7f21b140-45a6-46e0-8cbf-17b02e6a26b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="External">
+      <UniqueIdentifier>{33a66c4b-258e-4166-bb52-43a31601f2c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\ImGui">
+      <UniqueIdentifier>{16a66a20-a85f-4f52-9a86-037c9b102e14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External\SimpleMath">
+      <UniqueIdentifier>{0418e202-909b-4703-adb1-c351cd7d689a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Engine.rc">
       <Filter>TeacherStuff</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="SimpleMath.inl">
-      <Filter>TeacherStuff</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Exercise2VS.hlsl">
@@ -310,5 +335,10 @@
     <FxCompile Include="Shaders\Assigment1VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="SimpleMath.inl">
+      <Filter>External\SimpleMath</Filter>
+    </None>
   </ItemGroup>
 </Project>

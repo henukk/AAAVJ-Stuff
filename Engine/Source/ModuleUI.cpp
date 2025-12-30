@@ -28,8 +28,7 @@ void ModuleUI::preRender()
     );
 }
 
-bool ModuleUI::cleanUp()
-{
+bool ModuleUI::cleanUp() {
     delete imguiPass;
     return true;
 }
