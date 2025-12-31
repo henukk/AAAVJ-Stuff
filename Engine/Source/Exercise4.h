@@ -10,8 +10,6 @@ class ModuleShaderDescriptors;
 class ModuleRender;
 class ModuleCamera;
 
-class ModuleUI;
-
 class Exercise4 : public Module {
 private:
     Settings* settings;
@@ -20,8 +18,6 @@ private:
     ModuleShaderDescriptors* moduleShaderDescriptors;
     ModuleRender* moduleRender;
     ModuleCamera* moduleCamera;
-
-    ModuleUI* moduleUI;
 
     ComPtr<ID3D12Resource>          textureDog;
     ComPtr<ID3D12Resource>          vertexBuffer;

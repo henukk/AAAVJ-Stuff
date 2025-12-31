@@ -1,13 +1,12 @@
 #pragma once
 
-#include "DebugDrawPass.h"
-#include "ImGuiPass.h"
 #include "Module.h"
-#include <imgui.h>
+#include "DebugDrawPass.h"
 #include "ImGuizmo.h"
 
 class ModuleD3D12;
 class ModuleResources;
+class ModuleRender;
 class ModuleCamera;
 class ModuleSamplers;
 class ModuleShaderDescriptors;
@@ -20,11 +19,11 @@ class Exercise5 : public Module {
     ModuleCamera* moduleCamera;
     ModuleSamplers* moduleSamplers;
     ModuleShaderDescriptors* moduleDescriptors;
+    ModuleRender* moduleRender;
 
     ComPtr<ID3D12RootSignature>         rootSignature;
     ComPtr<ID3D12PipelineState>         pso;
     std::unique_ptr<DebugDrawPass>      debugDrawPass;
-    std::unique_ptr<ImGuiPass>          imguiPass;
     std::vector<ComPtr<ID3D12Resource>> materialBuffers;
     bool                                showAxis = false;
     bool                                showGrid = true;
@@ -33,16 +32,13 @@ class Exercise5 : public Module {
     std::unique_ptr<BasicModel>         model;
 
 public:
-    Exercise5();
-    ~Exercise5();
-
     virtual bool init() override;
     virtual bool cleanUp() override;
     virtual void preRender() override;
     virtual void render() override;
 
 private:
-    void imGuiCommands();
+    void drawGUI();
     bool createRootSignature();
     bool createPSO();
     bool loadModel();

@@ -26,7 +26,7 @@ bool Exercise4::init() {
     moduleCamera = app->getModuleCamera();
     moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
-    moduleUI = app->getModuleUI();
+    ModuleUI* moduleUI = app->getModuleUI();
 
     // Register UI window
     moduleUI->registerWindow([this]() { drawGUI(); });

@@ -5,204 +5,167 @@
 #include "ModuleD3D12.h"
 #include "ModuleCamera.h"
 #include "ModuleResources.h"
+#include "ModuleRender.h"
 #include "ModuleSamplers.h"
 #include "ModuleShaderDescriptors.h"
+#include "ModuleUI.h"
+
 #include "BasicModel.h"
 #include "BasicMesh.h"
-
 #include "ReadData.h"
 
 #include "DirectXTex.h"
 #include <d3d12.h>
 #include "d3dx12.h"
 
-
-Exercise5::Exercise5() { }
-
-Exercise5::~Exercise5() { }
-
 bool Exercise5::init() {
+    moduleD3d12 = app->getModuleD3D12();
+    moduleResources = app->getModuleResources();
+    moduleRender = app->getModuleRender();
+    moduleCamera = app->getModuleCamera();
+    moduleSamplers = app->getModuleSamplers();
+    moduleDescriptors = app->getModuleShaderDescriptors();
+
+    ModuleUI* moduleUI = app->getModuleUI();
+
+    // Register UI window
+    moduleUI->registerWindow([this]() { drawGUI(); });
+
     bool ok = createRootSignature();
     ok = ok && createPSO();
     ok = ok && loadModel();
 
-    if (ok)
-    {
-        moduleD3d12 = app->getModuleD3D12();
-        moduleResources = app->getModuleResources();
-        moduleCamera = app->getModuleCamera();
-        moduleSamplers = app->getModuleSamplers();
-        moduleDescriptors = app->getModuleShaderDescriptors();
+    return true;
+}
+
+bool Exercise5::cleanUp() {
+    return true;
+}
+
+bool Exercise5::loadModel()
+{
+    model = std::make_unique<BasicModel>();
+    //model->load("Assets/Models/BoxInterleaved/BoxInterleaved.gltf", "Assets/Models/BoxInterleaved/");
+    //model->load("Assets/Models/BoxTextured/BoxTextured.gltf", "Assets/Models/BoxTextured/");
+    model->load("Assets/Models/Duck/duck.gltf");//;, "Assets/Models/Duck/", BasicMaterial::BASIC);
+    model->setModelMatrix(Matrix::CreateScale(0.01f, 0.01f, 0.01f));
+
+
+    for (int i = 0, count = model->getNumMaterials(); i < count; ++i) {
+        /*
+        const BasicMaterial& material = model->getMaterials()[i];
+        const BasicMaterialData& data = material.getBasicMaterial();
+
+        materialBuffers.push_back(resources->createDefaultBuffer(&data, alignUp(sizeof(BasicMaterialData), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT), material.getName()));
+        */
     }
 
     return true;
 }
 
-bool Exercise5::cleanUp()
-{
-    imguiPass.reset();
+bool Exercise5::createPSO() {
+    D3D12_INPUT_ELEMENT_DESC inputLayout[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+                                              {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0} };
 
-    return true;
+    auto dataVS = DX::ReadData(L"Exercise5VS.cso");
+    auto dataPS = DX::ReadData(L"Exercise5PS.cso");
+
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+    psoDesc.InputLayout = { inputLayout, sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC) };  // the structure describing our input layout
+    psoDesc.pRootSignature = rootSignature.Get();                                                   // the root signature that describes the input data this pso needs
+    psoDesc.VS = { dataVS.data(), dataVS.size() };                                                  // structure describing where to find the vertex shader bytecode and how large it is
+    psoDesc.PS = { dataPS.data(), dataPS.size() };                                                  // same as VS but for pixel shader
+    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;                         // type of topology we are drawing
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;                                             // format of the render target
+    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+    psoDesc.SampleDesc = { 1, 0 };                                                                    // must be the same sample description as the swapchain and depth/stencil buffer
+    psoDesc.SampleMask = 0xffffffff;                                                                // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
+    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);                               // a default rasterizer state.
+    psoDesc.RasterizerState.FrontCounterClockwise = TRUE;                                           // our models are counter clock wise
+    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);                                         // a default blend state.
+    psoDesc.NumRenderTargets = 1;                                                                   // we are only binding one render target
+
+    // create the pso
+    return SUCCEEDED(moduleD3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 }
 
 void Exercise5::preRender()
 {
-    imguiPass->startFrame();
-    ImGuizmo::BeginFrame();
+    //imguiPass->startFrame();
+    //ImGuizmo::BeginFrame();
 
-    unsigned width = moduleD3d12->getWindowWidth();
-    unsigned height = moduleD3d12->getWindowHeight();
+    //unsigned width = moduleD3d12->getWindowWidth();
+    //unsigned height = moduleD3d12->getWindowHeight();
 
     // Set the viewport size (adjust based on your application)
-    ImGuizmo::SetRect(0, 0, float(width), float(height));
+    //ImGuizmo::SetRect(0, 0, float(width), float(height));
 
-}
-
-void Exercise5::imGuiCommands()
-{
-    ImGui::Begin("Geometry Viewer Options");
-    ImGui::Checkbox("Show grid", &showGrid);
-    ImGui::Checkbox("Show axis", &showAxis);
-    ImGui::Checkbox("Show guizmo", &showGuizmo);
-    ImGui::Text("Model loaded %s with %d meshes and %d materials", model->getSrcFile().c_str(), model->getNumMeshes(), model->getNumMaterials());
-
-    for (const BasicMesh& mesh : model->getMeshes())
-    {
-        ImGui::Text("Mesh %s with %d vertices and %d triangles", mesh.getName().c_str(), mesh.getNumVertices(), mesh.getNumIndices() / 3);
-    }
-
-    Matrix objectMatrix = model->getModelMatrix();
-
-    ImGui::Separator();
-    // Set ImGuizmo operation mode (TRANSLATE, ROTATE, SCALE)
-    static ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::IsKeyPressed(ImGuiKey_T)) gizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::IsKeyPressed(ImGuiKey_R)) gizmoOperation = ImGuizmo::ROTATE;
-    if (ImGui::IsKeyPressed(ImGuiKey_S)) gizmoOperation = ImGuizmo::SCALE;
-
-    ImGui::RadioButton("Translate", (int*)&gizmoOperation, (int)ImGuizmo::TRANSLATE);
-    ImGui::SameLine();
-    ImGui::RadioButton("Rotate", (int*)&gizmoOperation, ImGuizmo::ROTATE);
-    ImGui::SameLine();
-    ImGui::RadioButton("Scale", (int*)&gizmoOperation, ImGuizmo::SCALE);
-
-    float translation[3], rotation[3], scale[3];
-    ImGuizmo::DecomposeMatrixToComponents((float*)&objectMatrix, translation, rotation, scale);
-    bool transform_changed = ImGui::DragFloat3("Tr", translation, 0.1f);
-    transform_changed = transform_changed || ImGui::DragFloat3("Rt", rotation, 0.1f);
-    transform_changed = transform_changed || ImGui::DragFloat3("Sc", scale, 0.1f);
-
-    if (transform_changed)
-    {
-        ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, (float*)&objectMatrix);
-
-        model->setModelMatrix(objectMatrix);
-    }
-
-    ImGui::End();
-
-
-    if (showGuizmo)
-    {
-        unsigned width = moduleD3d12->getWindowWidth();
-        unsigned height = moduleD3d12->getWindowHeight();
-
-        const Matrix& viewMatrix = moduleCamera->getView();
-        Matrix projMatrix = moduleCamera->getProjection();
-
-        // Manipulate the object
-        ImGuizmo::Manipulate((const float*)&viewMatrix, (const float*)&projMatrix, gizmoOperation, ImGuizmo::LOCAL, (float*)&objectMatrix);
-    }
-
-    ImGuiIO& io = ImGui::GetIO();
-
-    //camera->setEnable(!io.WantCaptureMouse && !ImGuizmo::IsUsing());
-
-    if (ImGuizmo::IsUsing()) {
-        model->setModelMatrix(objectMatrix);
-    }
 }
 
 void Exercise5::render() {
-    imGuiCommands();
+    moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* commandList) {
+        unsigned width = moduleD3d12->getWindowWidth();
+        unsigned height = moduleD3d12->getWindowHeight();
 
-    ID3D12GraphicsCommandList* commandList = moduleD3d12->getCommandList();
+        Matrix view = moduleCamera->getView();
+        Matrix proj = moduleCamera->getProjection();
 
-    commandList->Reset(moduleD3d12->getCommandAllocator(), pso.Get());
+        Matrix mvp = model->getModelMatrix() * view * proj;
+        mvp = mvp.Transpose();
 
-    CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(moduleD3d12->getBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-    commandList->ResourceBarrier(1, &barrier);
+        D3D12_VIEWPORT viewport;
+        viewport.TopLeftX = viewport.TopLeftY = 0;
+        viewport.MinDepth = 0.0f;
+        viewport.MaxDepth = 1.0f;
+        viewport.Width = float(width);
+        viewport.Height = float(height);
 
-    unsigned width = moduleD3d12->getWindowWidth();
-    unsigned height = moduleD3d12->getWindowHeight();
+        D3D12_RECT scissor;
+        scissor.left = 0;
+        scissor.top = 0;
+        scissor.right = width;
+        scissor.bottom = height;
 
-    Matrix view = moduleCamera->getView();
-    Matrix proj = moduleCamera->getProjection();
+        float clearColor[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+        D3D12_CPU_DESCRIPTOR_HANDLE rtv = moduleD3d12->getRenderTargetDescriptor();
+        D3D12_CPU_DESCRIPTOR_HANDLE dsv = moduleD3d12->getDepthStencilDescriptor();
 
-    Matrix mvp = model->getModelMatrix() * view * proj;
-    mvp = mvp.Transpose();
+        commandList->OMSetRenderTargets(1, &rtv, false, &dsv);
 
-    D3D12_VIEWPORT viewport;
-    viewport.TopLeftX = viewport.TopLeftY = 0;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    viewport.Width = float(width);
-    viewport.Height = float(height);
+        commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+        commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
-    D3D12_RECT scissor;
-    scissor.left = 0;
-    scissor.top = 0;
-    scissor.right = width;
-    scissor.bottom = height;
+        commandList->SetGraphicsRootSignature(rootSignature.Get());
+        commandList->RSSetViewports(1, &viewport);
+        commandList->RSSetScissorRects(1, &scissor);
+        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // set the primitive topology
+        ID3D12DescriptorHeap* descriptorHeaps[] = { moduleDescriptors->getHeap(), moduleSamplers->getHeap() };
+        commandList->SetDescriptorHeaps(2, descriptorHeaps);
+        commandList->SetGraphicsRootDescriptorTable(3, moduleSamplers->getGPUHandle(ModuleSamplers::LINEAR_WRAP));
+        commandList->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
 
-    float clearColor[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    D3D12_CPU_DESCRIPTOR_HANDLE rtv = moduleD3d12->getRenderTargetDescriptor();
-    D3D12_CPU_DESCRIPTOR_HANDLE dsv = moduleD3d12->getDepthStencilDescriptor();
+        BEGIN_EVENT(commandList, "Model Render Pass");
 
-    commandList->OMSetRenderTargets(1, &rtv, false, &dsv);
+        for (const BasicMesh& mesh : model->getMeshes())
+        {
+            /*if (UINT(mesh.getMaterialIndex()) < model->getNumMaterials()) {
+                const BasicMaterial& material = model->getMaterials()[mesh.getMaterialIndex()];
 
-    commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-    commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+                commandList->SetGraphicsRootConstantBufferView(1, materialBuffers[mesh.getMaterialIndex()]->GetGPUVirtualAddress());
+                commandList->SetGraphicsRootDescriptorTable(2, material.getTexturesTableDesc().getGPUHandle());
 
-    commandList->SetGraphicsRootSignature(rootSignature.Get());
-    commandList->RSSetViewports(1, &viewport);
-    commandList->RSSetScissorRects(1, &scissor);
-    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // set the primitive topology
-    ID3D12DescriptorHeap* descriptorHeaps[] = { moduleDescriptors->getHeap(), moduleSamplers->getHeap() };
-    commandList->SetDescriptorHeaps(2, descriptorHeaps);
-    commandList->SetGraphicsRootDescriptorTable(3, moduleSamplers->getGPUHandle(ModuleSamplers::LINEAR_WRAP));
-    commandList->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
+            }*/
+            mesh.draw(commandList);
+        }
 
-    BEGIN_EVENT(commandList, "Model Render Pass");
+        END_EVENT(commandList);
 
-    for (const BasicMesh& mesh : model->getMeshes())
-    {
-        /*if (UINT(mesh.getMaterialIndex()) < model->getNumMaterials()) {
-            const BasicMaterial& material = model->getMaterials()[mesh.getMaterialIndex()];
+        if (showGrid) dd::xzSquareGrid(-10.0f, 10.0f, 0.0f, 1.0f, dd::colors::LightGray);
+        if (showAxis) dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
 
-            commandList->SetGraphicsRootConstantBufferView(1, materialBuffers[mesh.getMaterialIndex()]->GetGPUVirtualAddress());
-            commandList->SetGraphicsRootDescriptorTable(2, material.getTexturesTableDesc().getGPUHandle());
-
-        }*/
-        mesh.draw(commandList);
-    }
-
-    END_EVENT(commandList);
-
-    if (showGrid) dd::xzSquareGrid(-10.0f, 10.0f, 0.0f, 1.0f, dd::colors::LightGray);
-    if (showAxis) dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
-
-    debugDrawPass->record(commandList, width, height, view, proj);
-    imguiPass->record(commandList);
-
-    barrier = CD3DX12_RESOURCE_BARRIER::Transition(moduleD3d12->getBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-    commandList->ResourceBarrier(1, &barrier);
-
-    if (SUCCEEDED(commandList->Close()))
-    {
-        ID3D12CommandList* commandLists[] = { commandList };
-        moduleD3d12->getDrawCommandQueue()->ExecuteCommandLists(UINT(std::size(commandLists)), commandLists);
-    }
+        debugDrawPass->record(commandList, width, height, view, proj);
+    });
 }
 
 bool Exercise5::createRootSignature()
@@ -237,53 +200,66 @@ bool Exercise5::createRootSignature()
     return true;
 }
 
-bool Exercise5::loadModel()
-{
-    model = std::make_unique<BasicModel>();
-    //model->load("Assets/Models/BoxInterleaved/BoxInterleaved.gltf", "Assets/Models/BoxInterleaved/");
-    //model->load("Assets/Models/BoxTextured/BoxTextured.gltf", "Assets/Models/BoxTextured/");
-    model->load("Assets/Models/Duck/duck.gltf");//;, "Assets/Models/Duck/", BasicMaterial::BASIC);
-    model->setModelMatrix(Matrix::CreateScale(0.01f, 0.01f, 0.01f));
 
+void Exercise5::drawGUI() {
+    ImGui::Begin("Geometry Viewer Options");
+    ImGui::Checkbox("Show grid", &showGrid);
+    ImGui::Checkbox("Show axis", &showAxis);
+    ImGui::Checkbox("Show guizmo", &showGuizmo);
+    ImGui::Text("Model loaded %s with %d meshes and %d materials", model->getSrcFile().c_str(), model->getNumMeshes(), model->getNumMaterials());
 
-    for (int i = 0, count = model->getNumMaterials(); i < count; ++i)
+    for (const BasicMesh& mesh : model->getMeshes())
     {
-        /*
-        const BasicMaterial& material = model->getMaterials()[i];
-        const BasicMaterialData& data = material.getBasicMaterial();
-
-        materialBuffers.push_back(resources->createDefaultBuffer(&data, alignUp(sizeof(BasicMaterialData), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT), material.getName()));
-        */
+        ImGui::Text("Mesh %s with %d vertices and %d triangles", mesh.getName().c_str(), mesh.getNumVertices(), mesh.getNumIndices() / 3);
     }
 
-    return true;
-}
+    Matrix objectMatrix = model->getModelMatrix();
+
+    ImGui::Separator();
+    // Set ImGuizmo operation mode (TRANSLATE, ROTATE, SCALE)
+    static ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
+    if (ImGui::IsKeyPressed(ImGuiKey_T)) gizmoOperation = ImGuizmo::TRANSLATE;
+    if (ImGui::IsKeyPressed(ImGuiKey_R)) gizmoOperation = ImGuizmo::ROTATE;
+    if (ImGui::IsKeyPressed(ImGuiKey_S)) gizmoOperation = ImGuizmo::SCALE;
+
+    ImGui::RadioButton("Translate", (int*)&gizmoOperation, (int)ImGuizmo::TRANSLATE);
+    ImGui::SameLine();
+    ImGui::RadioButton("Rotate", (int*)&gizmoOperation, ImGuizmo::ROTATE);
+    ImGui::SameLine();
+    ImGui::RadioButton("Scale", (int*)&gizmoOperation, ImGuizmo::SCALE);
+
+    float translation[3], rotation[3], scale[3];
+    ImGuizmo::DecomposeMatrixToComponents((float*)&objectMatrix, translation, rotation, scale);
+    bool transform_changed = ImGui::DragFloat3("Tr", translation, 0.1f);
+    transform_changed = transform_changed || ImGui::DragFloat3("Rt", rotation, 0.1f);
+    transform_changed = transform_changed || ImGui::DragFloat3("Sc", scale, 0.1f);
+
+    if (transform_changed) {
+        ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, (float*)&objectMatrix);
+
+        model->setModelMatrix(objectMatrix);
+    }
+
+    ImGui::End();
 
 
-bool Exercise5::createPSO()
-{
-    D3D12_INPUT_ELEMENT_DESC inputLayout[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-                                              {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0} };
+    if (showGuizmo)
+    {
+        unsigned width = moduleD3d12->getWindowWidth();
+        unsigned height = moduleD3d12->getWindowHeight();
 
-    auto dataVS = DX::ReadData(L"Exercise5VS.cso");
-    auto dataPS = DX::ReadData(L"Exercise5PS.cso");
+        const Matrix& viewMatrix = moduleCamera->getView();
+        Matrix projMatrix = moduleCamera->getProjection();
 
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-    psoDesc.InputLayout = { inputLayout, sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC) };  // the structure describing our input layout
-    psoDesc.pRootSignature = rootSignature.Get();                                                   // the root signature that describes the input data this pso needs
-    psoDesc.VS = { dataVS.data(), dataVS.size() };                                                  // structure describing where to find the vertex shader bytecode and how large it is
-    psoDesc.PS = { dataPS.data(), dataPS.size() };                                                  // same as VS but for pixel shader
-    psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;                         // type of topology we are drawing
-    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;                                             // format of the render target
-    psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
-    psoDesc.SampleDesc = { 1, 0 };                                                                    // must be the same sample description as the swapchain and depth/stencil buffer
-    psoDesc.SampleMask = 0xffffffff;                                                                // sample mask has to do with multi-sampling. 0xffffffff means point sampling is done
-    psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);                               // a default rasterizer state.
-    psoDesc.RasterizerState.FrontCounterClockwise = TRUE;                                           // our models are counter clock wise
-    psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);                                         // a default blend state.
-    psoDesc.NumRenderTargets = 1;                                                                   // we are only binding one render target
+        // Manipulate the object
+        ImGuizmo::Manipulate((const float*)&viewMatrix, (const float*)&projMatrix, gizmoOperation, ImGuizmo::LOCAL, (float*)&objectMatrix);
+    }
 
-    // create the pso
-    return SUCCEEDED(moduleD3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
+    ImGuiIO& io = ImGui::GetIO();
+
+    //camera->setEnable(!io.WantCaptureMouse && !ImGuizmo::IsUsing());
+
+    if (ImGuizmo::IsUsing()) {
+        model->setModelMatrix(objectMatrix);
+    }
 }

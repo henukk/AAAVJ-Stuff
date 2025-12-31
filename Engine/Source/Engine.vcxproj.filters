@@ -112,7 +112,9 @@
     <ClCompile Include="BasicMesh.cpp">
       <Filter>Entities</Filter>
     </ClCompile>
-    <ClCompile Include="ModuleShaderDescriptors.cpp" />
+    <ClCompile Include="ModuleShaderDescriptors.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -253,7 +255,9 @@
     <ClInclude Include="gltf_utils.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="ModuleShaderDescriptors.h" />
+    <ClInclude Include="ModuleShaderDescriptors.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -329,6 +333,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Assigment1VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Exercise5PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Exercise5VS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

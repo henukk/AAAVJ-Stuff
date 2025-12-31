@@ -46,10 +46,10 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     //modules.push_back(new Exercise4());
 
 	// Assigment 1
-	modules.push_back(new Assigment1());
+	//modules.push_back(new Assigment1());
 
     // Ex5 - Paint duck model
-    //modules.push_back(new Exercise5());
+    modules.push_back(new Exercise5());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());
