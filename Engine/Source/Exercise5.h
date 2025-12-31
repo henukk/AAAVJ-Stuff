@@ -40,7 +40,6 @@ public:
 
     virtual bool init() override;
     virtual bool cleanUp() override;
-    virtual void preRender() override;
     virtual void render() override;
 
 private:

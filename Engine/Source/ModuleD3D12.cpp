@@ -5,13 +5,11 @@
 
 #include "d3dx12.h"
 
-ModuleD3D12::ModuleD3D12(HWND wnd) : hWnd(wnd)
-{
+ModuleD3D12::ModuleD3D12(HWND wnd) : hWnd(wnd) {
 
 }
 
-ModuleD3D12::~ModuleD3D12()
-{
+ModuleD3D12::~ModuleD3D12() {
     flush();
 }
 
@@ -41,36 +39,29 @@ bool ModuleD3D12::init() {
         currentBackBufferIdx = swapChain->GetCurrentBackBufferIndex();
     }
 
-    drawFenceCounter = 1;
     return ok;
 
 }
 
-bool ModuleD3D12::cleanUp()
-{
+bool ModuleD3D12::cleanUp() {
     if (drawEvent) CloseHandle(drawEvent);
     drawEvent = NULL;
 
     return true;
 }
 
-void ModuleD3D12::preRender()
-{
+void ModuleD3D12::preRender() {
     // 1) Sincronización con GPU
-    uint64_t fenceValue = drawFenceValues[currentBackBufferIdx];
+    currentBackBufferIdx = swapChain->GetCurrentBackBufferIndex();
 
-    if (fenceValue != 0)
+    if (drawFenceValues[currentBackBufferIdx] != 0)
     {
-        if (drawFence->GetCompletedValue() < fenceValue)
-        {
-            drawFence->SetEventOnCompletion(fenceValue, drawEvent);
-            WaitForSingleObject(drawEvent, INFINITE);
-        }
+        drawFence->SetEventOnCompletion(drawFenceValues[currentBackBufferIdx], drawEvent);
+        WaitForSingleObject(drawEvent, INFINITE);
 
         lastCompletedFrame = std::max(frameValues[currentBackBufferIdx], lastCompletedFrame);
         drawFenceValues[currentBackBufferIdx] = 0;
     }
-    
 
     // 2) Avanzar el contador de frame
     frameIndex++;
@@ -88,8 +79,7 @@ void ModuleD3D12::postRender() {
     signalDrawQueue();
 }
 
-UINT ModuleD3D12::signalDrawQueue()
-{
+UINT ModuleD3D12::signalDrawQueue() {
     drawFenceValues[currentBackBufferIdx] = ++drawFenceCounter;
     drawCommandQueue->Signal(drawFence.Get(), drawFenceValues[currentBackBufferIdx]);
 
@@ -105,7 +95,7 @@ void ModuleD3D12::resize() {
         windowWidth = width;
         windowHeight = height;
 
-        waitForGPU();
+        flush();
 
         for (unsigned i = 0; i < FRAMES_IN_FLIGHT; ++i)
         {
@@ -117,7 +107,6 @@ void ModuleD3D12::resize() {
 
         bool ok = SUCCEEDED(swapChain->GetDesc(&swapChainDesc));
         ok = ok && SUCCEEDED(swapChain->ResizeBuffers(FRAMES_IN_FLIGHT, windowWidth, windowHeight, swapChainDesc.BufferDesc.Format, swapChainDesc.Flags));
-        currentBackBufferIdx = swapChain->GetCurrentBackBufferIndex();
 
         if (windowWidth > 0 && windowHeight > 0)
         {
@@ -168,31 +157,14 @@ void ModuleD3D12::toogleFullscreen() {
     }
 }
 
-void ModuleD3D12::waitForGPU() {
-    if (drawFenceCounter == 0)
-        return;
-
-    if (drawFence->GetCompletedValue() < drawFenceCounter)
-    {
-        drawFence->SetEventOnCompletion(drawFenceCounter, drawEvent);
-        WaitForSingleObject(drawEvent, INFINITE);
-    }
-}
-
 void ModuleD3D12::flush() {
-    const uint64_t fenceToWait = ++drawFenceCounter;
+    drawCommandQueue->Signal(drawFence.Get(), ++drawFenceCounter);
 
-    drawCommandQueue->Signal(drawFence.Get(), fenceToWait);
-
-    if (drawFence->GetCompletedValue() < fenceToWait)
-    {
-        drawFence->SetEventOnCompletion(fenceToWait, drawEvent);
-        WaitForSingleObject(drawEvent, INFINITE);
-    }
+    drawFence->SetEventOnCompletion(drawFenceCounter, drawEvent);
+    WaitForSingleObject(drawEvent, INFINITE);
 }
 
-void ModuleD3D12::enableDebugLayer()
-{
+void ModuleD3D12::enableDebugLayer() {
     ComPtr<ID3D12Debug> debugInterface;
 
     D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface));
@@ -200,8 +172,7 @@ void ModuleD3D12::enableDebugLayer()
     debugInterface->EnableDebugLayer();
 }
 
-bool ModuleD3D12::createFactory()
-{
+bool ModuleD3D12::createFactory() {
     UINT createFactoryFlags = 0;
 #if defined(_DEBUG)
     createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
@@ -246,8 +217,7 @@ bool ModuleD3D12::createDevice(bool useWarp) {
     return ok;
 }
 
-bool ModuleD3D12::setupInfoQueue()
-{
+bool ModuleD3D12::setupInfoQueue() {
     ComPtr<ID3D12InfoQueue> pInfoQueue;
 
     bool ok = SUCCEEDED(device.As(&pInfoQueue));
@@ -401,10 +371,11 @@ bool ModuleD3D12::createCommandList() {
     return ok;
 }
 
-bool ModuleD3D12::createDrawFence()
-{
+bool ModuleD3D12::createDrawFence() {
     bool ok = SUCCEEDED(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&drawFence)));
-    if (ok) {
+
+    if (ok)
+    {
         drawEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
         ok = drawEvent != NULL;
     }
@@ -412,8 +383,7 @@ bool ModuleD3D12::createDrawFence()
     return ok;
 }
 
-void ModuleD3D12::getWindowSize(unsigned& width, unsigned& height)
-{
+void ModuleD3D12::getWindowSize(unsigned& width, unsigned& height) {
     RECT clientRect = {};
     GetClientRect(hWnd, &clientRect);
 
@@ -421,18 +391,15 @@ void ModuleD3D12::getWindowSize(unsigned& width, unsigned& height)
     height = unsigned(clientRect.bottom - clientRect.top);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE ModuleD3D12::getRenderTargetDescriptor()
-{
+D3D12_CPU_DESCRIPTOR_HANDLE ModuleD3D12::getRenderTargetDescriptor() {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(rtDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), currentBackBufferIdx, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV));
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE ModuleD3D12::getDepthStencilDescriptor()
-{
+D3D12_CPU_DESCRIPTOR_HANDLE ModuleD3D12::getDepthStencilDescriptor() {
     return dsDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-ID3D12GraphicsCommandList* ModuleD3D12::beginFrameRender()
-{
+ID3D12GraphicsCommandList* ModuleD3D12::beginFrameRender() {
     commandList->Reset(getCommandAllocator(), nullptr);
 
     //ID3D12DescriptorHeap* descriptorHeaps[] = { app->getShaderDescriptors()->getHeap(), app->getSamplers()->getHeap() };
@@ -441,8 +408,7 @@ ID3D12GraphicsCommandList* ModuleD3D12::beginFrameRender()
     return commandList.Get();
 }
 
-void ModuleD3D12::setBackBufferRenderTarget(const Vector4& clearColor /*= Vector4(0.0f, 0.0f, 0.0f, 1.0f)*/)
-{
+void ModuleD3D12::setBackBufferRenderTarget(const Vector4& clearColor /*= Vector4(0.0f, 0.0f, 0.0f, 1.0f)*/) {
     // Transition Back Buffer to Render Target
     CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(getBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     commandList->ResourceBarrier(1, &barrier);
@@ -460,8 +426,7 @@ void ModuleD3D12::setBackBufferRenderTarget(const Vector4& clearColor /*= Vector
     commandList->RSSetScissorRects(1, &scissor);
 }
 
-void ModuleD3D12::endFrameRender()
-{
+void ModuleD3D12::endFrameRender() {
     CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(getBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     commandList->ResourceBarrier(1, &barrier);
 

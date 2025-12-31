@@ -13,7 +13,7 @@ public:
     using WindowCallback = std::function<void()>;
 
 private:
-    ModuleD3D12* d3d12 = nullptr;
+    ModuleD3D12* moduleD3d12 = nullptr;
     ImGuiPass* imguiPass = nullptr;
 
     std::vector<WindowCallback> windows;

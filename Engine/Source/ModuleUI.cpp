@@ -5,17 +5,19 @@
 #include "ModuleRender.h"
 #include "ImGuiPass.h"
 #include "imgui.h"
+#include "ImGuizmo.h"
 
-bool ModuleUI::init()
-{
-    d3d12 = app->getModuleD3D12();
-    imguiPass = new ImGuiPass(d3d12->getDevice(), d3d12->getHWnd());
+bool ModuleUI::init() {
+    moduleD3d12 = app->getModuleD3D12();
+    imguiPass = new ImGuiPass(moduleD3d12->getDevice(), moduleD3d12->getHWnd());
     return true;
 }
 
-void ModuleUI::preRender()
-{
+void ModuleUI::preRender() {
     imguiPass->startFrame();
+
+    ImGuizmo::BeginFrame();
+    ImGuizmo::SetRect(0, 0, float(moduleD3d12->getWindowWidth()), float(moduleD3d12->getWindowHeight()));
 
     for (auto& current : windows)
         current();

@@ -3,8 +3,7 @@
 #include "Application.h"
 #include "ModuleD3D12.h"
 
-bool ModuleRender::init()
-{
+bool ModuleRender::init() {
     d3d12 = app->getModuleD3D12();
     return true;
 }
@@ -45,8 +44,7 @@ void ModuleRender::preRender() {
     commandList->RSSetScissorRects(1, &scissor);
 }
 
-void ModuleRender::render()
-{
+void ModuleRender::render() {
     ID3D12GraphicsCommandList* cmd = d3d12->getCommandList();
 
     for (auto& pass : worldPasses)
@@ -74,19 +72,16 @@ void ModuleRender::render()
     uiPasses.clear();
 }
 
-bool ModuleRender::cleanUp()
-{
+bool ModuleRender::cleanUp() {
     worldPasses.clear();
     uiPasses.clear();
     return true;
 }
 
-void ModuleRender::registerWorldPass(const RenderCallback& cb)
-{
+void ModuleRender::registerWorldPass(const RenderCallback& cb) {
     worldPasses.push_back(cb);
 }
 
-void ModuleRender::registerUIPass(const RenderCallback& cb)
-{
+void ModuleRender::registerUIPass(const RenderCallback& cb) {
     uiPasses.push_back(cb);
 }

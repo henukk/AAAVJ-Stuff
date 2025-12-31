@@ -37,6 +37,9 @@ bool Exercise5::init() {
 	moduleSamplers = app->getModuleSamplers();
 	moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
+    ModuleUI* moduleUI = app->getModuleUI();
+    moduleUI->registerWindow([this]() { drawGUI(); });
+
     bool ok = createRootSignature();
     ok = ok && createPSO();
     ok = ok && loadModel();
@@ -45,25 +48,11 @@ bool Exercise5::init() {
         debugDrawPass = std::make_unique<DebugDrawPass>(moduleD3d12->getDevice(), moduleD3d12->getDrawCommandQueue());
     }
 
-    //ModuleUI* moduleUI = app->getModuleUI();
-    //moduleUI->registerWindow([this]() { drawGUI(); });
-
     return true;
 }
 
 bool Exercise5::cleanUp() {
     return true;
-}
-
-void Exercise5::preRender() {
-    /*ImGuizmo::BeginFrame();
-
-    unsigned width = moduleD3d12->getWindowWidth();
-    unsigned height = moduleD3d12->getWindowHeight();
-
-    // Set the viewport size (adjust based on your application)
-    ImGuizmo::SetRect(0, 0, float(width), float(height));
-    */
 }
 
 void Exercise5::render() {
@@ -77,31 +66,9 @@ void Exercise5::render() {
         Matrix mvp = model->getModelMatrix() * view * proj;
         mvp = mvp.Transpose();
 
-        D3D12_VIEWPORT viewport;
-        viewport.TopLeftX = viewport.TopLeftY = 0;
-        viewport.MinDepth = 0.0f;
-        viewport.MaxDepth = 1.0f;
-        viewport.Width = float(width);
-        viewport.Height = float(height);
-
-        D3D12_RECT scissor;
-        scissor.left = 0;
-        scissor.top = 0;
-        scissor.right = width;
-        scissor.bottom = height;
-
-        float clearColor[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-        D3D12_CPU_DESCRIPTOR_HANDLE rtv = moduleD3d12->getRenderTargetDescriptor();
-        D3D12_CPU_DESCRIPTOR_HANDLE dsv = moduleD3d12->getDepthStencilDescriptor();
-
-        commandList->OMSetRenderTargets(1, &rtv, false, &dsv);
-
-        commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-        commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-
+        commandList->SetPipelineState(pso.Get());
         commandList->SetGraphicsRootSignature(rootSignature.Get());
-        commandList->RSSetViewports(1, &viewport);
-        commandList->RSSetScissorRects(1, &scissor);
+        
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // set the primitive topology
         ID3D12DescriptorHeap* descriptorHeaps[] = { moduleShaderDescriptors->getHeap(), moduleSamplers->getHeap() };
         commandList->SetDescriptorHeaps(2, descriptorHeaps);
@@ -123,8 +90,17 @@ void Exercise5::render() {
 
         END_EVENT(commandList);
 
-        //if (showGrid) dd::xzSquareGrid(-10.0f, 10.0f, 0.0f, 1.0f, dd::colors::LightGray);
-        //if (showAxis) dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
+        if (showGrid) dd::xzSquareGrid(-10.0f, 10.0f, 0.0f, 1.0f, dd::colors::LightGray);
+        if (showAxis) dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
+
+        Matrix objectMatrix = model->getModelMatrix();
+        if (showGuizmo) {
+            ImGuizmo::Manipulate((const float*)&view, (const float*)&proj, gizmoOperation, ImGuizmo::LOCAL, (float*)&objectMatrix);
+        }
+
+        if (ImGuizmo::IsUsing()) {
+            model->setModelMatrix(objectMatrix);
+        }
 
         debugDrawPass->record(commandList, width, height, view, proj);
     });
@@ -210,56 +186,42 @@ bool Exercise5::createPSO() {
 }
 
 void Exercise5::drawGUI() {
-    ImGui::Begin("Geometry Viewer Options");
-    ImGui::Checkbox("Show grid", &showGrid);
-    ImGui::Checkbox("Show axis", &showAxis);
-    ImGui::Checkbox("Show guizmo", &showGuizmo);
-    ImGui::Text("Model loaded %s with %d meshes and %d materials", model->getSrcFile().c_str(), model->getNumMeshes(), model->getNumMaterials());
-
-    for (const BasicMesh& mesh : model->getMeshes())
-    {
-        ImGui::Text("Mesh %s with %d vertices and %d triangles", mesh.getName().c_str(), mesh.getNumVertices(), mesh.getNumIndices() / 3);
-    }
-
     Matrix objectMatrix = model->getModelMatrix();
 
-    ImGui::Separator();
-    // Set ImGuizmo operation mode (TRANSLATE, ROTATE, SCALE)
-    static ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::IsKeyPressed(ImGuiKey_T)) gizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::IsKeyPressed(ImGuiKey_R)) gizmoOperation = ImGuizmo::ROTATE;
-    if (ImGui::IsKeyPressed(ImGuiKey_S)) gizmoOperation = ImGuizmo::SCALE;
+    if (ImGui::Begin("Geometry Viewer Options")) {
+        ImGui::Checkbox("Show grid", &showGrid);
+        ImGui::Checkbox("Show axis", &showAxis);
+        ImGui::Checkbox("Show guizmo", &showGuizmo);
+        ImGui::Text("Model loaded %s with %d meshes and %d materials", model->getSrcFile().c_str(), model->getNumMeshes(), model->getNumMaterials());
 
-    ImGui::RadioButton("Translate", (int*)&gizmoOperation, (int)ImGuizmo::TRANSLATE);
-    ImGui::SameLine();
-    ImGui::RadioButton("Rotate", (int*)&gizmoOperation, ImGuizmo::ROTATE);
-    ImGui::SameLine();
-    ImGui::RadioButton("Scale", (int*)&gizmoOperation, ImGuizmo::SCALE);
+        for (const BasicMesh& mesh : model->getMeshes())
+        {
+            ImGui::Text("Mesh %s with %d vertices and %d triangles", mesh.getName().c_str(), mesh.getNumVertices(), mesh.getNumIndices() / 3);
+        }
 
-    float translation[3], rotation[3], scale[3];
-    ImGuizmo::DecomposeMatrixToComponents((float*)&objectMatrix, translation, rotation, scale);
-    bool transform_changed = ImGui::DragFloat3("Tr", translation, 0.1f);
-    transform_changed = transform_changed || ImGui::DragFloat3("Rt", rotation, 0.1f);
-    transform_changed = transform_changed || ImGui::DragFloat3("Sc", scale, 0.1f);
+        ImGui::Separator();
+        if (ImGui::IsKeyPressed(ImGuiKey_T)) gizmoOperation = ImGuizmo::TRANSLATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_R)) gizmoOperation = ImGuizmo::ROTATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_S)) gizmoOperation = ImGuizmo::SCALE;
 
-    if (transform_changed)
-    {
-        ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, (float*)&objectMatrix);
+        ImGui::RadioButton("Translate", (int*)&gizmoOperation, (int)ImGuizmo::TRANSLATE);
+        ImGui::SameLine();
+        ImGui::RadioButton("Rotate", (int*)&gizmoOperation, ImGuizmo::ROTATE);
+        ImGui::SameLine();
+        ImGui::RadioButton("Scale", (int*)&gizmoOperation, ImGuizmo::SCALE);
 
-        model->setModelMatrix(objectMatrix);
+        float translation[3], rotation[3], scale[3];
+        ImGuizmo::DecomposeMatrixToComponents((float*)&objectMatrix, translation, rotation, scale);
+        bool transform_changed = ImGui::DragFloat3("Tr", translation, 0.1f);
+        transform_changed = transform_changed || ImGui::DragFloat3("Rt", rotation, 0.1f);
+        transform_changed = transform_changed || ImGui::DragFloat3("Sc", scale, 0.1f);
+
+        if (transform_changed) {
+            ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, (float*)&objectMatrix);
+
+            model->setModelMatrix(objectMatrix);
+        }
     }
-
     ImGui::End();
-
-    if (showGuizmo) {
-        const Matrix& viewMatrix = moduleCamera->getView();
-        Matrix projMatrix = moduleCamera->getProjection();
-
-        // Manipulate the object
-        ImGuizmo::Manipulate((const float*)&viewMatrix, (const float*)&projMatrix, gizmoOperation, ImGuizmo::LOCAL, (float*)&objectMatrix);
-    }
-
-    if (ImGuizmo::IsUsing()) {
-        model->setModelMatrix(objectMatrix);
-    }
 }
+

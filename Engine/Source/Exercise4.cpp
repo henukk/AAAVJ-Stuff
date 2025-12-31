@@ -27,7 +27,7 @@ bool Exercise4::init() {
 
     // Register UI window
     ModuleUI* moduleUI = app->getModuleUI();
-    //moduleUI->registerWindow([this]() { drawGUI(); });
+    moduleUI->registerWindow([this]() { drawGUI(); });
 
     struct Vertex {
         Vector3 position;
