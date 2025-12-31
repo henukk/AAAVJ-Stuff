@@ -11,6 +11,7 @@ public:
 
     // Crear SRV en un slot concreto
     void createTextureSRV(UINT baseIndex, UINT slot, ID3D12Resource* texture);
+	void createNullTexture2DSRV(UINT baseIndex, UINT slot);
 
     D3D12_GPU_DESCRIPTOR_HANDLE getGPUHandle(UINT baseIndex, UINT slot = 0) const;
     D3D12_CPU_DESCRIPTOR_HANDLE getCPUHandle(UINT baseIndex, UINT slot = 0) const;

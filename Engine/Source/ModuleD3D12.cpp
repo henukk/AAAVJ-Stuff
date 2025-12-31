@@ -15,8 +15,7 @@ ModuleD3D12::~ModuleD3D12()
     flush();
 }
 
-bool ModuleD3D12::init()
-{
+bool ModuleD3D12::init() {
 #if defined(_DEBUG)
     enableDebugLayer();
 #endif 
@@ -42,6 +41,7 @@ bool ModuleD3D12::init()
         currentBackBufferIdx = swapChain->GetCurrentBackBufferIndex();
     }
 
+    drawFenceCounter = 1;
     return ok;
 
 }
@@ -57,16 +57,20 @@ bool ModuleD3D12::cleanUp()
 void ModuleD3D12::preRender()
 {
     // 1) Sincronización con GPU
-    currentBackBufferIdx = swapChain->GetCurrentBackBufferIndex();
+    uint64_t fenceValue = drawFenceValues[currentBackBufferIdx];
 
-    if (drawFenceValues[currentBackBufferIdx] != 0)
+    if (fenceValue != 0)
     {
-        drawFence->SetEventOnCompletion(drawFenceValues[currentBackBufferIdx], drawEvent);
-        WaitForSingleObject(drawEvent, INFINITE);
+        if (drawFence->GetCompletedValue() < fenceValue)
+        {
+            drawFence->SetEventOnCompletion(fenceValue, drawEvent);
+            WaitForSingleObject(drawEvent, INFINITE);
+        }
 
         lastCompletedFrame = std::max(frameValues[currentBackBufferIdx], lastCompletedFrame);
         drawFenceValues[currentBackBufferIdx] = 0;
     }
+    
 
     // 2) Avanzar el contador de frame
     frameIndex++;
@@ -92,8 +96,7 @@ UINT ModuleD3D12::signalDrawQueue()
     return drawFenceCounter;
 }
 
-void ModuleD3D12::resize()
-{
+void ModuleD3D12::resize() {
     unsigned width, height;
     getWindowSize(width, height);
 
@@ -102,7 +105,7 @@ void ModuleD3D12::resize()
         windowWidth = width;
         windowHeight = height;
 
-        flush();
+        waitForGPU();
 
         for (unsigned i = 0; i < FRAMES_IN_FLIGHT; ++i)
         {
@@ -114,6 +117,7 @@ void ModuleD3D12::resize()
 
         bool ok = SUCCEEDED(swapChain->GetDesc(&swapChainDesc));
         ok = ok && SUCCEEDED(swapChain->ResizeBuffers(FRAMES_IN_FLIGHT, windowWidth, windowHeight, swapChainDesc.BufferDesc.Format, swapChainDesc.Flags));
+        currentBackBufferIdx = swapChain->GetCurrentBackBufferIndex();
 
         if (windowWidth > 0 && windowHeight > 0)
         {
@@ -123,8 +127,7 @@ void ModuleD3D12::resize()
     }
 }
 
-void ModuleD3D12::toogleFullscreen()
-{
+void ModuleD3D12::toogleFullscreen() {
     fullscreen = !fullscreen;
 
     if (fullscreen)
@@ -165,12 +168,27 @@ void ModuleD3D12::toogleFullscreen()
     }
 }
 
-void ModuleD3D12::flush()
-{
-    drawCommandQueue->Signal(drawFence.Get(), ++drawFenceCounter);
+void ModuleD3D12::waitForGPU() {
+    if (drawFenceCounter == 0)
+        return;
 
-    drawFence->SetEventOnCompletion(drawFenceCounter, drawEvent);
-    WaitForSingleObject(drawEvent, INFINITE);
+    if (drawFence->GetCompletedValue() < drawFenceCounter)
+    {
+        drawFence->SetEventOnCompletion(drawFenceCounter, drawEvent);
+        WaitForSingleObject(drawEvent, INFINITE);
+    }
+}
+
+void ModuleD3D12::flush() {
+    const uint64_t fenceToWait = ++drawFenceCounter;
+
+    drawCommandQueue->Signal(drawFence.Get(), fenceToWait);
+
+    if (drawFence->GetCompletedValue() < fenceToWait)
+    {
+        drawFence->SetEventOnCompletion(fenceToWait, drawEvent);
+        WaitForSingleObject(drawEvent, INFINITE);
+    }
 }
 
 void ModuleD3D12::enableDebugLayer()
@@ -192,8 +210,7 @@ bool ModuleD3D12::createFactory()
     return SUCCEEDED(CreateDXGIFactory2(createFactoryFlags, IID_PPV_ARGS(&factory)));
 }
 
-bool ModuleD3D12::createDevice(bool useWarp)
-{
+bool ModuleD3D12::createDevice(bool useWarp) {
     bool ok = true;
 
     if (useWarp)
@@ -270,8 +287,7 @@ bool ModuleD3D12::setupInfoQueue()
     return ok;
 }
 
-bool ModuleD3D12::createDrawCommandQueue()
-{
+bool ModuleD3D12::createDrawCommandQueue() {
     D3D12_COMMAND_QUEUE_DESC desc = {};
     desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
     desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
@@ -281,8 +297,7 @@ bool ModuleD3D12::createDrawCommandQueue()
     return SUCCEEDED(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&drawCommandQueue)));
 }
 
-bool ModuleD3D12::createSwapChain()
-{
+bool ModuleD3D12::createSwapChain() {
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
     swapChainDesc.Width = windowWidth;
     swapChainDesc.Height = windowHeight;
@@ -309,8 +324,7 @@ bool ModuleD3D12::createSwapChain()
     return ok;
 }
 
-bool ModuleD3D12::createDepthStencil()
-{
+bool ModuleD3D12::createDepthStencil() {
     D3D12_CLEAR_VALUE clearValue = {};
     clearValue.Format = DXGI_FORMAT_D32_FLOAT;
     clearValue.DepthStencil.Depth = 1.0f;
@@ -342,8 +356,7 @@ bool ModuleD3D12::createDepthStencil()
     return ok;
 }
 
-bool ModuleD3D12::createRenderTargets()
-{
+bool ModuleD3D12::createRenderTargets() {
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.NumDescriptors = FRAMES_IN_FLIGHT;
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -374,8 +387,7 @@ bool ModuleD3D12::createRenderTargets()
     return ok;
 }
 
-bool ModuleD3D12::createCommandList()
-{
+bool ModuleD3D12::createCommandList() {
     bool ok = true;
 
     for (unsigned i = 0; ok && i < FRAMES_IN_FLIGHT; ++i)
@@ -392,9 +404,7 @@ bool ModuleD3D12::createCommandList()
 bool ModuleD3D12::createDrawFence()
 {
     bool ok = SUCCEEDED(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&drawFence)));
-
-    if (ok)
-    {
+    if (ok) {
         drawEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
         ok = drawEvent != NULL;
     }

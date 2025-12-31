@@ -16,7 +16,6 @@
 #include <d3d12.h>
 #include "d3dx12.h"
 
-
 bool Exercise4::init() {
     settings = app->getSettings();
 
@@ -26,10 +25,9 @@ bool Exercise4::init() {
     moduleCamera = app->getModuleCamera();
     moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
-    ModuleUI* moduleUI = app->getModuleUI();
-
     // Register UI window
-    moduleUI->registerWindow([this]() { drawGUI(); });
+    ModuleUI* moduleUI = app->getModuleUI();
+    //moduleUI->registerWindow([this]() { drawGUI(); });
 
     struct Vertex {
         Vector3 position;

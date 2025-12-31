@@ -6,106 +6,91 @@
 
 #include "gltf_utils.h"
 
-BasicMesh::BasicMesh() {
+const D3D12_INPUT_ELEMENT_DESC BasicMesh::inputLayout[numVertexAttribs] = {
+    {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, offsetof(Vertex, texCoord0), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+    {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, normal),    D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+};
 
+const D3D12_INPUT_LAYOUT_DESC BasicMesh::inputLayoutDesc = { &inputLayout[0], UINT(std::size(inputLayout)) };
+
+BasicMesh::BasicMesh()
+{
 }
 
 BasicMesh::~BasicMesh() {
-	clean();
+    clean();
 }
 
-void BasicMesh::load(const tinygltf::Model& model,
-    const tinygltf::Mesh& mesh,
-    const tinygltf::Primitive& primitive)
+void BasicMesh::load(const tinygltf::Model& model, const tinygltf::Mesh& mesh, const tinygltf::Primitive& primitive)
 {
     name = mesh.name;
-    materialIndex = primitive.material;
 
-    const auto itPos = primitive.attributes.find("POSITION");
-    if (itPos == primitive.attributes.end())
-        return;
+    const auto& itPos = primitive.attributes.find("POSITION");
 
-    ModuleResources* resources = app->getModuleResources();
-
-    const tinygltf::Accessor& posAcc = model.accessors[itPos->second];
-    numVertices = uint32_t(posAcc.count);
-
-    vertices = std::make_unique<Vertex[]>(numVertices);
-    uint8_t* vertexData = reinterpret_cast<uint8_t*>(vertices.get());
-
-    loadAccessorData(vertexData + offsetof(Vertex, position),
-        sizeof(Vector3), sizeof(Vertex),
-        numVertices, model, itPos->second);
-
-    loadAccessorData(vertexData + offsetof(Vertex, texCoord0),
-        sizeof(Vector2), sizeof(Vertex),
-        numVertices, model,
-        primitive.attributes, "TEXCOORD_0");
-
-    loadAccessorData(vertexData + offsetof(Vertex, normal),
-        sizeof(Vector3), sizeof(Vertex),
-        numVertices, model,
-        primitive.attributes, "NORMAL");
-
-    vertexBuffer = resources->createDefaultBuffer(
-        vertices.get(),
-        numVertices * sizeof(Vertex),
-        name.c_str());
-
-    vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-    vertexBufferView.StrideInBytes = sizeof(Vertex);
-    vertexBufferView.SizeInBytes = numVertices * sizeof(Vertex);
-
-    // --- Índices ---
-    if (primitive.indices >= 0)
+    if (itPos != primitive.attributes.end())
     {
-        const tinygltf::Accessor& indAcc = model.accessors[primitive.indices];
+        ModuleResources* resources = app->getModuleResources();
 
-        indexElementSize = tinygltf::GetComponentSizeInBytes(indAcc.componentType);
-        numIndices = uint32_t(indAcc.count);
+        const tinygltf::Accessor& posAcc = model.accessors[itPos->second];
 
-        indices = std::make_unique<uint8_t[]>(numIndices * indexElementSize);
+        numVertices = uint32_t(posAcc.count);
 
-        loadAccessorData(indices.get(),
-            indexElementSize,
-            indexElementSize,
-            numIndices,
-            model,
-            primitive.indices);
+        vertices = std::make_unique<Vertex[]>(numVertices);
+        uint8_t* vertexData = reinterpret_cast<uint8_t*>(vertices.get());
 
-        static const DXGI_FORMAT formats[3] =
-        {
-            DXGI_FORMAT_R8_UINT,
-            DXGI_FORMAT_R16_UINT,
-            DXGI_FORMAT_R32_UINT
-        };
+        loadAccessorData(vertexData + offsetof(Vertex, position), sizeof(Vector3), sizeof(Vertex), numVertices, model, itPos->second);
+        loadAccessorData(vertexData + offsetof(Vertex, texCoord0), sizeof(Vector2), sizeof(Vertex), numVertices, model, primitive.attributes, "TEXCOORD_0");
+        loadAccessorData(vertexData + offsetof(Vertex, normal), sizeof(Vector3), sizeof(Vertex), numVertices, model, primitive.attributes, "NORMAL");
 
-        indexBuffer = resources->createDefaultBuffer(
-            indices.get(),
-            numIndices * indexElementSize,
-            name.c_str());
+        vertexBuffer = resources->createDefaultBuffer(vertices.get(), numVertices * sizeof(Vertex), name.c_str());
 
-        indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-        indexBufferView.Format = formats[indexElementSize >> 1];
-        indexBufferView.SizeInBytes = numIndices * indexElementSize;
+        vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
+        vertexBufferView.StrideInBytes = sizeof(Vertex);
+        vertexBufferView.SizeInBytes = numVertices * sizeof(BasicMesh::Vertex);
+
+        if (primitive.indices >= 0) {
+            const tinygltf::Accessor& indAcc = model.accessors[primitive.indices];
+
+            _ASSERT_EXPR(indAcc.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT ||
+                indAcc.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT ||
+                indAcc.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE, "Unsupported index format");
+
+            if (indAcc.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT ||
+                indAcc.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT ||
+                indAcc.componentType == TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE)
+            {
+                static const DXGI_FORMAT formats[3] = { DXGI_FORMAT_R8_UINT, DXGI_FORMAT_R16_UINT, DXGI_FORMAT_R32_UINT };
+
+                indexElementSize = tinygltf::GetComponentSizeInBytes(indAcc.componentType);
+                numIndices = uint32_t(indAcc.count);
+
+                indices = std::make_unique<uint8_t[]>(numIndices * indexElementSize);
+                loadAccessorData(indices.get(), indexElementSize, indexElementSize, numIndices, model, primitive.indices);
+                indexBuffer = resources->createDefaultBuffer(indices.get(), numIndices * indexElementSize, name.c_str());
+
+                indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
+                indexBufferView.Format = formats[indexElementSize >> 1];
+                indexBufferView.SizeInBytes = numIndices * indexElementSize;
+            }
+        }
+
+        materialIndex = primitive.material;
     }
 }
 
-
-void BasicMesh::draw (ID3D12GraphicsCommandList* commandList) const {
-	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	if (indexBuffer)
-	{
-		commandList->IASetIndexBuffer(&indexBufferView);
-		commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
-	}
-	else
-	{
-		commandList->DrawInstanced(numVertices, 1, 0, 0);
-	}
+void BasicMesh::draw(ID3D12GraphicsCommandList* commandList) const {
+    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+    if (indexBuffer) {
+        commandList->IASetIndexBuffer(&indexBufferView);
+        commandList->DrawIndexedInstanced(numIndices, 1, 0, 0, 0);
+    } else {
+        commandList->DrawInstanced(numVertices, 1, 0, 0);
+    }
 }
 
 void BasicMesh::clean() {
-
+    vertexBuffer.Reset();
+    indexBuffer.Reset();
 }

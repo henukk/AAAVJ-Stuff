@@ -2,6 +2,7 @@
 
 #include "Module.h"
 #include "DebugDrawPass.h"
+
 class Settings;
 
 class ModuleD3D12;

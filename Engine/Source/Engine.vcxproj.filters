@@ -115,6 +115,9 @@
     <ClCompile Include="ModuleShaderDescriptors.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="BasicMaterial.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -257,6 +260,9 @@
     </ClInclude>
     <ClInclude Include="ModuleShaderDescriptors.h">
       <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicMaterial.h">
+      <Filter>Entities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

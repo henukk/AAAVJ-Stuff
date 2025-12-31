@@ -10,7 +10,7 @@ bool ModuleShaderDescriptors::init()
     ID3D12Device* device = app->getModuleD3D12()->getDevice();
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-    desc.NumDescriptors = 1024; // suficiente para ahora
+    desc.NumDescriptors = 1024;
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
@@ -41,6 +41,17 @@ void ModuleShaderDescriptors::createTextureSRV(UINT baseIndex, UINT slot, ID3D12
 
     D3D12_CPU_DESCRIPTOR_HANDLE handle = getCPUHandle(baseIndex, slot);
     device->CreateShaderResourceView(texture, &srvDesc, handle);
+}
+
+void ModuleShaderDescriptors::createNullTexture2DSRV(UINT baseIndex, UINT slot) {
+    ID3D12Device* device = app->getModuleD3D12()->getDevice();
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    D3D12_CPU_DESCRIPTOR_HANDLE handle = getCPUHandle(baseIndex, slot);
+	device->CreateShaderResourceView(nullptr, &srvDesc, handle);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE ModuleShaderDescriptors::getCPUHandle(UINT base, UINT slot) const {
