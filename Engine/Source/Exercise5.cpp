@@ -125,7 +125,7 @@ bool Exercise5::createRootSignature() {
 
 bool Exercise5::loadModel() {
     model = BasicModel();
-    model.load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/");
+    model.load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/", BasicMaterial::Type::BASIC);
 
     Matrix scale = Matrix::CreateScale(0.01f);
     Matrix rotation = Matrix::CreateRotationY(-XM_PIDIV2);
@@ -176,7 +176,7 @@ bool Exercise5::createPSO() {
 void Exercise5::drawGUI() {
     Matrix objectMatrix = model.getModelMatrix();
 
-    if (ImGui::Begin("Geometry Viewer Options")) {
+    if (ImGui::Begin("Exercise 5 Controls")) {
         ImGui::Text("Model loaded %s with %d meshes and %d materials", model.getSrcFile().c_str(), model.getNumMeshes(), model.getNumMaterials());
 
         for (const BasicMesh& mesh : model.getMeshes()) {

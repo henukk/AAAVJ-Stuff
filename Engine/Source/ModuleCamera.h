@@ -16,33 +16,6 @@ private:
 
     Settings* settings;
 
-public:
-    bool init() override;
-    void update() override;
-
-    // --- Getters ---
-    const Matrix& getView() const { return view; }
-    const Matrix& getProjection() const { return projection; }
-
-private:
-    // Modes
-    void panMode();
-    void orbitMode();
-    void zoomMode();
-    void flythroughMode(float dt);
-
-    // Helpers
-    void handleMouseWheel();
-    void handleAutoFocus();
-    void rebuildViewProj();
-
-    void syncYawPitchFromLookAt();
-    void syncDistanceFromLookAt();
-    Vector3 getForwardFromYawPitch() const;
-    Vector3 getRightFromForward(const Vector3& fwd) const;
-    void focusOnTarget();
-
-private:
     // Camera state
     Vector3 position{ 0.0f, 10.0f, 10.0f };
     Vector3 target{ 0.0f, 0.0f, 0.0f };
@@ -82,4 +55,31 @@ private:
 
     int lastWheel = 0;
     int lastNavMode = -999;
+
+public:
+    bool init() override;
+    void update() override;
+
+    // --- Getters ---
+    const inline Matrix& getView() const { return view; }
+    const inline Matrix& getProjection() const { return projection; }
+    const inline Vector3& getPosition() const { return position; }
+
+private:
+    // Modes
+    void panMode();
+    void orbitMode();
+    void zoomMode();
+    void flythroughMode(float dt);
+
+    // Helpers
+    void handleMouseWheel();
+    void handleAutoFocus();
+    void rebuildViewProj();
+
+    void syncYawPitchFromLookAt();
+    void syncDistanceFromLookAt();
+    Vector3 getForwardFromYawPitch() const;
+    Vector3 getRightFromForward(const Vector3& fwd) const;
+    void focusOnTarget();
 };

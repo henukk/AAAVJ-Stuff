@@ -13,7 +13,7 @@
 
 #include "EditorConsole.h"
 
-void BasicModel::load(const char* fileName, const char* basePath) {
+void BasicModel::load(const char* fileName, const char* basePath, BasicMaterial::Type materialType) {
     tinygltf::TinyGLTF gltfContext;
     tinygltf::Model model;
     std::string error, warning;
@@ -22,7 +22,7 @@ void BasicModel::load(const char* fileName, const char* basePath) {
 
     if (loadOk) {
         srcFile = fileName;
-        loadMaterials(model, basePath);
+        loadMaterials(model, basePath, materialType);
         loadMeshes(model);
     } else {
         LOG("Error loading %s: %s", fileName, error.c_str());
@@ -53,7 +53,7 @@ void BasicModel::loadMeshes(const tinygltf::Model& model) {
     }
 }
 
-void BasicModel::loadMaterials(const tinygltf::Model& model, const char* basePath) {
+void BasicModel::loadMaterials(const tinygltf::Model& model, const char* basePath, BasicMaterial::Type materialType) {
     ModuleShaderDescriptors* descriptors = app->getModuleShaderDescriptors();
     ModuleResources* resources = app->getModuleResources();
 
@@ -63,6 +63,6 @@ void BasicModel::loadMaterials(const tinygltf::Model& model, const char* basePat
 
     for (const tinygltf::Material& material : model.materials)
     {
-        materials[materialIndex++].load(model, material, basePath);
+        materials[materialIndex++].load(model, material, basePath, materialType);
     }
 }

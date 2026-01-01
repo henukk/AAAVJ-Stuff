@@ -8,7 +8,7 @@ namespace tinygltf { class Model; }
 
 class BasicModel {
 public:
-    void load(const char* fileName, const char* basePath);
+    void load(const char* fileName, const char* basePath, BasicMaterial::Type materialType);
 
     uint32_t getNumMeshes() const { return numMeshes; }
     uint32_t getNumMaterials() const { return numMaterials; }
@@ -33,7 +33,7 @@ public:
 
 private:
     void loadMeshes(const tinygltf::Model& model);
-    void loadMaterials(const tinygltf::Model& model, const char* basePath);
+    void loadMaterials(const tinygltf::Model& model, const char* basePath, BasicMaterial::Type materialType);
 
 private:
     struct TextureInfo

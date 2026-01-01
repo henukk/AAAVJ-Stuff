@@ -9,8 +9,32 @@ class ModuleResources;
 class ModuleCamera;
 class ModuleSamplers;
 class ModuleShaderDescriptors;
+class ModuleRingBuffer;
 
 class BasicModel;
+
+struct PerInstance {
+    Matrix modelMat;
+    Matrix normalMat;
+    PhongMaterialData material;
+};
+
+struct Light {
+    Vector3 L = Vector3::One * (-0.5f);
+    Vector3 Lc = Vector3::One;
+    Vector3 Ac = Vector3::One * (0.1f);
+};
+
+struct PerFrame {
+    Vector3 L = Vector3::UnitX;
+    float pad0;
+    Vector3 Lc = Vector3::One;
+    float pad1;
+    Vector3 Ac = Vector3::Zero;
+    float pad2;
+    Vector3 viewPos = Vector3::Zero;
+    float pad3;
+};
 
 class Exercise6 : public Module {
 private:
@@ -20,6 +44,7 @@ private:
     ModuleCamera* moduleCamera;
     ModuleSamplers* moduleSamplers;
     ModuleShaderDescriptors* moduleShaderDescriptors;
+    ModuleRingBuffer* moduleRingBuffer;
 
     ComPtr<ID3D12RootSignature>         rootSignature;
     ComPtr<ID3D12PipelineState>         pso;
@@ -27,6 +52,7 @@ private:
     std::vector<ComPtr<ID3D12Resource>> materialBuffers;
 
     BasicModel model;
+    Light light;
 
 public:
     Exercise6();

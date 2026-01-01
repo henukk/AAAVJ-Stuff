@@ -12,11 +12,22 @@
 #include "tiny_gltf.h"
 #include <imgui.h>
 
-void BasicMaterial::load(const tinygltf::Model& model, const tinygltf::Material& material, const char* basePath) {
+
+BasicMaterial::BasicMaterial() {
+
+}
+
+BasicMaterial::~BasicMaterial() {
+
+}
+
+void BasicMaterial::load(const tinygltf::Model& model, const tinygltf::Material& material, const char* basePath, BasicMaterial::Type materialType) {
     ModuleResources* moduleResources = app->getModuleResources();
     ModuleShaderDescriptors* moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
     name = material.name;
+    this->materialType = materialType;
+
     Vector4 baseColour = Vector4(
         float(material.pbrMetallicRoughness.baseColorFactor[0]),
         float(material.pbrMetallicRoughness.baseColorFactor[1]),
@@ -43,8 +54,16 @@ void BasicMaterial::load(const tinygltf::Model& model, const tinygltf::Material&
 
     hasColourTexture = loadTexture(material.pbrMetallicRoughness.baseColorTexture.index, model, basePath, true, baseColourTex);
     
-    materialData.baseColour = baseColour;
-    materialData.hasColourTexture = hasColourTexture;
+    if (materialType == BASIC) {
+        materialData.basic.baseColour = baseColour;
+        materialData.basic.hasColourTexture = hasColourTexture;
+    } else if (materialType == PHONG) {
+        materialData.phong.diffuseColour = baseColour;
+        materialData.phong.hasDiffuseTex = hasColourTexture;
+        materialData.phong.Kd = 0.85f;
+        materialData.phong.Ks = 0.35f;
+        materialData.phong.shininess = 32.0f;
+    }
 
     textureTable = moduleShaderDescriptors->alloc(1);
 

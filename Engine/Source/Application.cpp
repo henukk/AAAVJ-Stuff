@@ -8,6 +8,7 @@
 #include "ModuleResources.h"
 #include "ModuleSamplers.h"
 #include "ModuleShaderDescriptors.h"
+#include "ModuleRingBuffer.h"
 
 #include "ModuleUI.h"
 #include "ModuleEditor.h"
@@ -28,6 +29,7 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(moduleResources = new ModuleResources());
 	modules.push_back(moduleSamplers = new ModuleSamplers());
     modules.push_back(moduleShaderDescriptors = new ModuleShaderDescriptors());
+    modules.push_back(moduleRingBuffer = new ModuleRingBuffer());
 
     // Editor stuff
     modules.push_back(moduleEditor = new ModuleEditor());
