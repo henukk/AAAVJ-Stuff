@@ -4,8 +4,8 @@ namespace tinygltf { class Model; struct Material; }
 
 struct BasicMaterialData
 {
-    XMFLOAT4 baseColour;
-    BOOL     hasColourTexture;
+    Vector4 baseColour;
+    BOOL    hasColourTexture;
 };
 
 class BasicMaterial
@@ -13,20 +13,16 @@ class BasicMaterial
 public:
     void load(const tinygltf::Model& model, const tinygltf::Material& material, const char* basePath);
 
-    UINT getTextureTable() const { return textureTable; }
     const BasicMaterialData getBasicMaterial() const { return materialData; }
 
     const char* getName() const { return name.c_str(); }
+    UINT getTextureTable() const { return textureTable; }
 
 private:
-    UINT textureTable = UINT(-1);
+    std::string name;
     BasicMaterialData materialData;
+    UINT textureTable = UINT(-1);
 
     ComPtr<ID3D12Resource>  baseColourTex;
-    ComPtr<ID3D12Resource>  metallicRoughnessTex;
-    ComPtr<ID3D12Resource>  occlusionTex;
-    ComPtr<ID3D12Resource>  normalTex;
-    ComPtr<ID3D12Resource>  emissiveTex;
 
-    std::string             name;
 };

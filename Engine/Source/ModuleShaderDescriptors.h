@@ -6,10 +6,8 @@ class ModuleShaderDescriptors : public Module {
 public:
     bool init() override;
 
-    // Reserva N descriptores contiguos
     UINT alloc(UINT count = 1);
 
-    // Crear SRV en un slot concreto
     void createTextureSRV(UINT baseIndex, UINT slot, ID3D12Resource* texture);
 	void createNullTexture2DSRV(UINT baseIndex, UINT slot);
 

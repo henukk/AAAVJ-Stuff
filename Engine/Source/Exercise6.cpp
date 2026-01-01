@@ -1,5 +1,5 @@
 #include "Globals.h"
-#include "Exercise5.h"
+#include "Exercise6.h"
 
 #include "Application.h"
 
@@ -21,21 +21,21 @@
 #include <d3d12.h>
 #include "d3dx12.h"
 
-Exercise5::Exercise5() {
+Exercise6::Exercise6() {
 
 }
 
-Exercise5::~Exercise5() {
-	cleanUp();
+Exercise6::~Exercise6() {
+    cleanUp();
 }
 
-bool Exercise5::init() {
+bool Exercise6::init() {
     moduleD3d12 = app->getModuleD3D12();
     moduleRender = app->getModuleRender();
     moduleResources = app->getModuleResources();
-	moduleCamera = app->getModuleCamera();
-	moduleSamplers = app->getModuleSamplers();
-	moduleShaderDescriptors = app->getModuleShaderDescriptors();
+    moduleCamera = app->getModuleCamera();
+    moduleSamplers = app->getModuleSamplers();
+    moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
     ModuleUI* moduleUI = app->getModuleUI();
     moduleUI->registerWindow([this]() { drawGUI(); });
@@ -51,11 +51,11 @@ bool Exercise5::init() {
     return true;
 }
 
-bool Exercise5::cleanUp() {
+bool Exercise6::cleanUp() {
     return true;
 }
 
-void Exercise5::render() {
+void Exercise6::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* commandList) {
         unsigned width = moduleD3d12->getWindowWidth();
         unsigned height = moduleD3d12->getWindowHeight();
@@ -68,7 +68,7 @@ void Exercise5::render() {
 
         commandList->SetPipelineState(pso.Get());
         commandList->SetGraphicsRootSignature(rootSignature.Get());
-        
+
         commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);  // set the primitive topology
         ID3D12DescriptorHeap* descriptorHeaps[] = { moduleShaderDescriptors->getHeap(), moduleSamplers->getHeap() };
         commandList->SetDescriptorHeaps(2, descriptorHeaps);
@@ -99,10 +99,10 @@ void Exercise5::render() {
         }
 
         debugDrawPass->record(commandList, width, height, view, proj);
-    });
+        });
 }
 
-bool Exercise5::createRootSignature() {
+bool Exercise6::createRootSignature() {
     CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
     CD3DX12_ROOT_PARAMETER rootParameters[4] = {};
     CD3DX12_DESCRIPTOR_RANGE tableRanges;
@@ -133,13 +133,13 @@ bool Exercise5::createRootSignature() {
     return true;
 }
 
-bool Exercise5::loadModel() {
+bool Exercise6::loadModel() {
     model = std::make_unique<BasicModel>();
     model->load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/");
-    
+
     Matrix scale = Matrix::CreateScale(0.01f);
     Matrix rotation = Matrix::CreateRotationY(-XM_PIDIV2);
-    Matrix translation = Matrix::CreateTranslation(0.f,0.f,0.f);
+    Matrix translation = Matrix::CreateTranslation(0.f, 0.f, 0.f);
     model->setModelMatrix(scale * rotation * translation);
 
 
@@ -154,14 +154,14 @@ bool Exercise5::loadModel() {
     return true;
 }
 
-bool Exercise5::createPSO() {
-    D3D12_INPUT_ELEMENT_DESC inputLayout[] = { 
+bool Exercise6::createPSO() {
+    D3D12_INPUT_ELEMENT_DESC inputLayout[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
     };
 
-    auto dataVS = DX::ReadData(L"Exercise5VS.cso");
-    auto dataPS = DX::ReadData(L"Exercise5PS.cso");
+    auto dataVS = DX::ReadData(L"Exercise6VS.cso");
+    auto dataPS = DX::ReadData(L"Exercise6PS.cso");
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
     psoDesc.InputLayout = { inputLayout, sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC) };  // the structure describing our input layout
@@ -183,7 +183,7 @@ bool Exercise5::createPSO() {
     return SUCCEEDED(moduleD3d12->getDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pso)));
 }
 
-void Exercise5::drawGUI() {
+void Exercise6::drawGUI() {
     Matrix objectMatrix = model->getModelMatrix();
 
     if (ImGui::Begin("Geometry Viewer Options")) {

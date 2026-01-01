@@ -31,25 +31,23 @@ UINT ModuleShaderDescriptors::alloc(UINT count) {
 }
 
 void ModuleShaderDescriptors::createTextureSRV(UINT baseIndex, UINT slot, ID3D12Resource* texture) {
-    ID3D12Device* device = app->getModuleD3D12()->getDevice();
-
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDesc.Format = texture->GetDesc().Format;
-    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = texture->GetDesc().MipLevels;
+    ModuleShaderDescriptors* descriptors = app->getModuleShaderDescriptors();
 
     D3D12_CPU_DESCRIPTOR_HANDLE handle = getCPUHandle(baseIndex, slot);
-    device->CreateShaderResourceView(texture, &srvDesc, handle);
+    app->getModuleD3D12()->getDevice()->CreateShaderResourceView(texture, nullptr, handle);
 }
 
 void ModuleShaderDescriptors::createNullTexture2DSRV(UINT baseIndex, UINT slot) {
     ID3D12Device* device = app->getModuleD3D12()->getDevice();
+    
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
     srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.Texture2D.MostDetailedMip = 0;
     srvDesc.Texture2D.MipLevels = 1;
+    srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+    
     D3D12_CPU_DESCRIPTOR_HANDLE handle = getCPUHandle(baseIndex, slot);
 	device->CreateShaderResourceView(nullptr, &srvDesc, handle);
 }

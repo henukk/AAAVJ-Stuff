@@ -1,7 +1,6 @@
 #include "Globals.h"
 #include "Application.h"
 #include "Settings.h"
-
 #include "ModuleInput.h"
 
 #include "ModuleD3D12.h"
@@ -20,6 +19,7 @@
 #include "Exercise4.h"
 #include "Assigment1.h"
 #include "Exercise5.h"
+#include "Exercise6.h"
 
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
@@ -49,7 +49,10 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
 	//modules.push_back(new Assigment1());
 
     // Ex5 - Paint duck model
-    modules.push_back(new Exercise5());
+    //modules.push_back(new Exercise5());
+
+    // Ex6 - Implement Phong Shading
+    modules.push_back(new Exercise6());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());

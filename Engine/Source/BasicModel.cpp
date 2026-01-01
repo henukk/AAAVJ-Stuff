@@ -11,6 +11,8 @@
 #define TINYGLTF_IMPLEMENTATION
 #include "tiny_gltf.h"
 
+#include "EditorConsole.h"
+
 void BasicModel::load(const char* fileName, const char* basePath) {
     tinygltf::TinyGLTF gltfContext;
     tinygltf::Model model;
@@ -24,14 +26,14 @@ void BasicModel::load(const char* fileName, const char* basePath) {
         loadMeshes(model);
     } else {
         LOG("Error loading %s: %s", fileName, error.c_str());
+        Console->PrintError("Error loading %s: %s", fileName, error.c_str());
     }
 }
 
 void BasicModel::loadMeshes(const tinygltf::Model& model) {
     auto countPrimitves = [](const tinygltf::Model& m) -> size_t {
         size_t count = 0;
-        for (const tinygltf::Mesh& mesh : m.meshes)
-        {
+        for (const tinygltf::Mesh& mesh : m.meshes) {
             count += mesh.primitives.size();
         }
         return count;

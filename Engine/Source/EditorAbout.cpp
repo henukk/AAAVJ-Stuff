@@ -1,6 +1,5 @@
 #include "Globals.h"
 #include "EditorAbout.h"
-
 #include "EditorConsole.h"
 
 #include <windows.h>
