@@ -1,9 +1,7 @@
 #pragma once
 #include "DebugDrawPass.h"
 #include "Module.h"
-
-#include "ImGuizmo.h"
-
+#include "BasicModel.h"
 
 class ModuleD3D12;
 class ModuleRender;
@@ -27,11 +25,8 @@ private:
     ComPtr<ID3D12PipelineState>         pso;
     std::unique_ptr<DebugDrawPass>      debugDrawPass;
     std::vector<ComPtr<ID3D12Resource>> materialBuffers;
-    bool                                showAxis = false;
-    bool                                showGrid = true;
-    bool                                showGuizmo = true;
-    ImGuizmo::OPERATION                 gizmoOperation = ImGuizmo::TRANSLATE;
-    std::unique_ptr<BasicModel>         model;
+
+    BasicModel model;
 
 public:
     Exercise6();

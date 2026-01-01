@@ -11,15 +11,15 @@
 #include "ModuleSamplers.h"
 
 #include "ModuleUI.h"
-
-#include "BasicModel.h"
-#include "BasicMesh.h"
+#include "ModuleEditor.h"
 
 #include "ReadData.h"
 
 #include "DirectXTex.h"
 #include <d3d12.h>
 #include "d3dx12.h"
+
+#include "ImGuizmo.h"
 
 Exercise6::Exercise6() {
 
@@ -44,6 +44,8 @@ bool Exercise6::init() {
     ok = ok && createPSO();
     ok = ok && loadModel();
 
+    app->getModuleEditor()->setSelectedGameObject(&model);
+
     if (ok) {
         debugDrawPass = std::make_unique<DebugDrawPass>(moduleD3d12->getDevice(), moduleD3d12->getDrawCommandQueue());
     }
@@ -63,7 +65,7 @@ void Exercise6::render() {
         const Matrix& view = moduleCamera->getView();
         Matrix proj = moduleCamera->getProjection();
 
-        Matrix mvp = model->getModelMatrix() * view * proj;
+        Matrix mvp = model.getModelMatrix() * view * proj;
         mvp = mvp.Transpose();
 
         commandList->SetPipelineState(pso.Get());
@@ -75,27 +77,15 @@ void Exercise6::render() {
         commandList->SetGraphicsRootDescriptorTable(3, moduleSamplers->getGPUHandle(ModuleSamplers::LINEAR_WRAP));
         commandList->SetGraphicsRoot32BitConstants(0, sizeof(Matrix) / sizeof(UINT32), &mvp, 0);
 
-        for (const BasicMesh& mesh : model->getMeshes()) {
-            if (UINT(mesh.getMaterialIndex()) < model->getNumMaterials()) {
-                const BasicMaterial& material = model->getMaterials()[mesh.getMaterialIndex()];
+        for (const BasicMesh& mesh : model.getMeshes()) {
+            if (UINT(mesh.getMaterialIndex()) < model.getNumMaterials()) {
+                const BasicMaterial& material = model.getMaterials()[mesh.getMaterialIndex()];
 
                 commandList->SetGraphicsRootConstantBufferView(1, materialBuffers[mesh.getMaterialIndex()]->GetGPUVirtualAddress());
                 commandList->SetGraphicsRootDescriptorTable(2, moduleShaderDescriptors->getGPUHandle(material.getTextureTable()));
 
                 mesh.draw(commandList);
             }
-        }
-
-        if (showGrid) dd::xzSquareGrid(-10.0f, 10.0f, 0.0f, 1.0f, dd::colors::LightGray);
-        if (showAxis) dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
-
-        Matrix objectMatrix = model->getModelMatrix();
-        if (showGuizmo) {
-            ImGuizmo::Manipulate((const float*)&view, (const float*)&proj, gizmoOperation, ImGuizmo::LOCAL, (float*)&objectMatrix);
-        }
-
-        if (ImGuizmo::IsUsing()) {
-            model->setModelMatrix(objectMatrix);
         }
 
         debugDrawPass->record(commandList, width, height, view, proj);
@@ -134,18 +124,18 @@ bool Exercise6::createRootSignature() {
 }
 
 bool Exercise6::loadModel() {
-    model = std::make_unique<BasicModel>();
-    model->load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/");
+    model = BasicModel();
+    model.load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/");
 
     Matrix scale = Matrix::CreateScale(0.01f);
     Matrix rotation = Matrix::CreateRotationY(-XM_PIDIV2);
     Matrix translation = Matrix::CreateTranslation(0.f, 0.f, 0.f);
-    model->setModelMatrix(scale * rotation * translation);
+    model.setModelMatrix(scale * rotation * translation);
 
 
-    for (int i = 0, count = model->getNumMaterials(); i < count; ++i)
+    for (int i = 0, count = model.getNumMaterials(); i < count; ++i)
     {
-        const BasicMaterial& material = model->getMaterials()[i];
+        const BasicMaterial& material = model.getMaterials()[i];
         const BasicMaterialData& data = material.getBasicMaterial();
 
         materialBuffers.push_back(moduleResources->createDefaultBuffer(&data, alignUp(sizeof(BasicMaterialData), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT), material.getName()));
@@ -184,30 +174,17 @@ bool Exercise6::createPSO() {
 }
 
 void Exercise6::drawGUI() {
-    Matrix objectMatrix = model->getModelMatrix();
+    Matrix objectMatrix = model.getModelMatrix();
 
     if (ImGui::Begin("Geometry Viewer Options")) {
-        ImGui::Checkbox("Show grid", &showGrid);
-        ImGui::Checkbox("Show axis", &showAxis);
-        ImGui::Checkbox("Show guizmo", &showGuizmo);
-        ImGui::Text("Model loaded %s with %d meshes and %d materials", model->getSrcFile().c_str(), model->getNumMeshes(), model->getNumMaterials());
+        ImGui::Text("Model loaded %s with %d meshes and %d materials", model.getSrcFile().c_str(), model.getNumMeshes(), model.getNumMaterials());
 
-        for (const BasicMesh& mesh : model->getMeshes())
-        {
+        for (const BasicMesh& mesh : model.getMeshes()) {
             ImGui::Text("Mesh %s with %d vertices and %d triangles", mesh.getName().c_str(), mesh.getNumVertices(), mesh.getNumIndices() / 3);
         }
 
         ImGui::Separator();
-        if (ImGui::IsKeyPressed(ImGuiKey_T)) gizmoOperation = ImGuizmo::TRANSLATE;
-        if (ImGui::IsKeyPressed(ImGuiKey_R)) gizmoOperation = ImGuizmo::ROTATE;
-        if (ImGui::IsKeyPressed(ImGuiKey_S)) gizmoOperation = ImGuizmo::SCALE;
-
-        ImGui::RadioButton("Translate", (int*)&gizmoOperation, (int)ImGuizmo::TRANSLATE);
-        ImGui::SameLine();
-        ImGui::RadioButton("Rotate", (int*)&gizmoOperation, ImGuizmo::ROTATE);
-        ImGui::SameLine();
-        ImGui::RadioButton("Scale", (int*)&gizmoOperation, ImGuizmo::SCALE);
-
+        ImGui::TextUnformatted("Scene helpers live in Settings > Scene.");
         float translation[3], rotation[3], scale[3];
         ImGuizmo::DecomposeMatrixToComponents((float*)&objectMatrix, translation, rotation, scale);
         bool transform_changed = ImGui::DragFloat3("Tr", translation, 0.1f);
@@ -217,7 +194,7 @@ void Exercise6::drawGUI() {
         if (transform_changed) {
             ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, (float*)&objectMatrix);
 
-            model->setModelMatrix(objectMatrix);
+            model.setModelMatrix(objectMatrix);
         }
     }
     ImGui::End();

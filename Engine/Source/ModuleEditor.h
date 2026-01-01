@@ -3,12 +3,18 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 
+class Settings;
+
 class ModuleInput;
+class ModuleCamera;
+
 //class EditorConsole;
 class EditorMenuBar;
 class EditorSettings;
 class EditorPerformance;
 class EditorAbout;
+
+class BasicModel;
 
 class ModuleEditor : public Module {
 public:
@@ -29,7 +35,10 @@ public:
     };
 
 private:
+    Settings* settings;
+
     ModuleInput* moduleInput;
+    ModuleCamera* moduleCamera;
 
     //EditorConsole* console;
     EditorMenuBar* menuBar;
@@ -37,14 +46,21 @@ private:
 	EditorPerformance* editorPerformance;
 	EditorAbout* editorAbout;
 
+    //EDITOR MANAGEMENT
 	SCENE_TOOL currentSceneTool;
 	NAVIGATION_MODE currentNavigationMode;
 	SCENE_TOOL previousSceneTool;
 
+    //SELECTED GAMEOBJECT
+    BasicModel* selectedGameObject;
+
 public:
+    ModuleEditor();
+
     bool init() override;
     bool cleanUp() override;
     void update() override;
+    void render() override;
 
 private:
     void drawDockSpace();
@@ -60,4 +76,14 @@ public:
     SCENE_TOOL getCurrentSceneTool() const { return currentSceneTool; }
 	NAVIGATION_MODE getCurrentNavigationMode() const { return currentNavigationMode; }
 	void setCurrentSceneTool(int tool) { currentSceneTool = static_cast<SCENE_TOOL>(tool); }
+
+    constexpr inline void setSelectedGameObject(BasicModel* gameObject) {
+        selectedGameObject = gameObject;
+    };
+    constexpr inline void releaseSelected() {
+        selectedGameObject = nullptr;
+    }
+    inline const BasicModel* getSelectedGameObject() const {
+        return selectedGameObject;
+    }
 };

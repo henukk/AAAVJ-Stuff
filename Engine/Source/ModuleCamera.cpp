@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "BasicModel.h"
+
 bool ModuleCamera::init() {
     settings = app->getSettings();
 
@@ -345,9 +347,16 @@ void ModuleCamera::handleAutoFocus() {
 }
 
 void ModuleCamera::focusOnTarget() {
-    Vector3 focusPoint = Vector3(0.f, 0.f, 0.f);
+    Vector3 focusPoint = Vector3::Zero;
+
+    const BasicModel* selectedModel = moduleEditor->getSelectedGameObject();
+
+    if (selectedModel) {
+        focusPoint = selectedModel->getModelMatrix().Translation();
+    }
 
     distanceToTarget = 10.0f;
+
     Vector3 forward = getForwardFromYawPitch();
 
     target = focusPoint;

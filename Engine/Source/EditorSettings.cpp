@@ -50,6 +50,7 @@ void EditorSettings::drawSceneSettings() {
     if (ImGui::CollapsingHeader("Scene")) {
         ImGui::Checkbox("Show Grid###SceneShowGrid", &settings->sceneEditor.showGrid);
         ImGui::Checkbox("Show Axis###SceneShowAxis", &settings->sceneEditor.showAxis);
+        ImGui::Checkbox("Show Gizmo###SceneShowGizmo", &settings->sceneEditor.showGuizmo);
     }
 }
 

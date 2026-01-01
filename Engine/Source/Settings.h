@@ -26,6 +26,7 @@ struct CameraSettings {
 struct SceneEditorSettings {
     bool showGrid = true;
     bool showAxis = true;
+    bool showGuizmo = true;
 };
 
 class Settings {
