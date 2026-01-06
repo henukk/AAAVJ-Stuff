@@ -3,6 +3,23 @@
 #include "Module.h"
 
 class ModuleShaderDescriptors : public Module {
+    struct FreeBlock {
+        UINT base;
+        UINT count;
+    };
+
+private:
+    ComPtr<ID3D12DescriptorHeap> heap;
+    UINT descriptorSize = 0;
+
+    UINT capacity = 0;
+    UINT nextFree = 0;
+
+    std::vector<FreeBlock> freeBlocks;
+
+    D3D12_CPU_DESCRIPTOR_HANDLE cpuStart{};
+    D3D12_GPU_DESCRIPTOR_HANDLE gpuStart{};
+
 public:
     bool init() override;
 
@@ -16,11 +33,5 @@ public:
 
     ID3D12DescriptorHeap* getHeap() const { return heap.Get(); }
 
-private:
-    ComPtr<ID3D12DescriptorHeap> heap;
-    UINT descriptorSize = 0;
-    UINT nextFree = 0;
-
-    D3D12_CPU_DESCRIPTOR_HANDLE cpuStart{};
-    D3D12_GPU_DESCRIPTOR_HANDLE gpuStart{};
+    void free(UINT baseIndex, UINT count = 1);
 };

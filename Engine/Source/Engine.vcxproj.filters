@@ -124,6 +124,15 @@
     <ClCompile Include="ModuleRingBuffer.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Exercise7.cpp">
+      <Filter>Exercises</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleDSDescriptors.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleRTDescriptors.cpp">
+      <Filter>Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -274,6 +283,15 @@
       <Filter>Exercises</Filter>
     </ClInclude>
     <ClInclude Include="ModuleRingBuffer.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Exercise7.h">
+      <Filter>Exercises</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleDSDescriptors.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleRTDescriptors.h">
       <Filter>Modules</Filter>
     </ClInclude>
   </ItemGroup>

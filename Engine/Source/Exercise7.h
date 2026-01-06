@@ -13,7 +13,7 @@ class ModuleRingBuffer;
 
 class BasicModel;
 
-class Exercise6 : public Module {
+class Exercise7 : public Module {
     struct PerInstance {
         Matrix modelMat;
         Matrix normalMat;
@@ -54,8 +54,8 @@ private:
     Light light;
 
 public:
-    Exercise6();
-    ~Exercise6();
+    Exercise7();
+    ~Exercise7();
 
     virtual bool init() override;
     virtual bool cleanUp() override;

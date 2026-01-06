@@ -15,6 +15,9 @@ class ModuleSamplers;
 class ModuleShaderDescriptors;
 class ModuleRingBuffer;
 
+class ModuleRTDescriptors;
+class ModuleDSDescriptors;
+
 class ModuleUI;
 class ModuleEditor;
 class ModuleCamera;
@@ -34,6 +37,9 @@ private:
     ModuleSamplers* moduleSamplers;
     ModuleShaderDescriptors* moduleShaderDescriptors;
     ModuleRingBuffer* moduleRingBuffer;
+
+    ModuleRTDescriptors* moduleRTDescriptors;
+    ModuleDSDescriptors* moduleDSDescriptors;
 
     ModuleUI* moduleUI;
     ModuleEditor* moduleEditor;
@@ -71,6 +77,8 @@ public:
     inline ModuleSamplers* getModuleSamplers() const noexcept { return moduleSamplers; }
     inline ModuleShaderDescriptors* getModuleShaderDescriptors() const noexcept { return moduleShaderDescriptors; }
     inline ModuleRingBuffer* getModuleRingBuffer() const noexcept { return moduleRingBuffer; }
+    inline ModuleRTDescriptors* getModuleRTDescriptors() const noexcept { return moduleRTDescriptors; }
+    inline ModuleDSDescriptors* getModuleDSDescriptors() const noexcept { return moduleDSDescriptors; }
 
     inline ModuleUI* getModuleUI() const noexcept { return moduleUI; }
     inline ModuleEditor* getModuleEditor() const noexcept { return moduleEditor; }

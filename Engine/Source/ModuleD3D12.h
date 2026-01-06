@@ -53,7 +53,7 @@ public:
 
     void                        resize();
     void                        toogleFullscreen();
-	void                        waitForGPU();
+	//void                        waitForGPU();
     void                        flush();
 
     HWND                        getHWnd() { return hWnd; }

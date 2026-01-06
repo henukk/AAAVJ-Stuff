@@ -31,9 +31,6 @@ private:
     // Orbit distance
     float distanceToTarget = 10.0f;
 
-    // Debug / UI
-    int test = -1;
-
     // --------- Tunables (UI) ----------
     // General
     float fovY = XM_PIDIV4;

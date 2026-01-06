@@ -5,12 +5,13 @@
 #include "ModuleD3D12.h"
 
 
-bool ModuleShaderDescriptors::init()
-{
+bool ModuleShaderDescriptors::init() {
     ID3D12Device* device = app->getModuleD3D12()->getDevice();
 
+    capacity = 1024;
+
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-    desc.NumDescriptors = 1024;
+    desc.NumDescriptors = capacity;
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
@@ -21,14 +22,39 @@ bool ModuleShaderDescriptors::init()
     cpuStart = heap->GetCPUDescriptorHandleForHeapStart();
     gpuStart = heap->GetGPUDescriptorHandleForHeapStart();
 
+    nextFree = 1; //imgui reserve
+    freeBlocks.clear();
+
     return true;
 }
 
+
 UINT ModuleShaderDescriptors::alloc(UINT count) {
+    for (auto it = freeBlocks.begin(); it != freeBlocks.end(); ++it) {
+        if (it->count >= count) {
+            UINT base = it->base;
+
+            if (it->count == count) {
+                freeBlocks.erase(it);
+            } else {
+                it->base += count;
+                it->count -= count;
+            }
+
+            return base;
+        }
+    }
+
+    if (nextFree + count > capacity) {
+        _ASSERT_EXPR(false, "Shader Descriptor Heap exhausted");
+        return UINT(-1);
+    }
+
     UINT base = nextFree;
     nextFree += count;
     return base;
 }
+
 
 void ModuleShaderDescriptors::createTextureSRV(UINT baseIndex, UINT slot, ID3D12Resource* texture) {
     ModuleShaderDescriptors* descriptors = app->getModuleShaderDescriptors();
@@ -59,3 +85,11 @@ D3D12_CPU_DESCRIPTOR_HANDLE ModuleShaderDescriptors::getCPUHandle(UINT base, UIN
 D3D12_GPU_DESCRIPTOR_HANDLE ModuleShaderDescriptors::getGPUHandle(UINT base, UINT slot) const {
     return { gpuStart.ptr + (base + slot) * descriptorSize };
 }
+
+void ModuleShaderDescriptors::free(UINT baseIndex, UINT count) {
+    if (baseIndex == UINT(-1) || count == 0)
+        return;
+
+    freeBlocks.push_back({ baseIndex, count });
+}
+

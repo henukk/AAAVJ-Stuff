@@ -10,6 +10,9 @@
 #include "ModuleShaderDescriptors.h"
 #include "ModuleRingBuffer.h"
 
+#include "ModuleRTDescriptors.h"
+#include "ModuleDSDescriptors.h"
+
 #include "ModuleUI.h"
 #include "ModuleEditor.h"
 #include "ModuleCamera.h"
@@ -21,6 +24,7 @@
 #include "Assigment1.h"
 #include "Exercise5.h"
 #include "Exercise6.h"
+#include "Exercise7.h"
 
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
@@ -30,6 +34,9 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
 	modules.push_back(moduleSamplers = new ModuleSamplers());
     modules.push_back(moduleShaderDescriptors = new ModuleShaderDescriptors());
     modules.push_back(moduleRingBuffer = new ModuleRingBuffer());
+
+    modules.push_back(moduleRTDescriptors = new ModuleRTDescriptors());
+    modules.push_back(moduleDSDescriptors = new ModuleDSDescriptors());
 
     // Editor stuff
     modules.push_back(moduleEditor = new ModuleEditor());
@@ -54,7 +61,10 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     //modules.push_back(new Exercise5());
 
     // Ex6 - Implement Phong Shading
-    modules.push_back(new Exercise6());
+    //modules.push_back(new Exercise6());
+
+    // Ex7 - Implement Physically Based Phong Shading (Changing -> Render to texture)
+    modules.push_back(new Exercise7());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());

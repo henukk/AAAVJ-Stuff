@@ -40,6 +40,23 @@ private:
     ModuleInput* moduleInput;
     ModuleCamera* moduleCamera;
 
+#pragma region SCENE_RENDER
+    bool sceneHovered = false;
+    ImVec2 sceneScreenMin;
+
+    ComPtr<ID3D12Resource> sceneColor;
+    ComPtr<ID3D12Resource> sceneDepth;
+
+    // Descriptor handles
+    UINT sceneRTV = UINT(-1);
+    UINT sceneDSV = UINT(-1);
+    UINT sceneSRV = UINT(-1);
+
+    // Size tracking
+    ImVec2 sceneSize = { 0, 0 };
+    ImVec2 prevSceneSize = { 0, 0 };
+#pragma endregion
+
     //EditorConsole* console;
     EditorMenuBar* menuBar;
     EditorSettings* editorSettings;
@@ -72,6 +89,8 @@ private:
     void handleKeyboardShortcuts();
     void handleQWERTYCases(Keyboard::State keyboardState);
 
+    void drawSceneWindow();
+    void recreateSceneRenderTarget();
 public:
     SCENE_TOOL getCurrentSceneTool() const { return currentSceneTool; }
 	NAVIGATION_MODE getCurrentNavigationMode() const { return currentNavigationMode; }
@@ -86,4 +105,17 @@ public:
     inline const BasicModel* getSelectedGameObject() const {
         return selectedGameObject;
     }
+
+#pragma region SCENE_RENDER
+    bool isSceneHovered() const { return sceneHovered; }
+    ImVec2 getSceneScreenMin() const { return sceneScreenMin; }
+
+    ImVec2 getSceneSize() const { return sceneSize; }
+    ID3D12Resource* getSceneColor() const { return sceneColor.Get(); }
+
+    D3D12_CPU_DESCRIPTOR_HANDLE getSceneRTV() const;
+    D3D12_CPU_DESCRIPTOR_HANDLE getSceneDSV() const;
+    D3D12_GPU_DESCRIPTOR_HANDLE getSceneSRV() const;
+#pragma endregion
+
 };
