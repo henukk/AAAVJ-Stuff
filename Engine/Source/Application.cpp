@@ -61,7 +61,7 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     //modules.push_back(new Exercise5());
 
     // Ex6 - Implement Phong Shading
-    //modules.push_back(new Exercise6());
+    modules.push_back(new Exercise6());
 
     // Ex7 - Implement Physically Based Phong Shading (Changing -> Render to texture)
     modules.push_back(new Exercise7());

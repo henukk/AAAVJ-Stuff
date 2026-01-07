@@ -97,7 +97,7 @@ void Exercise7::render() {
 			if (UINT(mesh.getMaterialIndex()) < model.getNumMaterials()) {
 				const BasicMaterial& material = model.getMaterials()[mesh.getMaterialIndex()];
 
-				PerInstance perInstance = { model.getModelMatrix().Transpose(), model.getNormalMatrix().Transpose(), material.getPhongMaterial() };
+				PerInstance perInstance = { model.getModelMatrix().Transpose(), model.getNormalMatrix().Transpose(), material.getPBRPhongMaterial() };
 				PerInstance* perInstancePtr = nullptr;
 				auto perInstanceGPU = moduleRingBuffer->allocBuffer(sizeof(PerInstance), (void**)&perInstancePtr);
 				*perInstancePtr = perInstance;
@@ -152,8 +152,8 @@ bool Exercise7::createPSO() {
 	};
 
 
-	auto dataVS = DX::ReadData(L"Exercise6VS.cso");
-	auto dataPS = DX::ReadData(L"Exercise6PS.cso");
+	auto dataVS = DX::ReadData(L"Exercise7VS.cso");
+	auto dataPS = DX::ReadData(L"Exercise7PS.cso");
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 	psoDesc.InputLayout = { inputLayout, sizeof(inputLayout) / sizeof(D3D12_INPUT_ELEMENT_DESC) };  // the structure describing our input layout
@@ -177,7 +177,7 @@ bool Exercise7::createPSO() {
 
 bool Exercise7::loadModel() {
 	model = BasicModel();
-	model.load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/", BasicMaterial::Type::PHONG);
+	model.load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/", BasicMaterial::Type::PBR_PHONG);
 
 	Matrix scale = Matrix::CreateScale(0.01f);
 	Matrix rotation = Matrix::CreateRotationY(-XM_PIDIV2);
@@ -197,13 +197,15 @@ void Exercise7::drawGUI() {
 			ImGui::Text("Mesh %s with %d vertices and %d triangles", mesh.getName().c_str(), mesh.getNumVertices(), mesh.getNumIndices() / 3);
 		}
 
+		Matrix objectMatrix = model.getModelMatrix();
+
 		ImGui::Separator();
-		ImGui::TextUnformatted("Scene helpers live in Settings > Scene.");
+
 		float translation[3], rotation[3], scale[3];
 		ImGuizmo::DecomposeMatrixToComponents((float*)&objectMatrix, translation, rotation, scale);
-		bool transform_changed = ImGui::DragFloat3("Tr", translation, 0.1f);
-		transform_changed = transform_changed || ImGui::DragFloat3("Rt", rotation, 0.1f);
-		transform_changed = transform_changed || ImGui::DragFloat3("Sc", scale, 0.1f);
+		bool transform_changed = ImGui::DragFloat3("Position", translation, 0.1f);
+		transform_changed = transform_changed || ImGui::DragFloat3("Rotation", rotation, 0.1f);
+		transform_changed = transform_changed || ImGui::DragFloat3("Scale", scale, 0.1f);
 
 		if (transform_changed) {
 			ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, (float*)&objectMatrix);
@@ -211,52 +213,39 @@ void Exercise7::drawGUI() {
 			model.setModelMatrix(objectMatrix);
 		}
 
-		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
-		{
+		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::DragFloat3("Light Direction", reinterpret_cast<float*>(&light.L), 0.1f, -1.0f, 1.0f);
 			ImGui::SameLine();
-			if (ImGui::SmallButton("Normalize"))
-			{
+			if (ImGui::SmallButton("Normalize")) {
 				light.L.Normalize();
 			}
 			ImGui::ColorEdit3("Light Colour", reinterpret_cast<float*>(&light.Lc), ImGuiColorEditFlags_NoAlpha);
 			ImGui::ColorEdit3("Ambient Colour", reinterpret_cast<float*>(&light.Ac), ImGuiColorEditFlags_NoAlpha);
 		}
 
-		for (BasicMaterial& material : model.getMaterials())
-		{
-			if (material.getMaterialType() == BasicMaterial::PHONG)
-			{
+		for (BasicMaterial& material : model.getMaterials()) {
+			if (material.getMaterialType() == BasicMaterial::PBR_PHONG) {
 				char tmp[256];
-				_snprintf_s(tmp, 255, "Materila %s", material.getName());
+				_snprintf_s(tmp, 255, "Material %s", material.getName());
 
-				if (ImGui::CollapsingHeader(tmp, ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					PhongMaterialData phong = material.getPhongMaterial();
-					if (ImGui::ColorEdit3("Diffuse Colour", reinterpret_cast<float*>(&phong.diffuseColour)))
-					{
-						material.setPhongMaterial(phong);
+				if (ImGui::CollapsingHeader(tmp, ImGuiTreeNodeFlags_DefaultOpen)) {
+					PBRPhongMaterialData pbr = material.getPBRPhongMaterial();
+					if (ImGui::ColorEdit3("Diffuse Colour", reinterpret_cast<float*>(&pbr.diffuseColour))) {
+						material.setPBRPhongMaterial(pbr);
 					}
 
-					bool hasTexture = phong.hasDiffuseTex;
-					if (ImGui::Checkbox("Use Texture", &hasTexture))
-					{
-						phong.hasDiffuseTex = hasTexture;
-						material.setPhongMaterial(phong);
+					bool hasTexture = pbr.hasDiffuseTex;
+					if (ImGui::Checkbox("Use Texture", &hasTexture)) {
+						pbr.hasDiffuseTex = hasTexture;
+						material.setPBRPhongMaterial(pbr);
 					}
 
-					if (ImGui::DragFloat("Kd", &phong.Kd, 0.01f))
-					{
-						material.setPhongMaterial(phong);
+					if (ImGui::ColorEdit3("Specular Colour", reinterpret_cast<float*>(&pbr.specularColour))) {
+						material.setPBRPhongMaterial(pbr);
 					}
 
-					if (ImGui::DragFloat("Ks", &phong.Ks, 0.01f)) {
-						material.setPhongMaterial(phong);
-					}
-
-					if (ImGui::DragFloat("shininess", &phong.shininess))
-					{
-						material.setPhongMaterial(phong);
+					if (ImGui::DragFloat("shininess", &pbr.shininess)) {
+						material.setPBRPhongMaterial(pbr);
 					}
 				}
 			}

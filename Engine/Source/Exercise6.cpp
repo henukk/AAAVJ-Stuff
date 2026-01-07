@@ -52,6 +52,8 @@ bool Exercise6::init() {
 		debugDrawPass = std::make_unique<DebugDrawPass>(moduleD3d12->getDevice(), moduleD3d12->getDrawCommandQueue());
 	}
 
+
+
 	return true;
 }
 
@@ -181,7 +183,7 @@ bool Exercise6::loadModel() {
 
 	Matrix scale = Matrix::CreateScale(0.01f);
 	Matrix rotation = Matrix::CreateRotationY(-XM_PIDIV2);
-	Matrix translation = Matrix::CreateTranslation(0.f, 0.f, 0.f);
+	Matrix translation = Matrix::CreateTranslation(2.f, 0.f, 0.f);
 	model.setModelMatrix(scale * rotation * translation);
 
 	return true;

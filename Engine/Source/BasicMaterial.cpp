@@ -54,17 +54,27 @@ void BasicMaterial::load(const tinygltf::Model& model, const tinygltf::Material&
 
     hasColourTexture = loadTexture(material.pbrMetallicRoughness.baseColorTexture.index, model, basePath, true, baseColourTex);
     
-    if (materialType == BASIC) {
+    switch (materialType) {
+    case BasicMaterial::BASIC:
         materialData.basic.baseColour = baseColour;
         materialData.basic.hasColourTexture = hasColourTexture;
-    } else if (materialType == PHONG) {
+        break;
+    case BasicMaterial::PHONG:
         materialData.phong.diffuseColour = baseColour;
         materialData.phong.hasDiffuseTex = hasColourTexture;
         materialData.phong.Kd = 0.85f;
         materialData.phong.Ks = 0.35f;
         materialData.phong.shininess = 32.0f;
+        break;
+    case BasicMaterial::PBR_PHONG:
+        materialData.pbrPhong.diffuseColour = XMFLOAT3(baseColour.x, baseColour.y, baseColour.z);
+        materialData.pbrPhong.hasDiffuseTex = hasColourTexture;
+        materialData.pbrPhong.shininess = 64.0f;
+        materialData.pbrPhong.specularColour = XMFLOAT3(0.015f, 0.015f, 0.015f);
+        break;
+    default:
+        break;
     }
-
     textureTable = moduleShaderDescriptors->alloc(1);
 
     if (hasColourTexture) {

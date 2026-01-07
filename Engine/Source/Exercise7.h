@@ -18,7 +18,7 @@ class Exercise7 : public Module {
     struct PerInstance {
         Matrix modelMat;
         Matrix normalMat;
-        PhongMaterialData material;
+        PBRPhongMaterialData material;
     };
 
     struct Light {

@@ -15,12 +15,21 @@ struct PhongMaterialData {
     BOOL        hasDiffuseTex;
 };
 
+struct PBRPhongMaterialData {
+    XMFLOAT3 diffuseColour;
+    BOOL     hasDiffuseTex;
+
+    XMFLOAT3 specularColour;
+    float    shininess;
+};
+
 class BasicMaterial {
 public:
     enum Type
     {
         BASIC = 0,
-        PHONG
+        PHONG,
+        PBR_PHONG
     };
 
 private:
@@ -30,6 +39,7 @@ private:
     union {
         BasicMaterialData basic;
         PhongMaterialData phong;
+		PBRPhongMaterialData pbrPhong;
     } materialData;
 
     Type materialType = BASIC;
@@ -49,6 +59,8 @@ public:
 
     const inline BasicMaterialData getBasicMaterial() const { return materialData.basic; }
     const inline PhongMaterialData getPhongMaterial() const { return materialData.phong; }
-    void inline setPhongMaterial(PhongMaterialData newData) { materialData.phong = newData; }
+    const inline PBRPhongMaterialData getPBRPhongMaterial() const { return materialData.pbrPhong; }
 
+    void inline setPhongMaterial(const PhongMaterialData newData) { materialData.phong = newData; }
+    void inline setPBRPhongMaterial(const PBRPhongMaterialData newData) { materialData.pbrPhong = newData; }
 };
