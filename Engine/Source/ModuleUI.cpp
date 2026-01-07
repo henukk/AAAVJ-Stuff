@@ -10,7 +10,7 @@
 
 bool ModuleUI::init() {
     moduleD3d12 = app->getModuleD3D12();
-    auto* shaderDesc = app->getModuleShaderDescriptors();
+    ModuleShaderDescriptors* shaderDesc = app->getModuleShaderDescriptors();
 
     imguiPass = new ImGuiPass(moduleD3d12->getDevice(), moduleD3d12->getHWnd(), shaderDesc->getCPUHandle(0), shaderDesc->getGPUHandle(0));
     return true;
@@ -24,12 +24,14 @@ void ModuleUI::preRender() {
     for (auto& current : windows)
         current();
 
+    
     ModuleRender* render = app->getModuleRender();
     render->registerUIPass(
         [this](ID3D12GraphicsCommandList* cmd) {
             imguiPass->record(cmd);
         }
     );
+    LOG("AAAAAA");
 }
 
 bool ModuleUI::cleanUp() {

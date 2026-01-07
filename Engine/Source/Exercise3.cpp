@@ -8,6 +8,7 @@
 #include "ModuleRender.h"
 #include "ModuleCamera.h"
 #include "ModuleUI.h"
+#include "ModuleEditor.h"
 
 #include "ReadData.h"
 #include <d3dcompiler.h>
@@ -45,11 +46,11 @@ bool Exercise3::init() {
     return ok;
 }
 
-void Exercise3::render()
-{
+void Exercise3::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
-            unsigned width = moduleD3d12->getWindowWidth();
-            unsigned height = moduleD3d12->getWindowHeight();
+            ImVec2 sceneSize = app->getModuleEditor()->getSceneSize();
+            unsigned width = sceneSize.x;
+            unsigned height = sceneSize.y;
 
             // --- Compute MVP ---
             Matrix model =

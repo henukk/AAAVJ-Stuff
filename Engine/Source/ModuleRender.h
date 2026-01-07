@@ -4,6 +4,7 @@
 #include <functional>
 
 class ModuleD3D12;
+class ModuleEditor;
 
 class ModuleRender : public Module
 {
@@ -12,6 +13,7 @@ public:
 
 private:
     ModuleD3D12* d3d12 = nullptr;
+	ModuleEditor* moduleEditor = nullptr;
 
     std::vector<RenderCallback> worldPasses;
     std::vector<RenderCallback> uiPasses;

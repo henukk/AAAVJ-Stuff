@@ -39,6 +39,13 @@ bool ModuleEditor::init() {
 	moduleInput = app->getModuleInput();
     moduleCamera = app->getModuleCamera();
 
+
+    moduleD3d12 = app->getModuleD3D12();
+    moduleResources = app->getModuleResources();
+    moduleRTDescriptors = app->getModuleRTDescriptors();
+    moduleDSDescriptors = app->getModuleDSDescriptors();
+    moduleShaderDescriptors = app->getModuleShaderDescriptors();
+
     Console = new EditorConsole();
     menuBar = new EditorMenuBar();
     editorSettings = new EditorSettings();
@@ -94,7 +101,6 @@ void ModuleEditor::drawPanels() {
 
 
 void ModuleEditor::update() {
-    ImGuiIO& io = ImGui::GetIO();
     bool allowCameraInput = isSceneHovered() && !ImGuizmo::IsUsing();
     if (allowCameraInput) {
         handleKeyboardShortcuts();
@@ -190,10 +196,10 @@ void ModuleEditor::resetMode() {
     currentNavigationMode = PAN;
 }
 
-void ModuleEditor::drawSceneWindow() {
+void ModuleEditor::drawSceneWindow()
+{
     ImGui::Begin("Scene");
     sceneHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
-    sceneScreenMin = ImGui::GetCursorScreenPos();
 
     sceneSize = ImGui::GetContentRegionAvail();
 
@@ -202,26 +208,43 @@ void ModuleEditor::drawSceneWindow() {
         recreateSceneRenderTarget();
     }
 
-    if (sceneSRV != UINT(-1) && sceneSize.x > 0.0f && sceneSize.y > 0.0f) {
-        ImVec2 winPos = ImGui::GetWindowPos();
-        ImVec2 cursor = ImGui::GetCursorPos();
-        ImVec2 min = ImGui::GetCursorScreenPos();
+    ImVec2 sceneMin = ImGui::GetCursorScreenPos();
+    sceneScreenMin = sceneMin;
 
-        ImGuizmo::SetRect(min.x, min.y, sceneSize.x, sceneSize.y);
-        
-        D3D12_GPU_DESCRIPTOR_HANDLE h = getSceneSRV();
-        ImGui::Image((ImTextureID)h.ptr, sceneSize, ImVec2(0, 0), ImVec2(1, 1));
+    if (sceneSRV != UINT(-1) && sceneSize.x > 0 && sceneSize.y > 0) {
+        ImGui::Image((ImTextureID)getSceneSRV().ptr, sceneSize, ImVec2(0, 0), ImVec2(1, 1));
+    }
+
+    // --- ImGuizmo ---
+    if (selectedGameObject) {
+        ImGuizmo::OPERATION op = ImGuizmo::TRANSLATE;
+		bool shouldShowGizmo = settings->sceneEditor.showGuizmo;
+
+        switch (currentSceneTool) {
+            case MOVE:  op = ImGuizmo::TRANSLATE; break;
+            case ROTATE: op = ImGuizmo::ROTATE; break;
+            case SCALE:  op = ImGuizmo::SCALE; break;
+            case TRANSFORM: op = ImGuizmo::UNIVERSAL; break;
+            default: shouldShowGizmo = false; break;
+        }
+
+        if (shouldShowGizmo) {
+            ImGuizmo::SetDrawlist();
+            ImGuizmo::SetRect(sceneMin.x, sceneMin.y, sceneSize.x, sceneSize.y);
+
+            Matrix model = selectedGameObject->getModelMatrix();
+            ImGuizmo::Manipulate((float*)&moduleCamera->getView(), (float*)&moduleCamera->getProjection(), op, ImGuizmo::LOCAL, (float*)&model);
+            if (ImGuizmo::IsUsing()) {
+                selectedGameObject->setModelMatrix(model);
+            }
+        }
     }
     ImGui::End();
 }
 
-void ModuleEditor::recreateSceneRenderTarget()
-{
-    auto* d3d12 = app->getModuleD3D12();
-    auto* resources = app->getModuleResources();
-    auto* srvDesc = app->getModuleShaderDescriptors();
-    auto* rtvDesc = app->getModuleRTDescriptors();
-    auto* dsvDesc = app->getModuleDSDescriptors();
+
+
+void ModuleEditor::recreateSceneRenderTarget() {
 
     uint32_t width = (uint32_t)sceneSize.x;
     uint32_t height = (uint32_t)sceneSize.y;
@@ -229,29 +252,29 @@ void ModuleEditor::recreateSceneRenderTarget()
     if (width == 0 || height == 0)
         return;
 
-    d3d12->flush();
+    moduleD3d12->flush();
 
-    if (sceneSRV != UINT(-1)) srvDesc->free(sceneSRV);
-    if (sceneRTV != UINT(-1)) rtvDesc->free(sceneRTV);
-    if (sceneDSV != UINT(-1)) dsvDesc->free(sceneDSV);
+    if (sceneSRV != UINT(-1)) moduleShaderDescriptors->free(sceneSRV);
+    if (sceneRTV != UINT(-1)) moduleRTDescriptors->free(sceneRTV);
+    if (sceneDSV != UINT(-1)) moduleDSDescriptors->free(sceneDSV);
 
     sceneColor.Reset();
     sceneDepth.Reset();
 
     const float clearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    sceneColor = resources->createRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM, width, height, clearColor);
+    sceneColor = moduleResources->createRenderTarget(DXGI_FORMAT_R8G8B8A8_UNORM, width, height, clearColor);
 
-    sceneRTV = rtvDesc->alloc();
-    rtvDesc->create(sceneRTV, sceneColor.Get());
+    sceneRTV = moduleRTDescriptors->alloc();
+    moduleRTDescriptors->create(sceneRTV, sceneColor.Get());
 
-    sceneSRV = srvDesc->alloc(1);
-    srvDesc->createTextureSRV(sceneSRV, 0, sceneColor.Get());
+    sceneSRV = moduleShaderDescriptors->alloc(1);
+    moduleShaderDescriptors->createTextureSRV(sceneSRV, 0, sceneColor.Get());
 
     // ---------- Depth ----------
-    sceneDepth = resources->createDepthStencil(DXGI_FORMAT_D32_FLOAT, width, height, 1.0f);
+    sceneDepth = moduleResources->createDepthStencil(DXGI_FORMAT_D32_FLOAT, width, height, 1.0f);
 
-    sceneDSV = dsvDesc->alloc();
-    dsvDesc->create(sceneDSV, sceneDepth.Get());
+    sceneDSV = moduleDSDescriptors->alloc();
+    moduleDSDescriptors->create(sceneDSV, sceneDepth.Get());
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE ModuleEditor::getSceneRTV() const {

@@ -6,7 +6,8 @@
 
 
 bool ModuleShaderDescriptors::init() {
-    ID3D12Device* device = app->getModuleD3D12()->getDevice();
+	moduleD3d12 = app->getModuleD3D12();
+    ID3D12Device* device = moduleD3d12->getDevice();
 
     capacity = 1024;
 
@@ -57,14 +58,12 @@ UINT ModuleShaderDescriptors::alloc(UINT count) {
 
 
 void ModuleShaderDescriptors::createTextureSRV(UINT baseIndex, UINT slot, ID3D12Resource* texture) {
-    ModuleShaderDescriptors* descriptors = app->getModuleShaderDescriptors();
-
     D3D12_CPU_DESCRIPTOR_HANDLE handle = getCPUHandle(baseIndex, slot);
-    app->getModuleD3D12()->getDevice()->CreateShaderResourceView(texture, nullptr, handle);
+    moduleD3d12->getDevice()->CreateShaderResourceView(texture, nullptr, handle);
 }
 
 void ModuleShaderDescriptors::createNullTexture2DSRV(UINT baseIndex, UINT slot) {
-    ID3D12Device* device = app->getModuleD3D12()->getDevice();
+    ID3D12Device* device = moduleD3d12->getDevice();
     
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;

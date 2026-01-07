@@ -9,8 +9,7 @@
 #include "imgui.h"
 #include "d3dx12.h"
 
-bool Exercise2::init()
-{
+bool Exercise2::init() {
     d3d12 = app->getModuleD3D12();
     moduleResources = app->getModuleResources();
     ui = app->getModuleUI();
@@ -75,8 +74,7 @@ bool Exercise2::init()
     return true;
 }
 
-void Exercise2::update()
-{
+void Exercise2::update() {
     // If vertices changed, re-upload buffer
     if (memcmp(lastVertices, vertices, sizeof(vertices)) != 0)
     {
@@ -85,8 +83,7 @@ void Exercise2::update()
     }
 }
 
-void Exercise2::render()
-{
+void Exercise2::render() {
     // Register a world pass in the renderer
     moduleRender->registerWorldPass(
         [this](ID3D12GraphicsCommandList* cmd)

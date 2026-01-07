@@ -8,6 +8,12 @@ class Settings;
 class ModuleInput;
 class ModuleCamera;
 
+class ModuleD3D12;
+class ModuleResources;
+class ModuleRTDescriptors;
+class ModuleDSDescriptors;
+class ModuleShaderDescriptors;
+
 //class EditorConsole;
 class EditorMenuBar;
 class EditorSettings;
@@ -39,6 +45,12 @@ private:
 
     ModuleInput* moduleInput;
     ModuleCamera* moduleCamera;
+
+    ModuleD3D12* moduleD3d12;
+    ModuleResources* moduleResources;
+    ModuleRTDescriptors* moduleRTDescriptors;
+    ModuleDSDescriptors* moduleDSDescriptors;
+    ModuleShaderDescriptors* moduleShaderDescriptors;
 
 #pragma region SCENE_RENDER
     bool sceneHovered = false;

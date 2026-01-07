@@ -190,7 +190,7 @@ bool Exercise7::loadModel() {
 void Exercise7::drawGUI() {
 	Matrix objectMatrix = model.getModelMatrix();
 
-	if (ImGui::Begin("Exericise 6 Controls")) {
+	if (ImGui::Begin("Exericise 7 Controls")) {
 		ImGui::Text("Model loaded %s with %d meshes and %d materials", model.getSrcFile().c_str(), model.getNumMeshes(), model.getNumMaterials());
 
 		for (const BasicMesh& mesh : model.getMeshes()) {

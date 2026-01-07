@@ -9,6 +9,7 @@
 #include "ModuleShaderDescriptors.h"
 #include "ModuleCamera.h"
 #include "ModuleUI.h"
+#include "ModuleEditor.h"
 
 #include "ReadData.h"
 
@@ -74,8 +75,9 @@ bool Exercise4::cleanUp() {
 
 void Exercise4::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
-        unsigned width = moduleD3d12->getWindowWidth();
-        unsigned height = moduleD3d12->getWindowHeight();
+        ImVec2 sceneSize = app->getModuleEditor()->getSceneSize();
+        unsigned width = sceneSize.x;
+        unsigned height = sceneSize.y;
 
         Matrix model =
             Matrix::CreateScale(textScale) *

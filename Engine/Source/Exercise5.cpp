@@ -59,8 +59,9 @@ bool Exercise5::cleanUp() {
 
 void Exercise5::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* commandList) {
-        unsigned width = moduleD3d12->getWindowWidth();
-        unsigned height = moduleD3d12->getWindowHeight();
+        ImVec2 sceneSize = app->getModuleEditor()->getSceneSize();
+        unsigned width = sceneSize.x;
+        unsigned height = sceneSize.y;
 
         const Matrix& view = moduleCamera->getView();
         Matrix proj = moduleCamera->getProjection();

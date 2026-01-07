@@ -2,6 +2,8 @@
 #include "Globals.h"
 #include "Module.h"
 
+class ModuleD3D12;
+
 class ModuleShaderDescriptors : public Module {
     struct FreeBlock {
         UINT base;
@@ -9,6 +11,8 @@ class ModuleShaderDescriptors : public Module {
     };
 
 private:
+	ModuleD3D12* moduleD3d12;
+
     ComPtr<ID3D12DescriptorHeap> heap;
     UINT descriptorSize = 0;
 

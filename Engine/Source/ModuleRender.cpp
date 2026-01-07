@@ -6,24 +6,26 @@
 
 bool ModuleRender::init() {
     d3d12 = app->getModuleD3D12();
+	moduleEditor = app->getModuleEditor();
+
     return true;
 }
 
 void ModuleRender::preRender() {
     auto* cmd = d3d12->getCommandList();
-    auto* editor = app->getModuleEditor();
+    moduleEditor = app->getModuleEditor();
 
     cmd->Reset(d3d12->getCommandAllocator(), nullptr);
 
-    ID3D12Resource* sceneColor = editor->getSceneColor();
-    ImVec2 size = editor->getSceneSize();
+    ID3D12Resource* sceneColor = moduleEditor->getSceneColor();
+    ImVec2 size = moduleEditor->getSceneSize();
 
     if (sceneColor && size.x > 0.0f && size.y > 0.0f) {
         CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(sceneColor, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
         cmd->ResourceBarrier(1, &barrier);
 
-        D3D12_CPU_DESCRIPTOR_HANDLE rtv = editor->getSceneRTV();
-        D3D12_CPU_DESCRIPTOR_HANDLE dsv = editor->getSceneDSV();
+        D3D12_CPU_DESCRIPTOR_HANDLE rtv = moduleEditor->getSceneRTV();
+        D3D12_CPU_DESCRIPTOR_HANDLE dsv = moduleEditor->getSceneDSV();
         cmd->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 
         const float clearColor[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
@@ -40,9 +42,8 @@ void ModuleRender::preRender() {
 
 void ModuleRender::render() {
     auto* cmd = d3d12->getCommandList();
-    auto* editor = app->getModuleEditor();
 
-    ID3D12Resource* sceneColor = editor->getSceneColor();
+    ID3D12Resource* sceneColor = moduleEditor->getSceneColor();
 
     if (sceneColor) {
         for (auto& pass : worldPasses)

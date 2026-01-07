@@ -5,8 +5,7 @@
 #include "ModuleUI.h"
 #include "imgui.h"
 
-bool Exercise1::init()
-{
+bool Exercise1::init() {
     d3d12 = app->getModuleD3D12();
     ui = app->getModuleUI();
 
@@ -15,8 +14,7 @@ bool Exercise1::init()
     return true;
 }
 
-void Exercise1::render()
-{
+void Exercise1::render() {
     ID3D12GraphicsCommandList* commandList = d3d12->getCommandList();
     D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = d3d12->getRenderTargetDescriptor();
 

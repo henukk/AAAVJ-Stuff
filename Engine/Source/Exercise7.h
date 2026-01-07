@@ -10,6 +10,7 @@ class ModuleCamera;
 class ModuleSamplers;
 class ModuleShaderDescriptors;
 class ModuleRingBuffer;
+class ModuleEditor;
 
 class BasicModel;
 
@@ -44,6 +45,7 @@ private:
     ModuleSamplers* moduleSamplers;
     ModuleShaderDescriptors* moduleShaderDescriptors;
     ModuleRingBuffer* moduleRingBuffer;
+	ModuleEditor* moduleEditor;
 
     ComPtr<ID3D12RootSignature>         rootSignature;
     ComPtr<ID3D12PipelineState>         pso;
