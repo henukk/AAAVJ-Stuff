@@ -181,10 +181,10 @@ bool Exercise6::loadModel() {
 	model = BasicModel();
 	model.load("Assets/Models/Duck/duck.gltf", "Assets/Models/Duck/", BasicMaterial::Type::PHONG);
 
-	Matrix scale = Matrix::CreateScale(0.01f);
-	Matrix rotation = Matrix::CreateRotationY(-XM_PIDIV2);
-	Matrix translation = Matrix::CreateTranslation(2.f, 0.f, 0.f);
-	model.setModelMatrix(scale * rotation * translation);
+	transform.setScale(Vector3(0.01f));
+	transform.setRotation(Vector3(0.f, -90.f, 0.f));
+	transform.setPosition(Vector3(0.f, 0.f, 0.f));
+	model.setTransform(&transform);
 
 	return true;
 }
@@ -201,17 +201,12 @@ void Exercise6::drawGUI() {
 
 		ImGui::Separator();
 		ImGui::TextUnformatted("Scene helpers live in Settings > Scene.");
-		float translation[3], rotation[3], scale[3];
-		ImGuizmo::DecomposeMatrixToComponents((float*)&objectMatrix, translation, rotation, scale);
-		bool transform_changed = ImGui::DragFloat3("Tr", translation, 0.1f);
-		transform_changed = transform_changed || ImGui::DragFloat3("Rt", rotation, 0.1f);
-		transform_changed = transform_changed || ImGui::DragFloat3("Sc", scale, 0.1f);
-
-		if (transform_changed) {
-			ImGuizmo::RecomposeMatrixFromComponents(translation, rotation, scale, (float*)&objectMatrix);
-
-			model.setModelMatrix(objectMatrix);
-		}
+		ImGui::Separator();
+		Transform& t = transform;
+		bool transform_changed = false;
+		transform_changed |= ImGui::DragFloat3("Position", (float*)&t.getPosition(), 0.1f);
+		transform_changed |= ImGui::DragFloat3("Rotation", (float*)&t.getRotation(), 0.1f);
+		transform_changed |= ImGui::DragFloat3("Scale", (float*)&t.getScale(), 0.1f);
 
 		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
 		{

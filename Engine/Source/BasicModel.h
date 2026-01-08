@@ -6,7 +6,30 @@
 
 namespace tinygltf { class Model; }
 
+class Transform;
+
 class BasicModel {
+private:
+    struct TextureInfo {
+        ComPtr<ID3D12Resource> resource;
+        UINT desc = 0;
+        Vector4 colour;
+    };
+
+    struct Transforms {
+        XMFLOAT4X4 model;
+        XMFLOAT3X3 normal;
+    };
+
+    Transform* transform = nullptr;
+    std::unique_ptr<BasicMaterial[]> materials;
+    std::unique_ptr<BasicMesh[]> meshes;
+    uint32_t numMeshes = 0;
+    uint32_t numMaterials = 0;
+    std::string srcFile;
+
+    ComPtr<ID3D12Resource> transformBuffer;
+
 public:
     void load(const char* fileName, const char* basePath, BasicMaterial::Type materialType);
 
@@ -17,44 +40,15 @@ public:
     std::span<const BasicMaterial> getMaterials() const { return std::span<const BasicMaterial>(materials.get(), numMaterials); }
     std::span<BasicMaterial> getMaterials() { return std::span<BasicMaterial>(materials.get(), numMaterials); }
 
-    const Matrix& getModelMatrix() const { return matrix; }
-    void setModelMatrix(const Matrix& m) { matrix = m; }
-    Matrix getNormalMatrix() const
-    {
-        Matrix normal = matrix;
-        normal.Translation(Vector3::Zero);
-        normal.Invert();
-        normal.Transpose();
+    void setTransform(Transform* t) { transform = t; }
+    Transform* getTransform() const { return transform; }
 
-        return normal;
-    }
+    Matrix getModelMatrix() const;
+    Matrix getNormalMatrix() const;
 
     const std::string& getSrcFile() const { return srcFile; }
 
 private:
     void loadMeshes(const tinygltf::Model& model);
     void loadMaterials(const tinygltf::Model& model, const char* basePath, BasicMaterial::Type materialType);
-
-private:
-    struct TextureInfo
-    {
-        ComPtr<ID3D12Resource> resource;
-        UINT desc = 0;
-        Vector4 colour;
-    };
-
-    struct Transforms
-    {
-        XMFLOAT4X4 model;
-        XMFLOAT3X3 normal;
-    };
-
-    Matrix matrix = Matrix::Identity;
-    std::unique_ptr<BasicMaterial[]> materials;
-    std::unique_ptr<BasicMesh[]> meshes;
-    uint32_t numMeshes = 0;
-    uint32_t numMaterials = 0;
-    std::string srcFile;
-
-    ComPtr<ID3D12Resource> transformBuffer;
 };

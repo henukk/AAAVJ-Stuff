@@ -13,6 +13,8 @@
 
 #include "EditorConsole.h"
 
+#include "Transform.h"
+
 void BasicModel::load(const char* fileName, const char* basePath, BasicMaterial::Type materialType) {
     tinygltf::TinyGLTF gltfContext;
     tinygltf::Model model;
@@ -65,4 +67,12 @@ void BasicModel::loadMaterials(const tinygltf::Model& model, const char* basePat
     {
         materials[materialIndex++].load(model, material, basePath, materialType);
     }
+}
+
+Matrix BasicModel::getModelMatrix() const {
+    return transform ? transform->getLocalMatrix() : Matrix::Identity;
+}
+
+Matrix BasicModel::getNormalMatrix() const {
+    return transform ? transform->getNormalMatrix() : Matrix::Identity;
 }

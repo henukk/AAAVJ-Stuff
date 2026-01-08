@@ -2,6 +2,7 @@
 #include "DebugDrawPass.h"
 #include "Module.h"
 #include "BasicModel.h"
+#include "Transform.h"
 
 class ModuleD3D12;
 class ModuleRender;
@@ -50,6 +51,7 @@ private:
     std::unique_ptr<DebugDrawPass>      debugDrawPass;
     std::vector<ComPtr<ID3D12Resource>> materialBuffers;
 
+    Transform transform;
     BasicModel model;
     Light light;
 

@@ -136,6 +136,9 @@
     <ClCompile Include="Assigment2.cpp">
       <Filter>Exercises</Filter>
     </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Entities\Propierties</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -300,6 +303,9 @@
     <ClInclude Include="Assigment2.h">
       <Filter>Exercises</Filter>
     </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Entities\Propierties</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Engine.ico">
@@ -345,6 +351,9 @@
     </Filter>
     <Filter Include="External\SimpleMath">
       <UniqueIdentifier>{0418e202-909b-4703-adb1-c351cd7d689a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entities\Propierties">
+      <UniqueIdentifier>{dda8f31c-48ca-4858-bf50-ba519462f42c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

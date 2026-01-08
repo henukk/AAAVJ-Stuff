@@ -2,6 +2,7 @@
 #include "DebugDrawPass.h"
 #include "Module.h"
 #include "BasicModel.h"
+#include "Transform.h"
 
 class ModuleD3D12;
 class ModuleRender;
@@ -15,10 +16,16 @@ class ModuleEditor;
 class BasicModel;
 
 class Assigment2 : public Module {
-    struct PerInstance {
+    struct PerInstancePbr {
         Matrix modelMat;
         Matrix normalMat;
         PBRPhongMaterialData material;
+    };
+
+    struct PerInstancePhong {
+        Matrix modelMat;
+        Matrix normalMat;
+        PhongMaterialData material;
     };
 
     struct Light {
@@ -37,6 +44,18 @@ class Assigment2 : public Module {
         Vector3 viewPos = Vector3::Zero;
         float pad3;
     };
+
+    struct ModelState {
+        BasicModel model;
+        std::vector<ComPtr<ID3D12Resource>> materialBuffers;
+    };
+
+    enum ModelType {
+        BASIC = 0,
+        PHONG = 1,
+        PBR_PHONG = 2,
+        MODEL_COUNT
+    };
 private:
     ModuleD3D12* moduleD3d12;
     ModuleRender* moduleRender;
@@ -47,13 +66,18 @@ private:
     ModuleRingBuffer* moduleRingBuffer;
     ModuleEditor* moduleEditor;
 
-    ComPtr<ID3D12RootSignature>         rootSignature;
-    ComPtr<ID3D12PipelineState>         pso;
-    std::unique_ptr<DebugDrawPass>      debugDrawPass;
-    std::vector<ComPtr<ID3D12Resource>> materialBuffers;
 
-    BasicModel model;
+    ComPtr<ID3D12RootSignature>         rootSignatureBasic;
+    ComPtr<ID3D12RootSignature>         rootSignatureLit;
+    ComPtr<ID3D12PipelineState>         psoBasic;
+    ComPtr<ID3D12PipelineState>         psoPhong;
+    ComPtr<ID3D12PipelineState>         psoPbr;
+    std::unique_ptr<DebugDrawPass>      debugDrawPass;
+
+    Transform sharedTransform;
+    ModelState models[ModelType::MODEL_COUNT];
     Light light;
+    ModelType selectedModel = ModelType::PBR_PHONG;
 
 public:
     Assigment2();
@@ -64,9 +88,13 @@ public:
     virtual void render() override;
 
 private:
-    bool createRootSignature();
-    bool createPSO();
-    bool loadModel();
+    bool createRootSignatureBasic();
+    bool createRootSignatureLit();
+    bool createPSOBasic();
+    bool createPSOPhong();
+    bool createPSOPbr();
+    bool loadModels();
+    ModelState& getActiveModelState();
 
     void drawGUI();
 };

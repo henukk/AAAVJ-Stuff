@@ -25,7 +25,7 @@
 #include "ImGuizmo.h"
 
 #include "BasicModel.h"
-
+#include "Transform.h"
 
 EditorConsole* Console = nullptr;
 
@@ -113,39 +113,6 @@ void ModuleEditor::render() {
     
     //Axis
     if (settings->sceneEditor.showAxis) dd::axisTriad(ddConvert(Matrix::Identity), 0.1f, 1.0f);
-
-    //Guizmo
-    if (selectedGameObject != nullptr) {
-        ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
-        bool shouldShowGizmo = settings->sceneEditor.showGuizmo;
-
-        switch (currentSceneTool) {
-        case ModuleEditor::SCENE_TOOL::MOVE:
-            gizmoOperation = ImGuizmo::TRANSLATE;
-            break;
-        case ModuleEditor::SCENE_TOOL::ROTATE:
-            gizmoOperation = ImGuizmo::ROTATE;
-            break;
-        case ModuleEditor::SCENE_TOOL::SCALE:
-            gizmoOperation = ImGuizmo::SCALE;
-            break;
-        case ModuleEditor::SCENE_TOOL::TRANSFORM:
-            gizmoOperation = ImGuizmo::UNIVERSAL;
-            break;
-        default:
-            shouldShowGizmo = false;
-            break;
-        }
-
-        Matrix gameObjectMatrix = selectedGameObject->getModelMatrix();
-        if (shouldShowGizmo) {
-            ImGuizmo::Manipulate((const float*)&moduleCamera->getView(), (const float*)&moduleCamera->getProjection(), gizmoOperation, ImGuizmo::LOCAL, (float*)&gameObjectMatrix);
-        }
-
-        if (ImGuizmo::IsUsing()) {
-            selectedGameObject->setModelMatrix(gameObjectMatrix);
-        }
-    }
 }
 
 void ModuleEditor::handleKeyboardShortcuts() {
@@ -221,10 +188,10 @@ void ModuleEditor::drawSceneWindow()
 		bool shouldShowGizmo = settings->sceneEditor.showGuizmo;
 
         switch (currentSceneTool) {
-            case MOVE:  op = ImGuizmo::TRANSLATE; break;
-            case ROTATE: op = ImGuizmo::ROTATE; break;
-            case SCALE:  op = ImGuizmo::SCALE; break;
-            case TRANSFORM: op = ImGuizmo::UNIVERSAL; break;
+            case MOVE:          op = ImGuizmo::TRANSLATE; break;
+            case ROTATE:        op = ImGuizmo::ROTATE; break;
+            case SCALE:         op = ImGuizmo::SCALE; break;
+            case TRANSFORM:     op = ImGuizmo::UNIVERSAL; break;
             default: shouldShowGizmo = false; break;
         }
 
@@ -232,10 +199,12 @@ void ModuleEditor::drawSceneWindow()
             ImGuizmo::SetDrawlist();
             ImGuizmo::SetRect(sceneMin.x, sceneMin.y, sceneSize.x, sceneSize.y);
 
-            Matrix model = selectedGameObject->getModelMatrix();
-            ImGuizmo::Manipulate((float*)&moduleCamera->getView(), (float*)&moduleCamera->getProjection(), op, ImGuizmo::LOCAL, (float*)&model);
+            Transform* t = selectedGameObject->getTransform();
+            Matrix m = t->toMatrix();
+            ImGuizmo::Manipulate((float*)&moduleCamera->getView(), (float*)&moduleCamera->getProjection(), op, ImGuizmo::LOCAL, (float*)&m);
+            
             if (ImGuizmo::IsUsing()) {
-                selectedGameObject->setModelMatrix(model);
+                t->setFromMatrix(m);
             }
         }
     }
