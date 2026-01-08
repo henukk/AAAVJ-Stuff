@@ -19,6 +19,7 @@ class EditorMenuBar;
 class EditorSettings;
 class EditorPerformance;
 class EditorAbout;
+class EditorToolbar;
 
 class BasicModel;
 
@@ -74,6 +75,7 @@ private:
     EditorSettings* editorSettings;
 	EditorPerformance* editorPerformance;
 	EditorAbout* editorAbout;
+    EditorToolbar* editorToolbar;
 
     //EDITOR MANAGEMENT
 	SCENE_TOOL currentSceneTool;

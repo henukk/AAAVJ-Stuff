@@ -20,6 +20,7 @@
 #include "EditorSettings.h"
 #include "EditorPerformance.h"
 #include "EditorAbout.h"
+#include "EditorToolbar.h"
 
 #include "imgui.h"
 #include "ImGuizmo.h"
@@ -48,6 +49,7 @@ bool ModuleEditor::init() {
 
     Console = new EditorConsole();
     menuBar = new EditorMenuBar();
+    editorToolbar = new EditorToolbar();
     editorSettings = new EditorSettings();
     editorPerformance = new EditorPerformance();
 	editorAbout = new EditorAbout(*(menuBar->getAboutVisible()));
@@ -74,6 +76,7 @@ bool ModuleEditor::cleanUp() {
     delete Console;
     delete menuBar;
     delete editorSettings;
+    delete editorToolbar;
 
     return true;
 }
@@ -163,10 +166,14 @@ void ModuleEditor::resetMode() {
     currentNavigationMode = PAN;
 }
 
-void ModuleEditor::drawSceneWindow()
-{
+void ModuleEditor::drawSceneWindow() {
     ImGui::Begin("Scene");
     sceneHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+
+    float toolbarWidth = ImGui::GetContentRegionAvail().x;
+    editorToolbar->DrawCentered(toolbarWidth);
+    ImGui::NewLine();
+    ImGui::Separator();
 
     sceneSize = ImGui::GetContentRegionAvail();
 

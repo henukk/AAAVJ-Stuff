@@ -1,16 +1,12 @@
 #pragma once
 #include <string>
 
-#include "EditorToolbar.h"
-
 class EditorMenuBar {
 private:
     bool showConsole;
     bool showSettings;
     bool showPerformance;
     bool showAbout;
-
-    EditorToolbar toolbar;
 public:
     EditorMenuBar();
     ~EditorMenuBar();

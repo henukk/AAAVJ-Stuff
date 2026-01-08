@@ -51,10 +51,6 @@ void EditorMenuBar::draw() {
             ImGui::EndMenu();
         }
 
-        float menuWidth = ImGui::GetWindowSize().x;
-
-        toolbar.DrawCentered(menuWidth);
-
         ImGui::EndMainMenuBar();
     }
 }
