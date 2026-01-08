@@ -133,6 +133,9 @@
     <ClCompile Include="ModuleRTDescriptors.cpp">
       <Filter>Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Assigment2.cpp">
+      <Filter>Exercises</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -293,6 +296,9 @@
     </ClInclude>
     <ClInclude Include="ModuleRTDescriptors.h">
       <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Assigment2.h">
+      <Filter>Exercises</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

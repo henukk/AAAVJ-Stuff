@@ -25,6 +25,7 @@
 #include "Exercise5.h"
 #include "Exercise6.h"
 #include "Exercise7.h"
+#include "Assigment2.h";
 
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
@@ -61,10 +62,13 @@ Application::Application(int argc, wchar_t** argv, void* hWnd) {
     //modules.push_back(new Exercise5());
 
     // Ex6 - Implement Phong Shading
-    modules.push_back(new Exercise6());
+    //modules.push_back(new Exercise6());
 
     // Ex7 - Implement Physically Based Phong Shading (Changing -> Render to texture)
-    modules.push_back(new Exercise7());
+    //modules.push_back(new Exercise7());
+
+    // Assigment 2
+    modules.push_back(new Assigment2());
 
     // Modulos wrappers de proceso
     modules.push_back(moduleUI = new ModuleUI());
