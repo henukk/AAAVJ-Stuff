@@ -1,32 +1,30 @@
 #pragma once
 
-#include <DirectXMath.h>
-#include <SimpleMath.h>
-
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-class Transform
-{
+class Transform {
+private:
+    Matrix localMatrix;
+
 public:
     Transform();
 
     void setPosition(const Vector3& p);
-    void setRotation(const Vector3& r);
+    void setRotation(const Vector3& eulerDegrees);
     void setScale(const Vector3& s);
 
-    const Vector3& getPosition() const { return position; }
-    const Vector3& getRotation() const { return rotation; }
-    const Vector3& getScale() const { return scale; }
+    Vector3 getPosition() const;
+    Vector3 getRotation() const;
+    Vector3 getScale() const;
 
-    Matrix  getLocalMatrix() const;
-    Matrix  getNormalMatrix() const;
+    const Matrix& getLocalMatrix() const { return localMatrix; }
+    Matrix getNormalMatrix() const;
 
-    void setFromMatrix(Matrix& m);
-    Matrix toMatrix() const;
+    void setFromMatrix(const Matrix& m);
+    Matrix toMatrix() const { return localMatrix; }
 
-private:
-    Vector3 position;
-    Vector3 rotation;
-    Vector3 scale;
+    // --- ImGuizmo ---
+    void toImGuizmoMatrix(float out[16]) const;
+    void fromImGuizmoMatrix(const float m[16]);
 };

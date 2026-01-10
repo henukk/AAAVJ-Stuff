@@ -27,7 +27,7 @@
 #include "Exercise7.h"
 #include "Assigment2.h"
 
-Application::Application(int argc, wchar_t** argv, void* hWnd) {
+Application::Application([[maybe_unused]] int argc, [[maybe_unused]] wchar_t** argv, void* hWnd) {
     modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));
     modules.push_back(d3d12 = new ModuleD3D12((HWND)hWnd));
     modules.push_back(moduleResources = new ModuleResources());

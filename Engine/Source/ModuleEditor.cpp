@@ -207,11 +207,14 @@ void ModuleEditor::drawSceneWindow() {
             ImGuizmo::SetRect(sceneMin.x, sceneMin.y, sceneSize.x, sceneSize.y);
 
             Transform* t = selectedGameObject->getTransform();
-            Matrix m = t->toMatrix();
-            ImGuizmo::Manipulate((float*)&moduleCamera->getView(), (float*)&moduleCamera->getProjection(), op, ImGuizmo::LOCAL, (float*)&m);
-            
+
+            float gizmoMatrix[16];
+            t->toImGuizmoMatrix(gizmoMatrix);
+
+            ImGuizmo::Manipulate( (float*)&moduleCamera->getView(), (float*)&moduleCamera->getProjection(), op, ImGuizmo::LOCAL, gizmoMatrix);
+
             if (ImGuizmo::IsUsing()) {
-                t->setFromMatrix(m);
+                t->fromImGuizmoMatrix(gizmoMatrix);
             }
         }
     }

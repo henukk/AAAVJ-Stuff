@@ -356,11 +356,25 @@ void Assigment2::drawGUI() {
 
 		ImGui::Separator();
 
-		Transform& t = sharedTransform;
-		bool transform_changed = false;
-		transform_changed |= ImGui::DragFloat3("Position", (float*)&t.getPosition(), 0.1f);
-		transform_changed |= ImGui::DragFloat3("Rotation", (float*)&t.getRotation(), 0.1f);
-		transform_changed |= ImGui::DragFloat3("Scale", (float*)&t.getScale(), 0.1f);
+		#pragma region Transform
+			Transform& t = sharedTransform;
+
+			float mat[16];
+			t.toImGuizmoMatrix(mat);
+
+			float tr[3], rt[3], sc[3];
+			ImGuizmo::DecomposeMatrixToComponents(mat, tr, rt, sc);
+
+			bool changed = false;
+			changed |= ImGui::DragFloat3("Position", tr, 0.1f);
+			changed |= ImGui::DragFloat3("Rotation", rt, 0.1f);
+			changed |= ImGui::DragFloat3("Scale", sc, 0.1f);
+
+			if (changed) {
+				ImGuizmo::RecomposeMatrixFromComponents(tr, rt, sc, mat);
+				t.fromImGuizmoMatrix(mat);
+			}
+		#pragma endregion
 
 		if (selectedModel != ModelType::BASIC) {
 			if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
