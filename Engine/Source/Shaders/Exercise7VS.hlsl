@@ -1,10 +1,8 @@
-// ---------- MVP ----------
 cbuffer MVP : register(b0)
 {
     float4x4 mvp;
 };
 
-// ---------- Per-Instance ----------
 struct PBRPhongMaterialData
 {
     float3 diffuseColour;
@@ -21,7 +19,6 @@ cbuffer PerInstance : register(b2)
     PBRPhongMaterialData material;
 };
 
-// ---------- Input ----------
 struct VSInput
 {
     float3 position : POSITION;
@@ -29,7 +26,6 @@ struct VSInput
     float3 normal : NORMAL;
 };
 
-// ---------- Output ----------
 struct VSOutput
 {
     float3 worldPos : POSITION;

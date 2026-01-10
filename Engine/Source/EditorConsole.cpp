@@ -5,8 +5,6 @@
 EditorConsole::EditorConsole() {}
 EditorConsole::~EditorConsole() {}
 
-//to improve
-
 void EditorConsole::clear() {
     items.clear();
 }
@@ -93,26 +91,35 @@ void EditorConsole::checkCopy(bool copyPressed) {
     std::string clipboard;
     clipboard.reserve(4096);
 
-    if (!selectedIndices.empty()) {
-        for (auto index : selectedIndices) {
-            if (index < items.size()) {
-                clipboard += items[index].message + "\n";
-            }
+    size_t selectedCount = 0;
+    for (auto& item : items) {
+        if (item.selected) {
+            ++selectedCount;
         }
     }
-    else {
+
+    if (selectedCount > 0) {
+        for (auto& item : items) {
+            if (item.selected) {
+                clipboard += item.message + "\n";
+            }
+        }
+    } else {
         for (auto& item : items) {
             if (!filter.PassFilter(item.message.c_str())) continue;
             if ((item.type == LogType::CONSOLE_LOG && !showLogs) ||
                 (item.type == LogType::CONSOLE_WARNING && !showWarnings) ||
                 (item.type == LogType::CONSOLE_ERROR && !showErrors)) continue;
+
             clipboard += item.message + "\n";
         }
     }
 
     ImGui::SetClipboardText(clipboard.c_str());
-    this->PrintLog("Copied %zu line(s) to clipboard.", selectedIndices.empty() ? items.size() : selectedIndices.size());
+    PrintLog("Copied %zu line(s) to clipboard.",
+        selectedCount > 0 ? selectedCount : items.size());
 }
+
 
 
 void EditorConsole::drawMessages() {
@@ -120,16 +127,15 @@ void EditorConsole::drawMessages() {
         ImGuiWindowFlags_HorizontalScrollbar |
         ImGuiWindowFlags_AlwaysVerticalScrollbar);
 
-    for (const auto& item : items) {
-        if (!filter.PassFilter(item.message.c_str()))
-            continue;
+    for (size_t i = 0; i < items.size(); ++i) {
+        auto& item = items[i];
 
+        if (!filter.PassFilter(item.message.c_str())) continue;
         if ((item.type == LogType::CONSOLE_LOG && !showLogs) ||
             (item.type == LogType::CONSOLE_WARNING && !showWarnings) ||
-            (item.type == LogType::CONSOLE_ERROR && !showErrors))
-            continue;
+            (item.type == LogType::CONSOLE_ERROR && !showErrors)) continue;
 
-        drawMessage(item);
+        drawMessage(item, i);
     }
 
     if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
@@ -138,32 +144,27 @@ void EditorConsole::drawMessages() {
     ImGui::EndChild();
 }
 
-void EditorConsole::drawMessage(const ConsoleItem& item) {
+void EditorConsole::drawMessage(ConsoleItem& item, size_t index) {
     ImVec4 color;
-    const char* prefix;
+    const char* prefix = "[A] ";
+
     switch (item.type) {
-    case LogType::CONSOLE_LOG:     color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); prefix = "[LOG] "; break;
-    case LogType::CONSOLE_WARNING: color = ImVec4(1.0f, 1.0f, 0.4f, 1.0f); prefix = "[WARN] "; break;
-    case LogType::CONSOLE_ERROR:   color = ImVec4(1.0f, 0.3f, 0.3f, 1.0f); prefix = "[ERROR] "; break;
-    default:                       color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); prefix = ""; break;
+    case LogType::CONSOLE_LOG:     color = ImVec4(1, 1, 1, 1);          prefix = "[LOG] ";      break;
+    case LogType::CONSOLE_WARNING: color = ImVec4(1, 1, 0.4f, 1);       prefix = "[WARN] ";     break;
+    case LogType::CONSOLE_ERROR:   color = ImVec4(1, 0.3f, 0.3f, 1);    prefix = "[ERROR] ";    break;
     }
 
     ImGui::PushStyleColor(ImGuiCol_Text, color);
-    std::string fullLine = std::string(prefix) + item.message + "###console_item_" + std::to_string(&item - &items[0]);
 
-    size_t index = &item - &items[0];
-    bool isSelected = selectedIndices.count(index) > 0;
+    std::string label = prefix + item.message + "###console_item_" + std::to_string(index);
 
-    if (ImGui::Selectable(fullLine.c_str(), isSelected, ImGuiSelectableFlags_AllowDoubleClick)) {
-        if (ImGui::GetIO().KeyCtrl) {
-            if (isSelected)
-                selectedIndices.erase(index);
-            else
-                selectedIndices.insert(index);
+    if (ImGui::Selectable(label.c_str(), item.selected)) {
+        if (!ImGui::GetIO().KeyCtrl) {
+            clearSelection();
+            item.selected = true;
         }
         else {
-            selectedIndices.clear();
-            selectedIndices.insert(index);
+            item.selected = !item.selected;
         }
     }
 
@@ -183,5 +184,11 @@ void EditorConsole::addMessage(LogType type, const char* fmt, va_list args) {
     const size_t maxItems = CONSOLE_MAX_ITEMS;
     if (items.size() > maxItems) {
         items.erase(items.begin());
+    }
+}
+
+void EditorConsole::clearSelection() {
+    for (auto& item : items) {
+        item.selected = false;
     }
 }

@@ -1,9 +1,7 @@
-// ---------- MVP ----------
 cbuffer MVP : register(b0) {
     float4x4 mvp;
 };
 
-// ---------- Per-Instance ----------
 struct PhongMaterialData {
     float4 diffuseColour;
     float Kd;
@@ -18,14 +16,12 @@ cbuffer PerInstance : register(b2) {
     PhongMaterialData material;
 };
 
-// ---------- Input ----------
 struct VSInput {
     float3 position : POSITION;
     float2 texCoord : TEXCOORD;
     float3 normal : NORMAL;
 };
 
-// ---------- Output ----------
 struct VSOutput {
     float3 worldPos : POSITION;
     float3 normal : NORMAL;

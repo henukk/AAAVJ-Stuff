@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <unordered_set>
 #include <string>
 #include "imgui.h"
 
@@ -15,6 +14,7 @@ enum class LogType {
 struct ConsoleItem {
     std::string message;
     LogType type;
+    bool selected = false;
 };
 
 class EditorConsole {
@@ -33,14 +33,14 @@ public:
 private:
     void drawHeader();
     void drawMessages();
-    void drawMessage(const ConsoleItem& item);
+    void drawMessage(ConsoleItem& item, size_t index);
     void addMessage(LogType type, const char* fmt, va_list args);
     void checkCopy(bool copyPressed);
+    void clearSelection();
 
 private:
     ImGuiTextFilter filter;
     std::vector<ConsoleItem> items;
-    std::unordered_set<size_t> selectedIndices;
 
     bool autoScroll = true;
 
