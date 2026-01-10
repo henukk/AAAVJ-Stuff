@@ -76,8 +76,8 @@ bool Exercise4::cleanUp() {
 void Exercise4::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
         ImVec2 sceneSize = app->getModuleEditor()->getSceneSize();
-        unsigned width = sceneSize.x;
-        unsigned height = sceneSize.y;
+        unsigned width = static_cast<unsigned>(sceneSize.x);
+        unsigned height = static_cast<unsigned>(sceneSize.y);
 
         Matrix model =
             Matrix::CreateScale(textScale) *

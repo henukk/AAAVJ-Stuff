@@ -34,8 +34,6 @@ bool ModuleCamera::init() {
 }
 
 void ModuleCamera::update() {
-    ImGuiIO& io = ImGui::GetIO();
-
     ImVec2 sceneSize = moduleEditor->getSceneSize();
     if (sceneSize.x <= 1.0f || sceneSize.y <= 1.0f)
         return;
@@ -97,8 +95,8 @@ void ModuleCamera::rebuildViewProj() {
     if (sceneSize.x <= 1.0f || sceneSize.y <= 1.0f)
         return;
 
-    unsigned width = sceneSize.x;
-    unsigned height = sceneSize.y;
+    unsigned width = static_cast<unsigned>(sceneSize.x);
+    unsigned height = static_cast<unsigned>(sceneSize.y);
 
     Vector3 viewTarget = target;
 

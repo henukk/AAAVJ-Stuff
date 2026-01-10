@@ -25,8 +25,7 @@
 #include "Exercise5.h"
 #include "Exercise6.h"
 #include "Exercise7.h"
-#include "Assigment2.h";
-
+#include "Assigment2.h"
 
 Application::Application(int argc, wchar_t** argv, void* hWnd) {
     modules.push_back(moduleInput = new ModuleInput((HWND)hWnd));

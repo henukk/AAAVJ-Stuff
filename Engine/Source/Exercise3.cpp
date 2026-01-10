@@ -49,8 +49,8 @@ bool Exercise3::init() {
 void Exercise3::render() {
     moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* cmd) {
             ImVec2 sceneSize = app->getModuleEditor()->getSceneSize();
-            unsigned width = sceneSize.x;
-            unsigned height = sceneSize.y;
+            unsigned width = static_cast<unsigned>(sceneSize.x);
+            unsigned height = static_cast<unsigned>(sceneSize.y);
 
             // --- Compute MVP ---
             Matrix model =

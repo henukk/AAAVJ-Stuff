@@ -8,7 +8,7 @@
 EditorAbout::EditorAbout(bool& imOppened) : imOpened(imOppened) {}
 EditorAbout::~EditorAbout() {}
 
-void EditorAbout::draw(const char* title, bool* p_open) {
+void EditorAbout::draw(const char* title) {
     if (!ImGui::Begin(title, &imOpened)) {
         ImGui::End();
         return;

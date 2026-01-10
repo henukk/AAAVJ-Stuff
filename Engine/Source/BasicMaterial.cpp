@@ -21,12 +21,12 @@ BasicMaterial::~BasicMaterial() {
 
 }
 
-void BasicMaterial::load(const tinygltf::Model& model, const tinygltf::Material& material, const char* basePath, BasicMaterial::Type materialType) {
+void BasicMaterial::load(const tinygltf::Model& model, const tinygltf::Material& material, const char* basePath, BasicMaterial::Type type) {
     ModuleResources* moduleResources = app->getModuleResources();
     ModuleShaderDescriptors* moduleShaderDescriptors = app->getModuleShaderDescriptors();
 
     name = material.name;
-    this->materialType = materialType;
+    materialType = type;
 
     Vector4 baseColour = Vector4(
         float(material.pbrMetallicRoughness.baseColorFactor[0]),

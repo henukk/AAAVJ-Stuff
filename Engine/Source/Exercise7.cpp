@@ -62,8 +62,8 @@ bool Exercise7::cleanUp() {
 void Exercise7::render() {
 	moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* commandList) {
 		ImVec2 sceneSize = app->getModuleEditor()->getSceneSize();
-		unsigned width = sceneSize.x;
-		unsigned height = sceneSize.y;
+		unsigned width = static_cast<unsigned>(sceneSize.x);
+		unsigned height = static_cast<unsigned>(sceneSize.y);
 
 		const Matrix& view = moduleCamera->getView();
 		Matrix proj = moduleCamera->getProjection();
@@ -196,8 +196,6 @@ void Exercise7::drawGUI() {
 		for (const BasicMesh& mesh : model.getMeshes()) {
 			ImGui::Text("Mesh %s with %d vertices and %d triangles", mesh.getName().c_str(), mesh.getNumVertices(), mesh.getNumIndices() / 3);
 		}
-
-		Matrix objectMatrix = model.getModelMatrix();
 
 		ImGui::Separator();
 

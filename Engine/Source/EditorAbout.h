@@ -7,6 +7,6 @@ public:
     EditorAbout(bool& imOppened);
     ~EditorAbout();
 
-    void draw(const char* title, bool* p_open = nullptr);
+    void draw(const char* title);
     void closeMyself();
 };

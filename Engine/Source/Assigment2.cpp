@@ -65,8 +65,8 @@ bool Assigment2::cleanUp() {
 void Assigment2::render() {
 	moduleRender->registerWorldPass([this](ID3D12GraphicsCommandList* commandList) {
 		ImVec2 sceneSize = app->getModuleEditor()->getSceneSize();
-		unsigned width = sceneSize.x;
-		unsigned height = sceneSize.y;
+		unsigned width = static_cast<unsigned>(sceneSize.x);
+		unsigned height = static_cast<unsigned>(sceneSize.y);
 
 		const Matrix& view = moduleCamera->getView();
 		Matrix proj = moduleCamera->getProjection();
@@ -355,8 +355,6 @@ void Assigment2::drawGUI() {
 		}
 
 		ImGui::Separator();
-
-		float translation[3], rotation[3], scale[3];
 
 		Transform& t = sharedTransform;
 		bool transform_changed = false;
